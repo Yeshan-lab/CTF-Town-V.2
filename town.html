@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D CTF Town Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #canvas-container {
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        
+        #town-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .progress-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #1a2a6c, #b21f1f, #fdbb2d);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .building-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 100;
+            max-width: 300px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .instructions {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 100;
+            max-width: 300px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .highlight {
+            color: #fdbb2d;
+            font-weight: bold;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .completion-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            text-align: center;
+            display: none;
+            backdrop-filter: blur(5px);
+            min-width: 300px;
+        }
+        
+        .reset-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        
+        #reset-progress {
+            padding: 8px 15px;
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .completed-building {
+            outline: 3px solid #00ff00 !important;
+            outline-offset: 2px;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 100;
+            display: none;
+        }
+        
+        .welcome-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: linear-gradient(to bottom, #1a2a6c, #b21f1f);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .competition-id {
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="town-canvas"></canvas>
+    </div>
+    
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text">Completed: <span id="progress-text">0</span>/<span id="total-challenges">0</span> challenges</div>
+    </div>
+    
+    <div class="building-info" id="building-info" style="display: none;">
+        <span class="close-btn" onclick="document.getElementById('building-info').style.display = 'none'">×</span>
+        <h3>Building <span id="building-number">0</span></h3>
+        <p id="building-description">Description</p>
+        <button id="building-link" style="margin-top: 10px; padding: 8px 15px; background: #fdbb2d; border: none; border-radius: 5px; cursor: pointer;">Go to Challenge</button>
+    </div>
+    
+    <div class="instructions">
+        <h3>CTF Town Instructions</h3>
+        <p>Explore the town and click on buildings to access CTF challenges.</p>
+        <p><span class="highlight">Controls:</span> Mouse to look around, Scroll to zoom, Click to select buildings</p>
+        <p><span class="highlight">Tip:</span> Complete challenges to fill the progress bar</p>
+    </div>
+    
+    <div class="completion-dialog" id="completion-dialog">
+        <h3>Challenge Completed!</h3>
+        <p>You've successfully completed this challenge.</p>
+        <button id="return-to-town" style="margin-top: 15px; padding: 8px 15px; background: #fdbb2d; border: none; border-radius: 5px; cursor: pointer;">Return to Town</button>
+    </div>
+
+    <div class="reset-container">
+        <button id="reset-progress">Reset Progress</button>
+    </div>
+
+    <div class="notification" id="notification">
+        Progress has been reset
+    </div>
+
+    <div class="welcome-modal" id="welcome-modal">
+        <div class="modal-content">
+            <h2>Welcome to CTF Town!</h2>
+            <p>This is a Capture The Flag competition environment. Explore the town, complete challenges and track your progress.</p>
+            <p>Your progress is stored locally in your browser and will not affect other participants.</p>
+            <div class="competition-id">
+                Competition ID: <span id="competition-id">CTF-2023-001</span>
+            </div>
+            <button id="start-exploring" style="margin-top: 15px; padding: 10px 20px; background: #fdbb2d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Start Exploring</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+
+    <script>
+        // Generate a unique competition ID
+        const competitionId = 'CTF-' + new Date().getTime();
+        document.getElementById('competition-id').textContent = competitionId;
+
+        // Show welcome modal on first visit
+        const firstVisit = !localStorage.getItem('ctfFirstVisit');
+        if (firstVisit) {
+            document.getElementById('welcome-modal').style.display = 'flex';
+            localStorage.setItem('ctfFirstVisit', 'true');
+        }
+
+        document.getElementById('start-exploring').addEventListener('click', function() {
+            document.getElementById('welcome-modal').style.display = 'none';
+        });
+
+        // Initialize Three.js
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky blue
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas: document.getElementById('town-canvas'), 
+            antialias: true 
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+
+        // Add lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(50, 50, 50);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 1024;
+        directionalLight.shadow.mapSize.height = 1024;
+        scene.add(directionalLight);
+
+        // Create ground with better visibility
+        const groundGeometry = new THREE.PlaneGeometry(100, 100);
+        const groundMaterial = new THREE.MeshLambertMaterial({ 
+            color: 0x4CAF50,
+            transparent: true,
+            opacity: 0.9
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Add grid for better orientation
+        const gridHelper = new THREE.GridHelper(100, 20, 0x444444, 0x444444);
+        gridHelper.position.y = 0.1;
+        scene.add(gridHelper);
+
+        // Store building information
+        const buildingData = [];
+        let buildingCounter = 1;
+        const completedChallenges = new Set();
+
+        // Function to create buildings with better visibility
+        function createBuilding(x, z, width, depth, height, color, challengeUrl, description) {
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            const material = new THREE.MeshLambertMaterial({ color: color });
+            const building = new THREE.Mesh(geometry, material);
+            building.position.set(x, height/2, z);
+            building.castShadow = true;
+            building.receiveShadow = true;
+            
+            // Store building data
+            const buildingId = buildingCounter++;
+            building.userData = {
+                id: buildingId,
+                challengeUrl: challengeUrl,
+                description: description
+            };
+            
+            buildingData.push(building);
+            scene.add(building);
+            
+            // Add building number label - improved visibility
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 128;
+            canvas.height = 128; // Increased size for better visibility
+            context.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            context.beginPath();
+            context.arc(canvas.width/2, canvas.height/2, canvas.width/2 - 10, 0, Math.PI * 2);
+            context.fill();
+            
+            context.font = 'bold 60px Arial';
+            context.fillStyle = '#1a2a6c';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(buildingId.toString(), canvas.width / 2, canvas.height / 2);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const labelMaterial = new THREE.SpriteMaterial({ 
+                map: texture,
+                transparent: true
+            });
+            const label = new THREE.Sprite(labelMaterial);
+            label.position.set(x, height + 5, z); // Positioned higher for better visibility
+            label.scale.set(8, 8, 1); // Larger label
+            scene.add(label);
+            
+            // Add windows with better visibility
+            const windowMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0xADD8E6,
+                emissive: 0x222222
+            });
+            
+            for (let i = 0; i < Math.floor(height/5); i++) {
+                for (let j = 0; j < 2; j++) {
+                    const window = new THREE.Mesh(
+                        new THREE.PlaneGeometry(1, 1.5),
+                        windowMaterial
+                    );
+                    window.position.set(
+                        x + (j === 0 ? -width/2.5 : width/2.5),
+                        5 + i * 5,
+                        z + (depth/2 + 0.01)
+                    );
+                    window.rotation.y = Math.PI;
+                    scene.add(window);
+                    
+                    const window2 = window.clone();
+                    window2.position.set(
+                        x + (j === 0 ? -width/2.5 : width/2.5),
+                        5 + i * 5,
+                        z - (depth/2 + 0.01)
+                    );
+                    window2.rotation.y = 0;
+                    scene.add(window2);
+                }
+            }
+            
+            // Add roof for better visibility
+            const roofGeometry = new THREE.ConeGeometry(width/1.5, height/4, 4);
+            const roofMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+            const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+            roof.position.set(x, height + height/8, z);
+            roof.rotation.y = Math.PI/4;
+            roof.castShadow = true;
+            scene.add(roof);
+            
+            return building;
+        }
+
+        // Create multiple buildings with challenge links
+        const buildingColors = [0x8B4513, 0xA52A2A, 0xD2691E, 0xCD853F, 0xA0522D, 0x708090, 0x2F4F4F];
+        
+        // Create a grid of buildings with challenge URLs
+        // 10 challenges as requested
+        // IMPORTANT: Replace these with your actual challenge URLs when hosting
+        const challengeUrls = [
+            "https://example.com/challenge1", // Replace with your actual challenge URL
+            "https://example.com/challenge2", // Replace with your actual challenge URL
+            "https://example.com/challenge3",
+            "https://example.com/challenge4",
+            "https://example.com/challenge5",
+            "https://example.com/challenge6",
+            "https://example.com/challenge7",
+            "https://example.com/challenge8",
+            "https://example.com/challenge9",
+            "https://example.com/challenge10"
+        ];
+        
+        const descriptions = [
+            "Forensics Challenge: Find the Hidden 3 Flags",
+            "Cyber Forest CTF: Find 4 Hidden Flags",
+            "Cryptography Challenge: Decode the secret message",
+            "Forensics Challenge: Analyze the image to find the flag",
+            "Steganography Challenge: There's more than meets the eye",
+            "Reverse Engineering Challenge: Crack the code",
+            "Network Analysis Challenge: Inspect the packets",
+            "OSINT Challenge: Find information about the target",
+            "Programming Challenge: Write a script to solve the problem",
+            "Binary Exploitation Challenge: Find the vulnerability"
+        ];
+        
+        let urlIndex = 0;
+        for (let i = -4; i <= 4; i += 2) {
+            for (let j = -4; j <= 4; j += 2) {
+                if (urlIndex < challengeUrls.length) {
+                    const width = 6 + Math.random() * 4;
+                    const depth = 6 + Math.random() * 4;
+                    const height = 10 + Math.random() * 15;
+                    const color = buildingColors[Math.floor(Math.random() * buildingColors.length)];
+                    
+                    createBuilding(
+                        i * 10, 
+                        j * 10, 
+                        width, 
+                        depth, 
+                        height, 
+                        color,
+                        challengeUrls[urlIndex],
+                        descriptions[urlIndex]
+                    );
+                    
+                    urlIndex++;
+                }
+            }
+        }
+        
+        // Update total challenges count
+        document.getElementById('total-challenges').textContent = urlIndex;
+
+        // Add roads with better visibility
+        function createRoad() {
+            const roadMaterial = new THREE.MeshLambertMaterial({ color: 0x333333 });
+            
+            // Main roads
+            for (let i = -5; i <= 5; i++) {
+                const road1 = new THREE.Mesh(
+                    new THREE.BoxGeometry(100, 0.2, 5),
+                    roadMaterial
+                );
+                road1.position.set(0, 0.1, i * 10);
+                road1.receiveShadow = true;
+                scene.add(road1);
+                
+                const road2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(5, 0.2, 100),
+                    roadMaterial
+                );
+                road2.position.set(i * 10, 0.1, 0);
+                road2.receiveShadow = true;
+                scene.add(road2);
+            }
+            
+            // Add road markings with better visibility
+            const markingMaterial = new THREE.MeshLambertMaterial({ color: 0xFFFF00 });
+            for (let i = -50; i <= 50; i += 5) {
+                for (let j = -5; j <= 5; j++) {
+                    if (j !== 0) {
+                        const marking1 = new THREE.Mesh(
+                            new THREE.BoxGeometry(0.5, 0.21, 1.5),
+                            markingMaterial
+                        );
+                        marking1.position.set(i, 0.11, j * 10);
+                        scene.add(marking1);
+                        
+                        const marking2 = new THREE.Mesh(
+                            new THREE.BoxGeometry(1.5, 0.21, 0.5),
+                            markingMaterial
+                        );
+                        marking2.position.set(j * 10, 0.11, i);
+                        scene.add(marking2);
+                    }
+                }
+            }
+        }
+        createRoad();
+
+        // Add trees with better visibility
+        function createTree(x, z) {
+            const group = new THREE.Group();
+            
+            // Trunk
+            const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.7, 5, 8);
+            const trunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+            trunk.position.y = 2.5;
+            trunk.castShadow = true;
+            trunk.receiveShadow = true;
+            group.add(trunk);
+            
+            // Foliage (multiple spheres for better visibility)
+            const foliageMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+            
+            for (let i = 0; i < 3; i++) {
+                const size = 3 - i * 0.7;
+                const foliage = new THREE.Mesh(
+                    new THREE.SphereGeometry(size, 8, 8),
+                    foliageMaterial
+                );
+                foliage.position.y = 6 + i * 2.5;
+                foliage.castShadow = true;
+                group.add(foliage);
+            }
+            
+            group.position.set(x, 0, z);
+            scene.add(group);
+            
+            return group;
+        }
+        
+        // Add trees randomly where there are no buildings
+        for (let i = -45; i <= 45; i += 5) {
+            for (let j = -45; j <= 45; j += 5) {
+                if (Math.abs(i) > 5 || Math.abs(j) > 5) {
+                    if (Math.random() > 0.7) {
+                        createTree(i, j);
+                    }
+                }
+            }
+        }
+
+        // Add a central fountain for better orientation
+        function createFountain() {
+            const group = new THREE.Group();
+            
+            // Base
+            const baseGeometry = new THREE.CylinderGeometry(5, 6, 1, 32);
+            const baseMaterial = new THREE.MeshLambertMaterial({ color: 0x888888 });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = 0.5;
+            base.receiveShadow = true;
+            group.add(base);
+            
+            // Middle
+            const middleGeometry = new THREE.CylinderGeometry(3, 5, 2, 32);
+            const middle = new THREE.Mesh(middleGeometry, baseMaterial);
+            middle.position.y = 2;
+            group.add(middle);
+            
+            // Top
+            const topGeometry = new THREE.CylinderGeometry(2, 3, 1, 32);
+            const top = new THREE.Mesh(topGeometry, baseMaterial);
+            top.position.y = 3.5;
+            group.add(top);
+            
+            // Water
+            const waterGeometry = new THREE.CylinderGeometry(2, 2, 0.2, 32);
+            const waterMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x0077be,
+                transparent: true,
+                opacity: 0.7
+            });
+            const water = new THREE.Mesh(waterGeometry, waterMaterial);
+            water.position.y = 3.6;
+            group.add(water);
+            
+            group.position.set(0, 0, 0);
+            scene.add(group);
+            
+            return group;
+        }
+        
+        createFountain();
+
+        // Set up camera controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.screenSpacePanning = false;
+        controls.minDistance = 5;
+        controls.maxDistance = 100;
+        controls.maxPolarAngle = Math.PI / 2;
+
+        // Set initial camera position for better visibility
+        camera.position.set(0, 30, 40);
+        controls.update();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Raycaster for detecting building clicks
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        function onMouseClick(event) {
+            // Calculate mouse position in normalized device coordinates
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            // Update the picking ray with the camera and mouse position
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Calculate objects intersecting the picking ray
+            const intersects = raycaster.intersectObjects(buildingData);
+            
+            if (intersects.length > 0) {
+                const building = intersects[0].object;
+                const buildingInfo = building.userData;
+                
+                // Show building info
+                document.getElementById('building-number').textContent = buildingInfo.id;
+                document.getElementById('building-description').textContent = buildingInfo.description;
+                
+                const linkButton = document.getElementById('building-link');
+                linkButton.onclick = function() {
+                    // Open challenge in new tab
+                    window.open(buildingInfo.challengeUrl, '_blank');
+                };
+                
+                document.getElementById('building-info').style.display = 'block';
+            }
+        }
+        
+        window.addEventListener('click', onMouseClick, false);
+        
+        // Function to update progress
+        function updateProgress() {
+            const progress = (completedChallenges.size / buildingData.length) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = completedChallenges.size;
+            
+            // Update building visuals for completed challenges
+            buildingData.forEach(building => {
+                if (completedChallenges.has(building.userData.id)) {
+                    building.material.emissive = new THREE.Color(0x00ff00);
+                    building.material.emissiveIntensity = 0.2;
+                } else {
+                    building.material.emissive = new THREE.Color(0x000000);
+                    building.material.emissiveIntensity = 0;
+                }
+            });
+        }
+        
+        // Load progress from localStorage
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('ctfProgress');
+            if (savedProgress) {
+                const progressData = JSON.parse(savedProgress);
+                progressData.forEach(id => completedChallenges.add(id));
+                updateProgress();
+            }
+        }
+        
+        // Save progress to localStorage
+        function saveProgress() {
+            const progressArray = Array.from(completedChallenges);
+            localStorage.setItem('ctfProgress', JSON.stringify(progressArray));
+        }
+        
+        // Reset progress
+        document.getElementById('reset-progress').addEventListener('click', function() {
+            completedChallenges.clear();
+            updateProgress();
+            saveProgress();
+            
+            // Show notification
+            const notification = document.getElementById('notification');
+            notification.textContent = 'Progress has been reset';
+            notification.style.display = 'block';
+            
+            setTimeout(function() {
+                notification.style.display = 'none';
+            }, 3000);
+        });
+        
+        // Check URL parameters for completed challenges
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const completedId = urlParams.get('completed');
+            
+            if (completedId) {
+                // Remove the parameter from URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Show completion dialog
+                document.getElementById('completion-dialog').style.display = 'block';
+                
+                // Mark challenge as completed
+                if (!completedChallenges.has(parseInt(completedId))) {
+                    completedChallenges.add(parseInt(completedId));
+                    updateProgress();
+                    saveProgress();
+                }
+            }
+        }
+        
+        // Return to town button handler
+        document.getElementById('return-to-town').addEventListener('click', function() {
+            document.getElementById('completion-dialog').style.display = 'none';
+        });
+        
+        // Load progress on startup and check URL parameters
+        loadProgress();
+        checkUrlParams();
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>
