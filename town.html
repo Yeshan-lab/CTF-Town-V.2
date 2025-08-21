@@ -258,25 +258,31 @@
 
     <script>
         // Generate a unique competition ID
+        // Generate or retrieve a unique competition ID
+        // Generate or retrieve a unique competition ID
         let competitionId = localStorage.getItem('ctfCompetitionId');
         if (!competitionId) {
             competitionId = 'CTF-' + new Date().getTime();
             localStorage.setItem('ctfCompetitionId', competitionId);
-            }
+        }
         document.getElementById('competition-id').textContent = competitionId;
 
-        // Show welcome modal on first visit
-        // Show welcome modal on first visit only if not returning from a challenge
-        const urlParams = new URLSearchParams(window.location.search);
-        const completedChallenge = urlParams.get('completed');
+        // Check if we're returning from a challenge
+        const returningFromChallenge = sessionStorage.getItem('returningFromChallenge');
+        if (returningFromChallenge) {
+            // Clear the flag
+            sessionStorage.removeItem('returningFromChallenge');
+            // Ensure welcome is hidden
+            document.getElementById('welcome-modal').style.display = 'none';
+        }
 
-        // Only show welcome if it's a true first visit (no completed parameter)
-        const firstVisit = !localStorage.getItem('ctfFirstVisit') && !completedChallenge;
+        // Show welcome modal on first visit only (check both conditions)
+        const firstVisit = !localStorage.getItem('ctfFirstVisit') && !returningFromChallenge;
         if (firstVisit) {
             document.getElementById('welcome-modal').style.display = 'flex';
             localStorage.setItem('ctfFirstVisit', 'true');
-        } else if (completedChallenge) {
-            // If returning from a challenge, ensure welcome is hidden
+        } else if (!returningFromChallenge) {
+            // Only hide if not returning from challenge (might be already hidden by the returning check above)
             document.getElementById('welcome-modal').style.display = 'none';
         }
 
