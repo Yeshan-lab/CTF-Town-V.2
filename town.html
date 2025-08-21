@@ -190,6 +190,14 @@
             text-align: center;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
+
+        .competition-id {
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            font-family: monospace;
+        }
         
     </style>
 </head>
@@ -238,6 +246,9 @@
             <h2>Welcome to CTF Town!</h2>
             <p>This is a Capture The Flag competition environment. Explore the town, complete challenges and track your progress.</p>
             <p>Your progress is stored locally in your browser and will not affect other participants.</p>
+            <div class="competition-id">
+                Competition ID: <span id="competition-id">CTF-2023-001</span>
+            </div>
             <button id="start-exploring" style="margin-top: 15px; padding: 10px 20px; background: #fdbb2d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Start Exploring</button>
         </div>
     </div>
@@ -247,14 +258,26 @@
 
     <script>
         // Generate a unique competition ID
-        const competitionId = 'CTF-' + new Date().getTime();
+        let competitionId = localStorage.getItem('ctfCompetitionId');
+        if (!competitionId) {
+            competitionId = 'CTF-' + new Date().getTime();
+            localStorage.setItem('ctfCompetitionId', competitionId);
+            }
         document.getElementById('competition-id').textContent = competitionId;
 
         // Show welcome modal on first visit
-        const firstVisit = !localStorage.getItem('ctfFirstVisit');
+        // Show welcome modal on first visit only if not returning from a challenge
+        const urlParams = new URLSearchParams(window.location.search);
+        const completedChallenge = urlParams.get('completed');
+
+        // Only show welcome if it's a true first visit (no completed parameter)
+        const firstVisit = !localStorage.getItem('ctfFirstVisit') && !completedChallenge;
         if (firstVisit) {
             document.getElementById('welcome-modal').style.display = 'flex';
             localStorage.setItem('ctfFirstVisit', 'true');
+        } else if (completedChallenge) {
+            // If returning from a challenge, ensure welcome is hidden
+            document.getElementById('welcome-modal').style.display = 'none';
         }
 
         document.getElementById('start-exploring').addEventListener('click', function() {
