@@ -1077,6 +1077,8 @@ There are 4 hidden flags in the system. Find them all!
 
         // Return to town function
         function returnToTown() {
+            // Set a flag indicating we're returning from a challenge
+            sessionStorage.setItem('returningFromChallenge', 'true');
             const townUrl = window.location.origin + "/town.html";
             window.location.href = townUrl;
         }
