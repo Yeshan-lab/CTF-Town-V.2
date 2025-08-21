@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌲 Cyber Forest CTF Challenge</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Source+Code+Pro:wght@300;400;600&display=swap');
+        
+        :root {
+            --main-bg: #0a0a12;
+            --terminal-bg: #0a0a18;
+            --terminal-border: #2a7fff;
+            --terminal-glow: rgba(42, 127, 255, 0.5);
+            --text-primary: #00ffcc;
+            --text-secondary: #2a7fff;
+            --text-command: #66ff00;
+            --text-error: #ff2a7f;
+            --text-success: #00ff95;
+            --text-warning: #ffcc00;
+            --accent-1: #7f2aff;
+            --accent-2: #ff2a7f;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--main-bg);
+            color: var(--text-primary);
+            font-family: 'Source Code Pro', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(42, 127, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 85% 30%, rgba(255, 42, 127, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 50% 80%, rgba(42, 255, 127, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        #app {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        
+        #header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            position: relative;
+            border-bottom: 1px solid var(--terminal-border);
+            text-shadow: 0 0 10px var(--terminal-glow);
+        }
+        
+        #header h1 {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+        
+        #header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+        
+        #terminal-container {
+            position: relative;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 25px var(--terminal-glow);
+        }
+        
+        #terminal-header {
+            background: linear-gradient(90deg, #151530, #0f0f25);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--terminal-border);
+            font-size: 0.9rem;
+        }
+        
+        #terminal-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .control.close { background-color: #ff5f57; }
+        .control.minimize { background-color: #ffbd2e; }
+        .control.maximize { background-color: #28c940; }
+        
+        #terminal {
+            background-color: var(--terminal-bg);
+            height: 500px;
+            padding: 20px;
+            overflow-y: auto;
+            background-image: 
+                linear-gradient(rgba(10, 10, 24, 0.9), rgba(10, 10, 24, 0.9)),
+                url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%232a7fff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+            border: 1px solid var(--terminal-border);
+        }
+        
+        #input-container {
+            display: flex;
+            align-items: center;
+            background-color: rgba(10, 10, 24, 0.7);
+            padding: 10px 15px;
+            border: 1px solid var(--terminal-border);
+            border-radius: 8px;
+            box-shadow: 0 0 15px var(--terminal-glow);
+        }
+        
+        #prompt {
+            color: var(--text-command);
+            margin-right: 10px;
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--text-command);
+        }
+        
+        #command-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Source Code Pro', monospace;
+            font-size: 1rem;
+            outline: none;
+            caret-color: var(--text-primary);
+            text-shadow: 0 0 5px var(--text-primary);
+        }
+        
+        #scoreboard {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(10, 10, 24, 0.7);
+            border: 1px solid var(--terminal-border);
+            border-radius: 8px;
+            box-shadow: 0 0 15px var(--terminal-glow);
+        }
+        
+        #scoreboard h3 {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        #flags-found {
+            color: var(--text-success);
+            margin-left: 10px;
+            font-size: 1.5rem;
+            text-shadow: 0 0 8px var(--text-success);
+        }
+        
+        #scoreboard p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            
+        }
+        
+        .command {
+            color: var(--text-command);
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px var(--text-command);
+        }
+        
+        .output {
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            text-shadow: 0 0 3px var(--text-primary);
+        }
+        
+        .error {
+            color: var(--text-error);
+            text-shadow: 0 0 5px var(--text-error);
+        }
+        
+        .success {
+            color: var(--text-success);
+            font-weight: bold;
+            text-shadow: 0 0 8px var(--text-success);
+        }
+        
+        .warning {
+            color: var(--text-warning);
+            text-shadow: 0 0 5px var(--text-warning);
+        }
+        
+        .directory {
+            color: var(--text-secondary);
+            text-shadow: 0 0 5px var(--text-secondary);
+        }
+        
+        .file {
+            color: var(--text-primary);
+        }
+        
+        .executable {
+            color: var(--text-command);
+            text-shadow: 0 0 5px var(--text-command);
+        }
+        
+        .virus-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff2a7f, #7f2aff);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: 2.5rem;
+            color: white;
+            text-align: center;
+            animation: virusPulse 0.3s infinite;
+            font-family: 'Share Tech Mono', monospace;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+        }
+        
+        @keyframes virusPulse {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+        
+        .scan-line {
+            position: fixed;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to bottom, 
+                rgba(0, 255, 204, 0.3), 
+                rgba(0, 255, 204, 0.1), 
+                rgba(0, 255, 204, 0.3));
+            z-index: 5;
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+        
+        .hacking-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(42, 127, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(42, 127, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .glowing-particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-40px) translateX(0); }
+            75% { transform: translateY(-20px) translateX(-10px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+        
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .hud-item {
+            background: rgba(10, 10, 24, 0.7);
+            padding: 10px 15px;
+            border: 1px solid var(--terminal-border);
+            border-radius: 6px;
+            box-shadow: 0 0 10px var(--terminal-glow);
+            font-size: 0.9rem;
+        }
+        
+        .hud-value {
+            color: var(--text-success);
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--text-success);
+        }
+        
+        #matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        
+        #submit-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        
+        #submit-button {
+            background-color: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        
+        @media (max-width: 768px) {
+            #header h1 {
+                font-size: 2rem;
+            }
+            
+            #terminal {
+                height: 400px;
+                padding: 15px;
+            }
+            
+            #hud {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-line"></div>
+    <div class="hacking-grid"></div>
+    <div class="glowing-particles" id="particles"></div>
+    <canvas id="matrix-rain"></canvas>
+    
+    <div id="app">
+        <div id="header">
+            <h1>CYBER FOREST CTF CHAPTER 02</h1>
+            <p>Navigate the digital maze. Find the flags. Avoid the traps.</p>
+        </div>
+        
+        <div id="hud">
+            <div class="hud-item">System: <span class="hud-value">ONLINE</span></div>
+            <div class="hud-item">Security: <span class="hud-value">BREACHED</span></div>
+            <div class="hud-item">Time: <span class="hud-value" id="timer">00:00:00</span></div>
+        </div>
+        
+        <div id="terminal-container">
+            <div id="terminal-header">
+                <div>user@cyberforest:~</div>
+                <div id="terminal-controls">
+                    <div class="control close"></div>
+                    <div class="control minimize"></div>
+                    <div class="control maximize"></div>
+                </div>
+            </div>
+            <div id="terminal"></div>
+        </div>
+        
+        <div id="input-container">
+            <span id="prompt">user@cyberforest:$</span>
+            <input type="text" id="command-input" autofocus>
+        </div>
+        
+        <div id="scoreboard">
+            <h3>Flags Captured: <span id="flags-found">0</span>/4</h3>
+            <p>Available commands: ls, cd, cat, file, help, clear, unzip, decrypt</p>
+        </div>
+        
+               <div id="submit-section">
+            <p>Found all flags? Submit your completion!</p>
+            <button id="submit-button" onclick="submitCompletion()">Submit Completion</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const state = {
+            currentPath: "/",
+            flagsFound: 0,
+            infected: false,
+            startTime: new Date(),
+            endTime: null,
+            foundFlags: {
+                flag1: false,
+                flag2: false,
+                flag3: false,
+                flag4: false
+            },
+            unlockedUnzip: false,
+            completed: false
+        };
+
+        // Leaderboard data (stored in localStorage)
+        let leaderboard = JSON.parse(localStorage.getItem('cyberForestLeaderboard')) || [];
+        
+        // File system structure
+        const fileSystem = {
+            "/": ["bin/", "home/", "var/", "opt/", "tmp/", "boot/", "readme.txt", ".system_log"],
+            "/bin/": ["ls", "cat", "file", "virus", "safe_program", "config_editor", "data_dump"],
+            "/home/": ["user/", "guest/", "admin/", "backup/", "flag.txt", "logfile.log"],
+            "/home/user/": ["Documents/", "Downloads/", "Pictures/", "Music/", "Desktop/", ".cache/", ".hidden_file", "temp.txt"],
+            "/home/user/Documents/": ["Work/", "Personal/", "Projects/", "note.txt", "flag2.txt", "secret.docx", "financial.xlsx", "passwords.pdf"],
+            "/home/user/Documents/Work/": ["Reports/", "Presentations/", "Q3_Summary.doc", "budget.xls", "important.txt"],
+            "/home/user/Documents/Work/Reports/": ["2023/", "2024/", "template.doc"],
+            "/home/user/Documents/Work/Reports/2024/": ["Q1_Report.pdf", "Q2_Report.pdf", "flag3.txt", "confidential.zip"],
+            "/home/user/Documents/Personal/": ["Taxes/", "Recipes/", "Diary/", "notes.txt"],
+            "/home/user/Documents/Personal/Taxes/": ["2023.pdf", "W2_forms.zip", "important.doc"],
+            "/home/user/Documents/Projects/": ["CTF/", "Website/", "App/", "ideas.txt"],
+            "/home/user/Documents/Projects/CTF/": ["challenge1.py", "challenge2.exe", "hint.txt", "encrypted_data.bin"],
+            "/home/user/Downloads/": ["malware.exe", "clean_file.zip", "suspicious.rar", "movie.torrent", "cracked_software.exe", "important_document.pdf"],
+            "/home/user/Pictures/": ["vacation.jpg", "forest.png", "flag3.png", "screenshot.png", "memes/", "profile_pic.jpg"],
+            "/home/user/Pictures/memes/": ["funny1.jpg", "funny2.png", "not_a_flag.txt"],
+            "/home/user/Music/": ["song1.mp3", "song2.wav", "lyrics.txt"],
+            "/home/user/Desktop/": ["shortcut.lnk", "temp_file", "notes.txt"],
+            "/home/admin/": ["logs/", "config/", "backups/", "admin_tools.exe"],
+            "/home/admin/logs/": ["system.log", "auth.log", "debug.log"],
+            "/home/admin/config/": ["server.cfg", "security.policy", "users.db"],
+            "/home/admin/backups/": ["backup2024.zip", "system_backup.tar"],
+            "/home/guest/": ["welcome.txt", "readme_first.txt"],
+            "/home/backup/": ["old_files.tar", "archive_2023.zip"],
+            "/var/": ["log/", "lib/", "tmp/", "cache/"],
+            "/var/log/": ["apache/", "system/", "install.log"],
+            "/var/log/apache/": ["access.log", "error.log", "flag4.txt"],
+            "/opt/": ["applications/", "config/", "data.bin"],
+            "/opt/applications/": ["app1/", "app2/", "readme.txt"],
+            "/tmp/": ["temp1", "temp2", "trash/", "swapfile.sys"],
+            "/tmp/trash/": ["deleted_file.tmp", "old_cache"],
+            "/boot/": ["kernel.img", "config.txt", "initrd"]
+        };
+
+        // File contents
+        const fileContents = {
+            "/readme.txt": "Welcome to the Cyber Forest!\nBe careful what files you open...",
+            "/.system_log": "System booted successfully.\nUser login detected.\nWarning: Unauthorized access attempt.",
+            "/home/flag.txt": "CTF{not_the_real_flag_1}",
+            "/home/logfile.log": "ERROR: File not found\nDEBUG: User accessed restricted area\nINFO: System shutdown scheduled",
+            "/home/user/.hidden_file": "CTF{hidden_in_plain_sight}",
+            "/home/user/temp.txt": "Temporary data storage\nThis file will be deleted soon",
+            "/home/user/Documents/note.txt": "Important Notes:\n- Change password every 90 days\n- Backup important files\n- Don't forget the meeting on Friday",
+            "/home/user/Documents/flag2.txt": "CTF{you_found_the_second_flag}",
+            "/home/user/Documents/secret.docx": "This appears to be a Word document, but it's actually empty.",
+            "/home/user/Documents/financial.xlsx": "Corrupted spreadsheet file. Cannot display content.",
+            "/home/user/Documents/passwords.pdf": "This PDF is password protected.",
+            "/home/user/Documents/Work/Q3_Summary.doc": "Q3 Performance Summary:\n- Revenue: $1.2M\n- Expenses: $800K\n- Profit: $400K",
+            "/home/user/Documents/Work/budget.xls": "Budget allocation for next year:\n- R&D: $200K\n- Marketing: $150K\n- Security: $100K",
+            "/home/user/Documents/Work/important.txt": "REMINDER: Server maintenance scheduled for Saturday 2AM",
+            "/home/user/Documents/Work/Reports/template.doc": "Report Template\nUse this for all quarterly reports",
+            "/home/user/Documents/Work/Reports/2024/Q1_Report.pdf": "Q1 2024 Financial Report\nAll targets met successfully",
+            "/home/user/Documents/Work/Reports/2024/Q2_Report.pdf": "Q2 2024 Financial Report\nMarket conditions challenging\nProjections adjusted downward",
+            "/home/user/Documents/Work/Reports/2024/flag3.txt": "CTF{deep_nested_exploration}",
+            "/home/user/Documents/Work/Reports/2024/confidential.zip": "Password: 'forest'\nThis archive contains sensitive information.",
+            "/home/user/Documents/Personal/notes.txt": "Personal reminder:\n- Buy groceries\n- Call dentist\n- Pay electricity bill",
+            "/home/user/Documents/Personal/Taxes/2023.pdf": "2023 Tax Return\nFiled electronically April 15, 2024",
+            "/home/user/Documents/Personal/Taxes/W2_forms.zip": "W2 Forms Archive\nContains tax documents for 2023",
+            "/home/user/Documents/Personal/Taxes/important.doc": "Tax consultant contact info:\nJohn Smith, CPA\n555-0123",
+            "/home/user/Documents/Projects/ideas.txt": "Project Ideas:\n- Smart home system\n- Mobile game app\n- AI assistant",
+            "/home/user/Documents/Projects/CTF/challenge1.py": "print('Hello CTF player!')\n# This is a decoy file",
+            "/home/user/Documents/Projects/CTF/challenge2.exe": "This executable file is corrupted",
+            "/home/user/Documents/Projects/CTF/hint.txt": "Look deeper than you think necessary",
+            "/home/user/Documents/Projects/CTF/encrypted_data.bin": "U2FsdGVkX1+2w2Z6P4zX6Q5R5K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y1Z2\nThis data is encrypted with AES-256",
+            "/home/user/Downloads/malware.exe": "VIRUS ACTIVATED! Your system is now compromised!",
+            "/home/user/Downloads/clean_file.zip": "This archive contains nothing interesting.",
+            "/home/user/Downloads/suspicious.rar": "This archive is password protected.",
+            "/home/user/Downloads/movie.torrent": "Torrent file corrupted",
+            "/home/user/Downloads/cracked_software.exe": "WARNING: This file may contain malware",
+            "/home/user/Downloads/important_document.pdf": "Document appears to be blank",
+            "/home/user/Pictures/vacation.jpg": "A nice picture of the beach. Nothing hidden here.",
+            "/home/user/Pictures/forest.png": "A dense digital forest. Look closer...",
+            "/home/user/Pictures/flag3.png": "The flag is hidden in this image's metadata: CTF{metadata_master}",
+            "/home/user/Pictures/screenshot.png": "Screenshot of error message\nError code: 0x80070005",
+            "/home/user/Pictures/profile_pic.jpg": "User profile picture\nTaken 2024-01-15",
+            "/home/user/Pictures/memes/funny1.jpg": "Internet meme: 'One does not simply...'",
+            "/home/user/Pictures/memes/funny2.png": "Meme: 'I have no idea what I'm doing'",
+            "/home/user/Pictures/memes/not_a_flag.txt": "CTF{this_is_fake_flag}",
+            "/home/user/Music/song1.mp3": "Audio file metadata:\nArtist: Unknown\nTitle: Unknown\nDuration: 3:45",
+            "/home/user/Music/song2.wav": "Raw audio data, no metadata",
+            "/home/user/Music/lyrics.txt": "Song lyrics:\nNever gonna give you up\nNever gonna let you down",
+            "/home/user/Desktop/shortcut.lnk": "Shortcut to important document\nTarget: /home/user/Documents/Work/Q3_Summary.doc",
+            "/home/user/Desktop/temp_file": "Temporary file contents\nWill be deleted on reboot",
+            "/home/user/Desktop/notes.txt": "Desktop notes:\n- Finish report\n- Email client\n- Buy coffee",
+            "/home/admin/logs/system.log": "System log:\nServices started successfully\nNo errors detected",
+            "/home/admin/logs/auth.log": "Authentication log:\nUser admin logged in\nFailed login attempt: user123",
+            "/home/admin/logs/debug.log": "Debug messages:\nMemory allocation: 2GB\nCPU usage: 15%",
+            "/home/admin/config/server.cfg": "Server configuration:\nPort: 8080\nTimeout: 30s\nSSL: enabled",
+            "/home/admin/config/security.policy": "Security policy:\nPassword length: 12 chars\nLockout after 5 attempts",
+            "/home/admin/config/users.db": "User database encrypted",
+            "/home/admin/backups/backup2024.zip": "System backup from January 2024",
+            "/home/admin/backups/system_backup.tar": "Full system backup\nSize: 15GB",
+            "/home/admin/admin_tools.exe": "Administrative tools suite\nRequires elevation",
+            "/home/guest/welcome.txt": "Guest account - limited privileges.\nPlease contact admin for access.",
+            "/home/guest/readme_first.txt": "Guest user guide:\n- No installation privileges\n- Limited storage space",
+            "/home/backup/old_files.tar": "Old files archive from 2022",
+            "/home/backup/archive_2023.zip": "Yearly archive from 2023",
+            "/var/log/install.log": "Software installation log:\nPackage: text-editor\nStatus: success",
+            "/var/log/apache/access.log": "Web server access log:\n127.0.0.1 - GET /index.html\n192.168.1.5 - POST /login",
+            "/var/log/apache/error.log": "Web server errors:\n500 Internal Server Error\n404 File Not Found",
+            "/var/log/apache/flag4.txt": "The final flag is: CTF{apache_logs_hold_secrets}\nBut wait... there's one more step!",
+            "/opt/applications/readme.txt": "Applications directory\nInstall software here",
+            "/opt/data.bin": "Binary data file\nFormat: proprietary",
+            "/tmp/temp1": "Temporary data 1",
+            "/tmp/temp2": "Temporary data 2",
+            "/tmp/swapfile.sys": "System swap file\nDo not modify",
+            "/tmp/trash/deleted_file.tmp": "Deleted file contents\nMarked for removal",
+            "/tmp/trash/old_cache": "Old cache data\nExpired: 2024-03-01",
+            "/boot/kernel.img": "System kernel image\nDo not modify",
+            "/boot/config.txt": "Boot configuration:\nTimeout: 5s\nDefault: Linux",
+            "/boot/initrd": "Initial RAM disk\nRequired for boot",
+            "/bin/config_editor": "Configuration editor tool\nUsage: config_editor [file]",
+            "/bin/data_dump": "Data dumping utility\nUse with caution"
+        };
+
+        // File types (for 'file' command)
+        const fileTypes = {
+            "/readme.txt": "ASCII text",
+            "/.system_log": "ASCII text",
+            "/home/flag.txt": "ASCII text",
+            "/home/logfile.log": "ASCII text",
+            "/home/user/.hidden_file": "ASCII text",
+            "/home/user/temp.txt": "ASCII text",
+            "/home/user/Documents/note.txt": "ASCII text",
+            "/home/user/Documents/flag2.txt": "ASCII text",
+            "/home/user/Documents/secret.docx": "Microsoft Word 2007+",
+            "/home/user/Documents/financial.xlsx": "Microsoft Excel 2007+",
+            "/home/user/Documents/passwords.pdf": "PDF document",
+            "/home/user/Documents/Work/Q3_Summary.doc": "Microsoft Word 97-2003",
+            "/home/user/Documents/Work/budget.xls": "Microsoft Excel 97-2003",
+            "/home/user/Documents/Work/important.txt": "ASCII text",
+            "/home/user/Documents/Work/Reports/template.doc": "Microsoft Word 2007+",
+            "/home/user/Documents/Work/Reports/2024/Q1_Report.pdf": "PDF document",
+            "/home/user/Documents/Work/Reports/2024/Q2_Report.pdf": "PDF document",
+            "/home/user/Documents/Work/Reports/2024/flag3.txt": "ASCII text",
+            "/home/user/Documents/Work/Reports/2024/confidential.zip": "Zip archive data",
+            "/home/user/Documents/Personal/notes.txt": "ASCII text",
+            "/home/user/Documents/Personal/Taxes/2023.pdf": "PDF document",
+            "/home/user/Documents/Personal/Taxes/W2_forms.zip": "Zip archive data",
+            "/home/user/Documents/Personal/Taxes/important.doc": "Microsoft Word 97-2003",
+            "/home/user/Documents/Projects/ideas.txt": "ASCII text",
+            "/home/user/Documents/Projects/CTF/challenge1.py": "Python script",
+            "/home/user/Documents/Projects/CTF/challenge2.exe": "PE32 executable",
+            "/home/user/Documents/Projects/CTF/hint.txt": "ASCII text",
+            "/home/user/Documents/Projects/CTF/encrypted_data.bin": "data",
+            "/home/user/Downloads/malware.exe": "PE32 executable (GUI) Intel 80386",
+            "/home/user/Downloads/clean_file.zip": "Zip archive data",
+            "/home/user/Downloads/suspicious.rar": "RAR archive data",
+            "/home/user/Downloads/movie.torrent": "BitTorrent file",
+            "/home/user/Downloads/cracked_software.exe": "PE32 executable",
+            "/home/user/Downloads/important_document.pdf": "PDF document",
+            "/home/user/Pictures/vacation.jpg": "JPEG image data",
+            "/home/user/Pictures/forest.png": "PNG image data",
+            "/home/user/Pictures/flag3.png": "PNG image data",
+            "/home/user/Pictures/screenshot.png": "PNG image data",
+            "/home/user/Pictures/profile_pic.jpg": "JPEG image data",
+            "/home/user/Pictures/memes/funny1.jpg": "JPEG image data",
+            "/home/user/Pictures/memes/funny2.png": "PNG image data",
+            "/home/user/Pictures/memes/not_a_flag.txt": "ASCII text",
+            "/home/user/Music/song1.mp3": "MP3 audio",
+            "/home/user/Music/song2.wav": "RIFF (little-endian) data",
+            "/home/user/Music/lyrics.txt": "ASCII text",
+            "/home/user/Desktop/shortcut.lnk": "shortcut",
+            "/home/user/Desktop/temp_file": "ASCII text",
+            "/home/user/Desktop/notes.txt": "ASCII text",
+            "/home/admin/logs/system.log": "ASCII text",
+            "/home/admin/logs/auth.log": "ASCII text",
+            "/home/admin/logs/debug.log": "ASCII text",
+            "/home/admin/config/server.cfg": "ASCII text",
+            "/home/admin/config/security.policy": "ASCII text",
+            "/home/admin/config/users.db": "data",
+            "/home/admin/backups/backup2024.zip": "Zip archive data",
+            "/home/admin/backups/system_backup.tar": "POSIX tar archive",
+            "/home/admin/admin_tools.exe": "PE32 executable",
+            "/home/guest/welcome.txt": "ASCII text",
+            "/home/guest/readme_first.txt": "ASCII text",
+            "/home/backup/old_files.tar": "POSIX tar archive",
+            "/home/backup/archive_2023.zip": "Zip archive data",
+            "/var/log/install.log": "ASCII text",
+            "/var/log/apache/access.log": "ASCII text",
+            "/var/log/apache/error.log": "ASCII text",
+            "/var/log/apache/flag4.txt": "ASCII text",
+            "/opt/applications/readme.txt": "ASCII text",
+            "/opt/data.bin": "data",
+            "/tmp/temp1": "ASCII text",
+            "/tmp/temp2": "ASCII text",
+            "/tmp/swapfile.sys": "data",
+            "/tmp/trash/deleted_file.tmp": "ASCII text",
+            "/tmp/trash/old_cache": "data",
+            "/boot/kernel.img": "data",
+            "/boot/config.txt": "ASCII text",
+            "/boot/initrd": "data",
+            "/bin/config_editor": "ELF 64-bit LSB executable",
+            "/bin/data_dump": "ELF 64-bit LSB executable"
+        };
+
+        // DOM elements
+        const terminal = document.getElementById('terminal');
+        const commandInput = document.getElementById('command-input');
+        const flagsFoundDisplay = document.getElementById('flags-found');
+        const timerDisplay = document.getElementById('timer');
+        const submitSection = document.getElementById('submit-section');
+
+        // Initialize terminal
+        printToTerminal('Cyber Forest CTF Terminal - Type "help" for available commands\n\n');
+        printToTerminal('Initializing system...', 'warning');
+        setTimeout(() => {
+            printToTerminal('System security bypassed...', 'warning');
+            setTimeout(() => {
+                printToTerminal('Filesystem mounted...\n', 'warning');
+                printToTerminal('You are in a digital forest full of hidden flags and traps.', 'success');
+                printToTerminal('Find all 4 flags to complete the challenge.\n', 'success');
+                
+                // Display leaderboard
+                updateLeaderboard();
+            }, 800);
+        }, 800);
+
+        // Create glowing particles
+        createParticles();
+
+        // Start timer
+        const timerInterval = setInterval(updateTimer, 1000);
+
+        // Command processing
+        commandInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const command = commandInput.value.trim();
+                commandInput.value = '';
+                
+                if (command) {
+                    printToTerminal(`user@cyberforest:${state.currentPath}$ ${command}`, 'command');
+                    processCommand(command);
+                }
+            }
+        });
+
+        function processCommand(command) {
+            if (state.infected) {
+                printToTerminal('System locked due to infection! Please wait...', 'error');
+                return;
+            }
+
+            const parts = command.split(' ');
+            const cmd = parts[0];
+            const args = parts.slice(1);
+
+            switch (cmd) {
+                case 'ls':
+                    executeLs(args);
+                    break;
+                case 'cd':
+                    executeCd(args);
+                    break;
+                case 'cat':
+                    executeCat(args);
+                    break;
+                case 'file':
+                    executeFile(args);
+                    break;
+                case 'unzip':
+                    executeUnzip(args);
+                    break;
+                case 'decrypt':
+                    executeDecrypt(args);
+                    break;
+                case 'help':
+                    executeHelp();
+                    break;
+                case 'clear':
+                    terminal.innerHTML = '';
+                    break;
+                default:
+                    printToTerminal(`Command not found: ${cmd}`, 'error');
+            }
+        }
+
+        function executeLs(args) {
+            const path = args[0] ? resolvePath(args[0]) : state.currentPath;
+            
+            if (!fileSystem[path]) {
+                printToTerminal(`ls: cannot access '${args[0] || path}': No such file or directory`, 'error');
+                return;
+            }
+            
+            const items = fileSystem[path];
+            let output = '';
+            
+            items.forEach(item => {
+                if (item.endsWith('/')) {
+                    output += `<span class="directory">${item}</span> `;
+                } else if (item.endsWith('.exe') || item.endsWith('.bin') || item === 'virus') {
+                    output += `<span class="executable">${item}</span> `;
+                } else {
+                    output += `<span class="file">${item}</span> `;
+                }
+            });
+            
+            printToTerminal(output, '', true);
+        }
+
+        function executeCd(args) {
+            if (!args[0]) {
+                state.currentPath = "/";
+                return;
+            }
+
+            let targetPath = resolvePath(args[0]);
+            
+            // Special case for parent directory
+            if (args[0] === '..') {
+                if (state.currentPath === '/') {
+                    printToTerminal('Already at root directory', 'warning');
+                    return;
+                }
+                
+                const parts = state.currentPath.split('/').filter(p => p);
+                parts.pop();
+                state.currentPath = parts.length ? '/' + parts.join('/') + '/' : '/';
+                return;
+            }
+            
+            // Check if directory exists
+            if (!fileSystem[targetPath] && !fileSystem[targetPath + '/']) {
+                printToTerminal(`cd: no such file or directory: ${args[0]}`, 'error');
+                return;
+            }
+            
+            // Add trailing slash if needed
+            if (!targetPath.endsWith('/')) {
+                targetPath += '/';
+            }
+            
+            state.currentPath = targetPath;
+        }
+
+        function executeCat(args) {
+            if (!args[0]) {
+                printToTerminal('Usage: cat FILE', 'error');
+                return;
+            }
+
+            const filePath = resolvePath(args[0]);
+            
+            if (filePath in fileContents) {
+                const content = fileContents[filePath];
+                printToTerminal(content);
+                
+                // Check for flags
+                checkForFlags(content);
+                
+                // Check for viruses
+                if (filePath === '/bin/virus' || filePath === '/home/user/Downloads/malware.exe' || 
+                    filePath === '/home/user/Downloads/cracked_software.exe') {
+                    triggerVirus();
+                }
+
+                // Check if this file unlocks the unzip command
+                if (filePath === '/home/user/Documents/Work/Reports/2024/confidential.zip') {
+                    state.unlockedUnzip = true;
+                    printToTerminal('\nYou discovered the unzip command! Try: unzip confidential.zip', 'success');
+                }
+            } else {
+                printToTerminal(`cat: ${args[0]}: No such file or directory`, 'error');
+            }
+        }
+
+        function executeFile(args) {
+            if (!args[0]) {
+                printToTerminal('Usage: file FILE', 'error');
+                return;
+            }
+
+            const filePath = resolvePath(args[0]);
+            
+            if (filePath in fileTypes) {
+                printToTerminal(`${args[0]}: ${fileTypes[filePath]}`);
+            } else {
+                printToTerminal(`file: ${args[0]}: No such file or directory`, 'error');
+            }
+        }
+
+        function executeUnzip(args) {
+            if (!state.unlockedUnzip) {
+                printToTerminal('unzip: command not found', 'error');
+                return;
+            }
+
+            if (!args[0]) {
+                printToTerminal('Usage: unzip FILE.zip', 'error');
+                return;
+            }
+
+            const filePath = resolvePath(args[0]);
+            
+            if (filePath === '/home/user/Documents/Work/Reports/2024/confidential.zip') {
+                printToTerminal('Archive: confidential.zip');
+                printToTerminal(' extracting: secret_note.txt');
+                printToTerminal(' extracting: final_flag.txt');
+                printToTerminal('\nContents extracted successfully!');
+                printToTerminal('Check the current directory for extracted files.', 'success');
+                
+                // Add the extracted files to the file system
+                if (!fileSystem[state.currentPath].includes('secret_note.txt')) {
+                    fileSystem[state.currentPath].push('secret_note.txt');
+                    fileSystem[state.currentPath].push('final_flag.txt');
+                    
+                    fileContents[state.currentPath + 'secret_note.txt'] = 'The password for the final flag is: "cyber_forest_2024"';
+                    fileContents[state.currentPath + 'final_flag.txt'] = 'This file is encrypted. Use: decrypt final_flag.txt';
+                    
+                    fileTypes[state.currentPath + 'secret_note.txt'] = 'ASCII text';
+                    fileTypes[state.currentPath + 'final_flag.txt'] = 'encrypted data';
+                }
+            } else {
+                printToTerminal('unzip: cannot find or open specified file', 'error');
+            }
+        }
+
+        function executeDecrypt(args) {
+            if (!args[0]) {
+                printToTerminal('Usage: decrypt FILE', 'error');
+                return;
+            }
+
+            const filePath = resolvePath(args[0]);
+            
+            if (filePath.endsWith('final_flag.txt')) {
+                const password = prompt('Enter decryption password:');
+                if (password === 'cyber_forest_2024') {
+                    printToTerminal('Decryption successful!');
+                    printToTerminal('Final flag: CTF{password_protected_mastery}');
+                    checkForFlags('CTF{password_protected_mastery}');
+                } else {
+                    printToTerminal('Decryption failed: incorrect password', 'error');
+                }
+            } else {
+                printToTerminal('decrypt: file is not encrypted or unsupported format', 'error');
+            }
+        }
+
+        function executeHelp() {
+            const helpText = `Available commands:
+ls [DIR]    - List directory contents
+cd [DIR]    - Change directory
+cat FILE    - Display file contents
+file FILE   - Determine file type
+help        - Display this help
+clear       - Clear the terminal
+
+${state.unlockedUnzip ? 'unzip FILE.zip - Extract ZIP archive contents\ndecrypt FILE - Decrypt encrypted files\n' : ''}
+Flags:
+There are 4 hidden flags in the system. Find them all!
+`;
+            printToTerminal(helpText);
+        }
+
+        function resolvePath(path) {
+            if (path.startsWith('/')) {
+                return path;
+            }
+            
+            return state.currentPath + path;
+        }
+
+        function checkForFlags(content) {
+            const flags = [
+                'CTF{hidden_in_plain_sight}',
+                'CTF{you_found_the_second_flag}',
+                'CTF{deep_nested_exploration}',
+                'CTF{password_protected_mastery}'
+            ];
+            
+            flags.forEach((flag, index) => {
+                if (content.includes(flag) && !state.foundFlags[`flag${index + 1}`]) {
+                    state.foundFlags[`flag${index + 1}`] = true;
+                    state.flagsFound++;
+                    flagsFoundDisplay.textContent = state.flagsFound;
+                    printToTerminal(`\nCongratulations! You found flag ${index + 1}: ${flag}`, 'success');
+                    
+                    if (state.flagsFound === 4 && !state.completed) {
+                        state.completed = true;
+                        state.endTime = new Date();
+                        const timeTaken = Math.floor((state.endTime - state.startTime) / 1000);
+                        const minutes = Math.floor(timeTaken / 60);
+                        const seconds = timeTaken % 60;
+                        
+                        printToTerminal(`\n🎉 MISSION COMPLETE! 🎉\nFound all 4 flags in ${minutes}m ${seconds}s!`, 'success');
+                        printToTerminal('You have proven yourself as a master hacker!', 'success');
+                        
+                        // Show submit section
+                        submitSection.style.display = 'block';
+                        terminal.scrollTop = terminal.scrollHeight;
+                    }
+                }
+            });
+        }
+
+        function triggerVirus() {
+            state.infected = true;
+            
+            // Create virus effect
+            const virusDiv = document.createElement('div');
+            virusDiv.className = 'virus-effect';
+            virusDiv.innerHTML = '☠ VIRUS DETECTED!<br>SYSTEM COMPROMISED!<br><span style="font-size: 1rem;">Terminal locked for 10 seconds</span>';
+            document.body.appendChild(virusDiv);
+            
+            // Disable input
+            commandInput.disabled = true;
+            
+            // Remove virus after timeout
+            setTimeout(() => {
+                document.body.removeChild(virusDiv);
+                state.infected = false;
+                commandInput.disabled = false;
+                commandInput.focus();
+                printToTerminal('System restored. Be more careful next time!', 'warning');
+            }, 10000);
+        }
+
+        function printToTerminal(text, className = '', isHTML = false) {
+            const div = document.createElement('div');
+            if (className) {
+                div.className = `output ${className}`;
+            } else {
+                div.className = 'output';
+            }
+            
+            if (isHTML) {
+                div.innerHTML = text;
+            } else {
+                div.textContent = text;
+            }
+            
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const colors = ['#2a7fff', '#00ffcc', '#7f2aff', '#ff2a7f'];
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random properties
+                const size = Math.random() * 10 + 5;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.background = color;
+                particle.style.boxShadow = `0 0 ${size*2}px ${size}px ${color}`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+                particle.style.animationDelay = `-${Math.random() * 20}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const elapsed = Math.floor((now - state.startTime) / 1000);
+            
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const seconds = elapsed % 60;
+            
+            timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+
+        // Matrix rain effect
+        function setupMatrixRain() {
+            const canvas = document.getElementById('matrix-rain');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const characters = '01';
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            
+            const drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = 1;
+            }
+            
+            function draw() {
+                ctx.fillStyle = 'rgba(10, 10, 24, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#00ffcc';
+                ctx.font = `${fontSize}px monospace`;
+                
+                for (let i = 0; i < drops.length; i++) {
+                    const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    
+                    drops[i]++;
+                }
+            }
+            
+            setInterval(draw, 33);
+        }
+        
+        
+                // Submit completion function
+        function submitCompletion() {
+            if (state.flagsFound === 4) {
+                // Redirect back to the town with completion parameter
+                // Building 2 corresponds to this challenge
+                window.location.href = "file:///home/nova/Downloads/town.html?completed=2";
+            } else {
+                alert("You haven't found all flags yet! Keep searching.");
+            }
+        }
+
+        // Initialize matrix rain
+        window.addEventListener('load', setupMatrixRain);
+        window.addEventListener('resize', setupMatrixRain);
+    </script>
+</body>
+</html>
