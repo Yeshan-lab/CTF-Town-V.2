@@ -424,19 +424,16 @@ There are 3 hidden flags in the system. Find them all!
         // Submit completion function
         function submitCompletion() {
             if (state.flagsFound === 3) {
-                // Get the town page URL from the parent page
-                const townUrl = window.location.origin + "/town.html";
                 // Redirect back to the town with completion parameter
-                window.location.href = `${townUrl}?completed=1`;
+                window.location.href = "/?completed=1"; // Just "/" for home page
             } else {
                 alert("You haven't found all flags yet! Keep searching.");
-            }
+    }
         }
         
         // Return to town function
         function returnToTown() {
-            const townUrl = window.location.origin + "/town.html";
-            window.location.href = townUrl;
+            window.location.href = "/"; 
         }
     </script>
 </body>
