@@ -410,6 +410,7 @@
                <div id="submit-section">
             <p>Found all flags? Submit your completion!</p>
             <button id="submit-button" onclick="submitCompletion()">Submit Completion</button>
+            <button id="return-button" onclick="returnToTown()" style="margin-left: 10px; padding: 10px 20px; background: #2a7fff; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: 'Source Code Pro', monospace;">Return to Town</button>
         </div>
     </div>
 
@@ -1059,9 +1060,10 @@ There are 4 hidden flags in the system. Find them all!
                 // Submit completion function
         function submitCompletion() {
             if (state.flagsFound === 4) {
-                // Redirect back to the town with completion parameter
-                // Building 2 corresponds to this challenge
-                window.location.href = "file:///home/nova/Downloads/town.html?completed=2";
+                // Get the town page URL from the current domain
+                const townUrl = window.location.origin + "/town.html";
+                // Redirect back to the town with completion parameter for Building 2
+                window.location.href = `${townUrl}?completed=2`;
             } else {
                 alert("You haven't found all flags yet! Keep searching.");
             }
@@ -1070,6 +1072,14 @@ There are 4 hidden flags in the system. Find them all!
         // Initialize matrix rain
         window.addEventListener('load', setupMatrixRain);
         window.addEventListener('resize', setupMatrixRain);
+
+
+
+        // Return to town function
+        function returnToTown() {
+            const townUrl = window.location.origin + "/town.html";
+            window.location.href = townUrl;
+        }
     </script>
 </body>
 </html>
