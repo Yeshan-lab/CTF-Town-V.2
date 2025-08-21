@@ -433,7 +433,10 @@ There are 3 hidden flags in the system. Find them all!
         
         // Return to town function
         function returnToTown() {
-            window.location.href = "/"; 
+            // Set a flag indicating we're returning from a challenge
+            sessionStorage.setItem('returningFromChallenge', 'true');
+            const townUrl = window.location.origin + "/town.html";
+            window.location.href = townUrl; 
         }
     </script>
 </body>
