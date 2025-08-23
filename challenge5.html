@@ -1464,9 +1464,9 @@
                 completionMessage.innerHTML = '<span class="success">✓ Investigation completed! All 8 flags found!</span>';
                 
                 // Simulate completion - in a real scenario, this would redirect
-                setTimeout(() => {
-                    alert("Investigation completed successfully! All 8 flags collected. In a real game, you would be returned to the town now.");
-                }, 1000);
+                const townUrl = window.location.origin + "/town.html";
+                // Redirect back to the town with completion parameter for Building 5
+                window.location.href = `${townUrl}?completed=5`;
             } else {
                 addTerminalLine('<span class="error">You haven\'t collected all flags yet!</span>');
                 addTerminalLine(`<span class="output">Flags collected: ${evidenceFound.length}/8 required</span>`);
@@ -1476,10 +1476,9 @@
         
         function returnToTown() {
             // Simulate returning to town - in a real scenario, this would redirect
-            addTerminalLine('<span class="output">Returning to town...</span>');
-            setTimeout(() => {
-                alert("In a real game, you would be returned to the town now.");
-            }, 1000);
+            sessionStorage.setItem('returningFromChallenge', 'true');
+            const townUrl = window.location.origin + "/town.html";
+            window.location.href = townUrl;
         }
         
         // Initialize the interface
