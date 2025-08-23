@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Cyber Investigation - CTF Challenge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        :root {
+            --primary: #00ffcc;
+            --secondary: #00ccff;
+            --accent: #ff00cc;
+            --dark: #0a0a1a;
+            --darker: #050510;
+            --success: #00ff00;
+            --warning: #ffcc00;
+            --danger: #ff3366;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 204, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 102, 255, 0.05) 0%, transparent 20%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .cyber-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+            grid-template-areas:
+                "header header header"
+                "tools main side"
+                "footer footer footer";
+        }
+        
+        @media (max-width: 1400px) {
+            .cyber-container {
+                grid-template-columns: 1fr 1fr;
+                grid-template-areas:
+                    "header header"
+                    "tools main"
+                    "side side"
+                    "footer footer";
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .cyber-container {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "tools"
+                    "main"
+                    "side"
+                    "footer";
+            }
+        }
+        
+        header {
+            grid-area: header;
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            background: rgba(10, 15, 30, 0.9);
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 255, 204, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+        }
+        
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+        
+        .cyber-card {
+            background: rgba(10, 15, 30, 0.9);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cyber-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 255, 204, 0.05) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        .cyber-card h2 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .cyber-card h2 i {
+            font-size: 1.5rem;
+        }
+        
+        .tools-panel {
+            grid-area: tools;
+        }
+        
+        .main-panel {
+            grid-area: main;
+        }
+        
+        .side-panel {
+            grid-area: side;
+        }
+        
+        .footer {
+            grid-area: footer;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            border-top: 1px solid var(--primary);
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .network-map {
+            background: rgba(5, 5, 15, 0.9);
+            border: 1px solid var(--accent);
+            position: relative;
+            min-height: 400px;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 20, 40, 0.7), rgba(0, 20, 40, 0.7));
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        .node {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: rgba(30, 30, 80, 0.8);
+            border: 2px solid var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            text-align: center;
+            z-index: 2;
+            box-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+        }
+        
+        .node:hover {
+            background: rgba(40, 40, 100, 0.8);
+            box-shadow: 0 0 15px var(--secondary);
+            transform: scale(1.15);
+        }
+        
+        .node::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid var(--secondary);
+            animation: pulse 2s infinite;
+            box-sizing: border-box;
+        }
+        
+        .main-server {
+            background: rgba(80, 30, 30, 0.8);
+            border-color: var(--accent);
+            top: 150px;
+            left: 300px;
+        }
+        
+        .main-server:hover {
+            box-shadow: 0 0 15px var(--accent);
+        }
+        
+        .router {
+            top: 100px;
+            left: 150px;
+        }
+        
+        .workstation {
+            top: 250px;
+            left: 150px;
+        }
+        
+        .darkweb-node {
+            top: 100px;
+            left: 450px;
+        }
+        
+        .crypto-wallet {
+            top: 250px;
+            left: 450px;
+        }
+        
+        .hint {
+            font-size: 0.9rem;
+            color: var(--secondary);
+            font-style: italic;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .terminal {
+            background: rgba(0, 5, 15, 0.9);
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .prompt {
+            color: var(--success);
+        }
+        
+        .command {
+            color: var(--secondary);
+        }
+        
+        .output {
+            color: #cccccc;
+        }
+        
+        .success {
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        .error {
+            color: var(--danger);
+        }
+        
+        .important {
+            color: var(--warning);
+            font-weight: bold;
+        }
+        
+        .flag {
+            color: var(--warning);
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+        }
+        
+        .input-area {
+            display: flex;
+            margin-top: 10px;
+        }
+        
+        #command-input {
+            flex-grow: 1;
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid var(--primary);
+            color: var(--success);
+            padding: 10px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        #execute-btn {
+            background: linear-gradient(to bottom, #0044cc, #002288);
+            color: white;
+            border: 1px solid var(--secondary);
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            transition: all 0.3s ease;
+        }
+        
+        #execute-btn:hover {
+            background: linear-gradient(to bottom, #0066ff, #0044cc);
+            box-shadow: 0 0 10px rgba(0, 102, 255, 0.7);
+        }
+        
+        .progress {
+            margin-top: 20px;
+            background: rgba(10, 20, 40, 0.8);
+            border-radius: 5px;
+            padding: 15px;
+            border: 1px solid var(--primary);
+        }
+        
+        .progress-bar-container {
+            height: 25px;
+            background: rgba(0, 10, 30, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--secondary);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #0066ff, #00ccff);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-image: linear-gradient(
+                -45deg,
+                rgba(255, 255, 255, 0.2) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0.2) 75%,
+                transparent 75%,
+                transparent
+            );
+            z-index: 1;
+            background-size: 50px 50px;
+            animation: move 2s linear infinite;
+            overflow: hidden;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: var(--secondary);
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .glitch {
+            animation: glitch 1s linear infinite;
+        }
+        
+        @keyframes glitch {
+            0% { text-shadow: 2px 2px 0px var(--accent), -2px -2px 0px var(--secondary); }
+            50% { text-shadow: -2px 2px 0px var(--accent), 2px -2px 0px var(--secondary); }
+            100% { text-shadow: 2px -2px 0px var(--accent), -2px 2px 0px var(--secondary); }
+        }
+        
+        @keyframes pulse {
+            0% { 
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            70% { 
+                transform: scale(1.5);
+                opacity: 0;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes move {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 50px 50px;
+            }
+        }
+        
+        .toolbox {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .tool {
+            background: rgba(0, 30, 60, 0.8);
+            border: 1px solid var(--secondary);
+            border-radius: 5px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            text-align: center;
+        }
+        
+        .tool:hover {
+            background: rgba(0, 50, 100, 0.8);
+            box-shadow: 0 0 10px var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .tool i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .evidence-list {
+            background: rgba(20, 10, 30, 0.8);
+            border: 1px solid #cc00ff;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .evidence-list h3 {
+            color: #cc00ff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .decrypt-area {
+            display: flex;
+            margin-top: 15px;
+        }
+        
+        #decrypt-input {
+            flex-grow: 1;
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid var(--primary);
+            color: var(--success);
+            padding: 10px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .decrypt-btn {
+            background: linear-gradient(to bottom, #6600cc, #440088);
+            color: white;
+            border: 1px solid #cc00ff;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .decrypt-btn:hover {
+            background: linear-gradient(to bottom, #8800ff, #6600cc);
+            box-shadow: 0 0 10px rgba(204, 0, 255, 0.7);
+        }
+        
+        .scan-line {
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: linear-gradient(to right, transparent, var(--primary), transparent);
+            top: 0;
+            animation: scan 3s linear infinite;
+            z-index: 1;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: rgba(10, 15, 30, 0.9);
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .connection {
+            position: absolute;
+            background: rgba(0, 204, 255, 0.3);
+            z-index: 1;
+            transform-origin: 0 0;
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            background: rgba(0, 30, 60, 0.5);
+        }
+        
+        .tab.active {
+            background: rgba(0, 50, 100, 0.8);
+            border-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .file-system {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            padding: 10px;
+            background: rgba(0, 10, 30, 0.8);
+            margin-bottom: 15px;
+        }
+        
+        .file-item {
+            padding: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .file-item:hover {
+            background: rgba(0, 50, 100, 0.5);
+        }
+        
+        .code-view {
+            height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            padding: 10px;
+            background: rgba(0, 10, 30, 0.8);
+            font-family: 'Courier New', monospace;
+            white-space: pre;
+            margin-bottom: 15px;
+        }
+        
+        .crypto-challenge {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid var(--warning);
+            border-radius: 5px;
+            background: rgba(30, 30, 10, 0.8);
+        }
+        
+        .hacking-minigame {
+            height: 200px;
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+            background: rgba(30, 10, 30, 0.8);
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .firewall {
+            position: absolute;
+            width: 20px;
+            height: 100px;
+            background: linear-gradient(to bottom, var(--danger), #ff0066);
+            top: 50px;
+            left: 150px;
+            box-shadow: 0 0 10px var(--danger);
+        }
+        
+        .packet {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: var(--success);
+            border-radius: 50%;
+            top: 90px;
+            left: 20px;
+        }
+        
+        .control-btn {
+            padding: 8px 15px;
+            background: rgba(0, 50, 100, 0.8);
+            border: 1px solid var(--secondary);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 70, 140, 0.8);
+            box-shadow: 0 0 10px var(--secondary);
+        }
+        
+        .manual-search {
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            background: rgba(0, 20, 40, 0.8);
+        }
+        
+        .search-results {
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            padding: 10px;
+            background: rgba(0, 10, 30, 0.8);
+            margin-top: 10px;
+        }
+        
+        .submit-section {
+            margin-top: 20px;
+            text-align: center;
+            padding: 20px;
+            background: rgba(10, 30, 60, 0.8);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            grid-column: 1 / -1;
+        }
+        
+        .submit-button {
+            background-color: var(--success);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+            border-radius: 4px;
+        }
+        
+        .return-button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+            border-radius: 4px;
+        }
+        
+        .completion-message {
+            color: var(--success);
+            font-weight: bold;
+            margin: 15px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-container">
+        <header>
+            <h1 class="glitch">CYBER INVESTIGATION LAB</h1>
+            <p class="subtitle">Advanced Dark Web Forensics & Network Penetration Challenge</p>
+            <div class="scan-line"></div>
+        </header>
+        
+        <div class="cyber-card tools-panel">
+            <h2><i class="fas fa-tools"></i> Investigation Tools</h2>
+            
+            <div class="tab-container">
+                <div class="tab active" onclick="switchTab('forensics-tab')">Forensics</div>
+                <div class="tab" onclick="switchTab('network-tab')">Network</div>
+                <div class="tab" onclick="switchTab('crypto-tab')">Cryptography</div>
+            </div>
+            
+            <div id="forensics-tab" class="tab-content active">
+                <div class="toolbox">
+                    <div class="tool" onclick="executeTool('memory-analysis')">
+                        <i class="fas fa-memory"></i>
+                        <span>Memory Analysis</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('file-carving')">
+                        <i class="fas fa-file-archive"></i>
+                        <span>File Carving</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('registry-analysis')">
+                        <i class="fas fa-database"></i>
+                        <span>Registry Analysis</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('timeline-analysis')">
+                        <i class="fas fa-clock"></i>
+                        <span>Timeline Analysis</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('packet-analysis')">
+                        <i class="fas fa-network-wired"></i>
+                        <span>Packet Analysis</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('malware-analysis')">
+                        <i class="fas fa-virus"></i>
+                        <span>Malware Analysis</span>
+                    </div>
+                </div>
+                
+                <div class="file-system">
+                    <div class="file-item" onclick="openFile('financial-records')">
+                        <i class="fas fa-file-excel"></i>
+                        <span>financial_records.xlsx (Encrypted)</span>
+                    </div>
+                    <div class="file-item" onclick="openFile('customer-list')">
+                        <i class="fas fa-file-csv"></i>
+                        <span>customer_list.csv (Partially Corrupted)</span>
+                    </div>
+                    <div class="file-item" onclick="openFile('delivery-logs')">
+                        <i class="fas fa-file-alt"></i>
+                        <span>delivery_logs.txt (Password Protected)</span>
+                    </div>
+                    <div class="file-item" onclick="openFile('secret-recipe')">
+                        <i class="fas fa-file-code"></i>
+                        <span>secret_recipe.enc (Encrypted)</span>
+                    </div>
+                    <div class="file-item" onclick="openFile('bash-history')">
+                        <i class="fas fa-history"></i>
+                        <span>.bash_history (Deleted/Recovered)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="network-tab" class="tab-content">
+                <div class="toolbox">
+                    <div class="tool" onclick="executeTool('port-scan')">
+                        <i class="fas fa-door-open"></i>
+                        <span>Port Scanning</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('vulnerability-scan')">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Vulnerability Scan</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('traffic-analysis')">
+                        <i class="fas fa-traffic-light"></i>
+                        <span>Traffic Analysis</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('os-detection')">
+                        <i class="fas fa-fingerprint"></i>
+                        <span>OS Detection</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('firewall-test')">
+                        <i class="fas fa-fire"></i>
+                        <span>Firewall Test</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('exploit-search')">
+                        <i class="fas fa-search"></i>
+                        <span>Exploit Search</span>
+                    </div>
+                </div>
+                
+                <div class="manual-search">
+                    <h3><i class="fas fa-search"></i> Manual Network Search</h3>
+                    <div class="input-area">
+                        <input type="text" id="network-search" placeholder="Enter IP, domain, or network range">
+                        <button class="control-btn" onclick="manualNetworkSearch()">Scan</button>
+                    </div>
+                    <div class="search-results" id="network-results">
+                        <!-- Results will appear here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div id="crypto-tab" class="tab-content">
+                <div class="crypto-challenge">
+                    <h3><i class="fas fa-lock"></i> AES-256 Encryption Challenge</h3>
+                    <p>Ciphertext: U2FsdGVkX1+ZzyL2yyBkQOezvSizQY3Jf7n8JHE2a+Y=</p>
+                    <p>Hint: The key is the bakery's name followed by the year it was established</p>
+                    <div class="input-area">
+                        <input type="text" id="aes-key" placeholder="Enter decryption key">
+                        <button class="control-btn" onclick="attemptAESDecryption()">Decrypt</button>
+                    </div>
+                </div>
+                
+                <div class="crypto-challenge">
+                    <h3><i class="fas fa-lock-open"></i> RSA Challenge</h3>
+                    <p>Public Key: (e=65537, n=123456789...)</p>
+                    <p>Ciphertext: 42a7...e9c3 (1024-bit encrypted message)</p>
+                    <div class="input-area">
+                        <input type="text" id="rsa-key" placeholder="Enter private key components">
+                        <button class="control-btn" onclick="attemptRSADecryption()">Decrypt</button>
+                    </div>
+                </div>
+                
+                <div class="hacking-minigame">
+                    <div class="firewall"></div>
+                    <div class="packet"></div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="control-btn" onclick="startFirewallGame()">Bypass Firewall</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cyber-card main-panel">
+            <h2><i class="fas fa-network-wired"></i> Network Infrastructure</h2>
+            <p>Explore the network to find vulnerabilities and access points.</p>
+            
+            <div class="network-map">
+                <div class="node main-server" title="Main Server - Investigate manually using commands">
+                    <i class="fas fa-server"></i>
+                    <span>Server</span>
+                </div>
+                <div class="node router" title="Network Router - Investigate manually using commands">
+                    <i class="fas fa-router"></i>
+                    <span>Router</span>
+                </div>
+                <div class="node workstation" title="Workstation - Investigate manually using commands">
+                    <i class="fas fa-desktop"></i>
+                    <span>Workstation</span>
+                </div>
+                <div class="node darkweb-node" title="Dark Web Node - Investigate manually using commands">
+                    <i class="fas fa-skull"></i>
+                    <span>Dark Web</span>
+                </div>
+                <div class="node crypto-wallet" title="Crypto Wallet - Investigate manually using commands">
+                    <i class="fas fa-wallet"></i>
+                    <span>Crypto Wallet</span>
+                </div>
+                <div class="scan-line"></div>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="progress-text" id="progress-text">Investigation Progress: 0%</div>
+            </div>
+        </div>
+        
+        <div class="cyber-card side-panel">
+            <h2><i class="fas fa-terminal"></i> Investigation Terminal</h2>
+            
+            <div class="terminal" id="terminal">
+                <div class="terminal-line">
+                    <span class="prompt">root@cyberlab:~#</span>
+                    <span class="output">Initializing Advanced Cyber Investigation Toolkit</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">root@cyberlab:~#</span>
+                    <span class="output">Loading modules: forensics, network, cryptography, exploitation</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">root@cyberlab:~#</span>
+                    <span class="output">Type 'help' for available commands or use the tool panels</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">root@cyberlab:~#</span>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="command-input" placeholder="Type command here..." autofocus>
+                <button id="execute-btn" onclick="executeCommand()">EXECUTE</button>
+            </div>
+            
+            <div class="evidence-list">
+                <h3><i class="fas fa-clipboard-list"></i> Investigation Objectives</h3>
+                <div class="terminal-line output">1. Breach the main server firewall</div>
+                <div class="terminal-line output">2. Decrypt financial records</div>
+                <div class="terminal-line output">3. Trace cryptocurrency transactions</div>
+                <div class="terminal-line output">4. Identify dark web marketplace users</div>
+                <div class="terminal-line output">5. Uncover the full criminal network</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>ADVANCED CYBER CRIME INVESTIGATION SIMULATION | MULTI-LAYER SECURITY PENETRATION</p>
+            <p>This is a simulation for educational purposes only. All challenges are fictional.</p>
+        </div>
+        
+        <div class="submit-section">
+            <p>Completed the investigation? Submit your findings!</p>
+            <button class="submit-button" onclick="submitCompletion()">Submit Investigation</button>
+            <button class="return-button" onclick="returnToTown()">Return to Town</button>
+            <div id="completion-message" class="completion-message"></div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <span id="notification-text"></span>
+    </div>
+
+    <script>
+        // Initialize variables
+        let progress = 0;
+        let evidenceFound = [];
+        let nodesInvestigated = [];
+        let commandHistory = [];
+        let historyIndex = -1;
+        let currentTab = 'forensics-tab';
+        
+        // Define all 8 CTF flags
+        const allFlags = [
+            'CTF{network_scan_complete}',
+            'CTF{hidden_partition_found}',
+            'CTF{remote_exploit_success}',
+            'CTF{aes_encryption_cracked}',
+            'CTF{main_server_breached}',
+            'CTF{financial_records_decrypted}',
+            'CTF{darkweb_connections_traced}',
+            'CTF{crypto_wallet_analyzed}'
+        ];
+        
+        // Initialize terminal
+        const terminal = document.getElementById('terminal');
+        const commandInput = document.getElementById('command-input');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
+        const completionMessage = document.getElementById('completion-message');
+        
+        // Add event listener for Enter key
+        commandInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                executeCommand();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                navigateHistory(-1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                navigateHistory(1);
+            }
+        });
+        
+        function navigateHistory(direction) {
+            if (commandHistory.length === 0) return;
+            
+            historyIndex += direction;
+            
+            if (historyIndex < 0) historyIndex = 0;
+            if (historyIndex >= commandHistory.length) historyIndex = commandHistory.length - 1;
+            
+            commandInput.value = commandHistory[historyIndex];
+        }
+        
+        function executeCommand() {
+            const command = commandInput.value.trim();
+            if (!command) return;
+            
+            // Add to history
+            commandHistory.push(command);
+            historyIndex = commandHistory.length;
+            
+            // Display command
+            addTerminalLine(`<span class="prompt">root@cyberlab:~#</span> <span class="command">${command}</span>`);
+            
+            // Process command
+            processCommand(command);
+            
+            // Clear input
+            commandInput.value = '';
+            commandInput.focus();
+        }
+        
+        function processCommand(cmd) {
+            const command = cmd.toLowerCase();
+            
+            if (command === 'help') {
+                showHelp();
+            } else if (command === 'clear') {
+                clearTerminal();
+            } else if (command === 'exit') {
+                addTerminalLine('<span class="output">Ending investigation...</span>');
+            } else if (command === 'ls' || command === 'dir') {
+                addTerminalLine('<span class="output">case_notes.txt  evidence/  financial/  network/  crypto/  exploit/</span>');
+            } else if (command === 'whoami') {
+                addTerminalLine('<span class="output">root</span>');
+            } else if (command === 'pwd') {
+                addTerminalLine('<span class="output">/root/cyberlab/investigations/bakery-case</span>');
+            } else if (command.includes('scan') || command.includes('nmap')) {
+                networkScan(command);
+            } else if (command.includes('decrypt') || command.includes('crack')) {
+                decryptData(command);
+            } else if (command.includes('analyze') || command.includes('forensic')) {
+                forensicAnalysis(command);
+            } else if (command.includes('exploit') || command.includes('vulnerability')) {
+                exploitVulnerability(command);
+            } else if (command.includes('connect') || command.includes('ssh')) {
+                connectToSystem(command);
+            } else if (command === 'show flags') {
+                showFlags();
+            } else if (command === 'show progress') {
+                showProgress();
+            } else if (command === 'status') {
+                showStatus();
+            } else {
+                addTerminalLine(`<span class="error">Command not found: ${cmd}. Type 'help' for available commands.</span>`);
+            }
+        }
+        
+        function networkScan(cmd) {
+            addTerminalLine('<span class="output">Initializing network scan...</span>');
+            
+            setTimeout(() => {
+                addTerminalLine('<span class="output">Scanning 256 hosts...</span>');
+                addTerminalLine('<span class="output">Discovered vulnerable port: 22/tcp (SSH) on 192.168.1.45</span>');
+                addTerminalLine('<span class="output">Discovered vulnerable port: 80/tcp (HTTP) on 192.168.1.67</span>');
+                addTerminalLine('<span class="output">Unknown service on 443/tcp (HTTPS) on 192.168.1.102</span>');
+                
+                if (!evidenceFound.includes('CTF{network_scan_complete}')) {
+                    evidenceFound.push('CTF{network_scan_complete}');
+                    addTerminalLine('<span class="important">Flag 1: CTF{network_scan_complete}</span>');
+                    showNotification('Network Scan Completed - Vulnerabilities Found');
+                    updateProgress(10);
+                }
+            }, 3000);
+        }
+        
+        function decryptData(cmd) {
+            addTerminalLine('<span class="output">Attempting decryption...</span>');
+            
+            setTimeout(() => {
+                addTerminalLine('<span class="output">Testing AES-256 encryption...</span>');
+                addTerminalLine('<span class="output">Trying common passwords and patterns...</span>');
+                addTerminalLine('<span class="output">Progress: 12%... Brute force attack ongoing</span>');
+                
+                if (cmd.includes('financial')) {
+                    addTerminalLine('<span class="output">Financial records encryption: 256-bit AES</span>');
+                    addTerminalLine('<span class="output">Hint: The key might be related to the business</span>');
+                }
+            }, 2000);
+        }
+        
+        function forensicAnalysis(cmd) {
+            addTerminalLine('<span class="output">Starting forensic analysis...</span>');
+            
+            setTimeout(() => {
+                addTerminalLine('<span class="output">Analyzing file metadata...</span>');
+                addTerminalLine('<span class="output">Recovering deleted files...</span>');
+                addTerminalLine('<span class="output">Found hidden partition on disk image</span>');
+                
+                if (!evidenceFound.includes('CTF{hidden_partition_found}')) {
+                    evidenceFound.push('CTF{hidden_partition_found}');
+                    addTerminalLine('<span class="important">Flag 2: CTF{hidden_partition_found}</span>');
+                    showNotification('Forensic Analysis Completed - Hidden Data Found');
+                    updateProgress(10);
+                }
+            }, 2500);
+        }
+        
+        function exploitVulnerability(cmd) {
+            addTerminalLine('<span class="output">Searching for exploits...</span>');
+            
+            setTimeout(() => {
+                addTerminalLine('<span class="output">Testing SSH vulnerability (CVE-2023-38408)...</span>');
+                addTerminalLine('<span class="output">Vulnerability confirmed! Attempting exploitation...</span>');
+                addTerminalLine('<span class="output">Payload delivered... Waiting for callback...</span>');
+                
+                if (!evidenceFound.includes('CTF{remote_exploit_success}')) {
+                    evidenceFound.push('CTF{remote_exploit_success}');
+                    addTerminalLine('<span class="important">Flag 3: CTF{remote_exploit_success}</span>');
+                    showNotification('Exploit Successful - Remote Access Gained');
+                    updateProgress(10);
+                }
+            }, 3000);
+        }
+        
+        function connectToSystem(cmd) {
+            addTerminalLine('<span class="output">Attempting SSH connection...</span>');
+            
+            setTimeout(() => {
+                if (cmd.includes('192.168.1.45')) {
+                    addTerminalLine('<span class="output">Connected to 192.168.1.45</span>');
+                    addTerminalLine('<span class="output">Linux 4.15.0-213-generic #224-Ubuntu</span>');
+                    addTerminalLine('<span class="output">Last login: Fri Oct 27 18:34:21 2023 from 192.168.1.100</span>');
+                    addTerminalLine('<span class="prompt">root@bakery-server:~#</span>');
+                    
+                    if (!evidenceFound.includes('CTF{main_server_breached}')) {
+                        evidenceFound.push('CTF{main_server_breached}');
+                        addTerminalLine('<span class="important">Flag 5: CTF{main_server_breached}</span>');
+                        showNotification('Main Server Breached - Access Gained');
+                        updateProgress(10);
+                    }
+                } else {
+                    addTerminalLine('<span class="error">Connection failed. Check IP address and credentials.</span>');
+                }
+            }, 2000);
+        }
+        
+        function executeTool(tool) {
+            addTerminalLine(`<span class="prompt">root@cyberlab:~#</span> <span class="command">${tool.replace('-', ' ')}</span>`);
+            
+            switch(tool) {
+                case 'memory-analysis':
+                    addTerminalLine('<span class="output">Analyzing memory dump...</span>');
+                    setTimeout(() => {
+                        addTerminalLine('<span class="output">Found encryption keys in process memory</span>');
+                        addTerminalLine('<span class="output">Extracted 3 potential passwords</span>');
+                    }, 2000);
+                    break;
+                    
+                case 'file-carving':
+                    addTerminalLine('<span class="output">Carving deleted files from disk image...</span>');
+                    setTimeout(() => {
+                        addTerminalLine('<span class="output">Recovered partial transaction log</span>');
+                        addTerminalLine('<span class="output">Found hidden message in slack space</span>');
+                    }, 2000);
+                    break;
+                    
+                case 'port-scan':
+                    addTerminalLine('<span class="output">Scanning for open ports...</span>');
+                    setTimeout(() => {
+                        addTerminalLine('<span class="output">Port 22: Open (SSH)</span>');
+                        addTerminalLine('<span class="output">Port 80: Open (HTTP)</span>');
+                        addTerminalLine('<span class="output">Port 443: Filtered (HTTPS)</span>');
+                    }, 2000);
+                    break;
+            }
+        }
+        
+        function investigateNode(nodeType) {
+            addTerminalLine(`<span class="prompt">root@cyberlab:~#</span> <span class="command">investigate ${nodeType}</span>`);
+            
+            if (!nodesInvestigated.includes(nodeType)) {
+                nodesInvestigated.push(nodeType);
+                
+                switch(nodeType) {
+                    case 'main-server':
+                        addTerminalLine('<span class="output">Investigating main server...</span>');
+                        setTimeout(() => {
+                            addTerminalLine('<span class="output">Server OS: Ubuntu 20.04.6 LTS</span>');
+                            addTerminalLine('<span class="output">Open ports: 22, 80, 443, 3306</span>');
+                            addTerminalLine('<span class="output">Vulnerability: Outdated OpenSSL version</span>');
+                        }, 2000);
+                        break;
+                        
+                    case 'router':
+                        addTerminalLine('<span class="output">Investigating network router...</span>');
+                        setTimeout(() => {
+                            addTerminalLine('<span class="output">Router model: Cisco ISR 4431</span>');
+                            addTerminalLine('<span class="output">Firmware version: 16.12.4 (outdated)</span>');
+                            addTerminalLine('<span class="output">Vulnerability: CVE-2023-20159 (9.8 Critical)</span>');
+                        }, 2000);
+                        break;
+                        
+                    case 'workstation':
+                        addTerminalLine('<span class="output">Investigating workstation...</span>');
+                        setTimeout(() => {
+                            addTerminalLine('<span class="output">OS: Windows 10 Pro 22H2</span>');
+                            addTerminalLine('<span class="output">Last user: jdoe (John Doe)</span>');
+                            addTerminalLine('<span class="output">Found browser history with suspicious sites</span>');
+                        }, 2000);
+                        break;
+                        
+                    case 'darkweb-node':
+                        addTerminalLine('<span class="output">Investigating dark web node...</span>');
+                        setTimeout(() => {
+                            addTerminalLine('<span class="output">Connected to Tor network</span>');
+                            addTerminalLine('<span class="output">Hidden service: sweet4u4j3z.onion</span>');
+                            addTerminalLine('<span class="output">Marketplace: Sweet Delights Bakery (illegal goods)</span>');
+                            
+                            if (!evidenceFound.includes('CTF{darkweb_connections_traced}')) {
+                                evidenceFound.push('CTF{darkweb_connections_traced}');
+                                addTerminalLine('<span class="important">Flag 7: CTF{darkweb_connections_traced}</span>');
+                                showNotification('Dark Web Connections Traced - Marketplace Identified');
+                                updateProgress(10);
+                            }
+                        }, 2000);
+                        break;
+                        
+                    case 'crypto-wallet':
+                        addTerminalLine('<span class="output">Investigating crypto wallet...</span>');
+                        setTimeout(() => {
+                            addTerminalLine('<span class="output">Wallet address: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</span>');
+                            addTerminalLine('<span class="output">Cryptocurrency: Bitcoin</span>');
+                            addTerminalLine('<span class="output">Balance: 12.75 BTC (~$350,000)</span>');
+                            addTerminalLine('<span class="output">Recent transactions to dark web marketplace</span>');
+                            
+                            if (!evidenceFound.includes('CTF{crypto_wallet_analyzed}')) {
+                                evidenceFound.push('CTF{crypto_wallet_analyzed}');
+                                addTerminalLine('<span class="important">Flag 8: CTF{crypto_wallet_analyzed}</span>');
+                                showNotification('Crypto Wallet Analyzed - Transactions Mapped');
+                                updateProgress(10);
+                            }
+                        }, 2000);
+                        break;
+                }
+            } else {
+                addTerminalLine('<span class="output">Already investigated this node. No new information found.</span>');
+            }
+        }
+        
+        function showHelp() {
+            addTerminalLine('<span class="output">Available commands:</span>');
+            addTerminalLine('<span class="output">- scan network - Scan for vulnerable systems</span>');
+            addTerminalLine('<span class="output">- decrypt [target] - Attempt decryption</span>');
+            addTerminalLine('<span class="output">- analyze [target] - Forensic analysis</span>');
+            addTerminalLine('<span class="output">- exploit [target] - Exploit vulnerability</span>');
+            addTerminalLine('<span class="output">- connect [ip] - Connect to remote system</span>');
+            addTerminalLine('<span class="output">- show flags - Display found flags</span>');
+            addTerminalLine('<span class="output">- show progress - Display investigation progress</span>');
+            addTerminalLine('<span class="output">- status - Show current investigation status</span>');
+            addTerminalLine('<span class="output">- clear - Clear terminal</span>');
+        }
+        
+        function showFlags() {
+            if (evidenceFound.length === 0) {
+                addTerminalLine('<span class="output">No flags collected yet</span>');
+            } else {
+                addTerminalLine('<span class="output">Flags collected:</span>');
+                evidenceFound.forEach(flag => {
+                    addTerminalLine(`<span class="important">- ${flag}</span>`);
+                });
+            }
+        }
+        
+        function showProgress() {
+            addTerminalLine(`<span class="output">Investigation progress: ${progress}%</span>`);
+            addTerminalLine(`<span class="output">Flags collected: ${evidenceFound.length}/8</span>`);
+        }
+        
+        function showStatus() {
+            addTerminalLine('<span class="output">Current investigation status:</span>');
+            addTerminalLine('<span class="output">- Main Server: Partially investigated</span>');
+            addTerminalLine('<span class="output">- Network Router: Basic scan completed</span>');
+            addTerminalLine('<span class="output">- Dark Web Node: Connection traced</span>');
+            addTerminalLine('<span class="output">- Financial Records: Encryption detected</span>');
+        }
+        
+        function clearTerminal() {
+            terminal.innerHTML = '';
+            addTerminalLine('<span class="prompt">root@cyberlab:~#</span> <span class="output">Terminal cleared</span>');
+        }
+        
+        function addTerminalLine(content) {
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.innerHTML = content;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        function updateProgress(value) {
+            progress += value;
+            if (progress > 100) progress = 100;
+            
+            progressBar.style.width = progress + '%';
+            progressText.textContent = `Investigation Progress: ${progress}%`;
+            
+            if (progress >= 80) {
+                progressBar.style.background = 'linear-gradient(to right, var(--success), #00cc00)';
+            }
+            
+            // Check if all flags are found
+            if (evidenceFound.length >= 8 && progress < 100) {
+                progress = 100;
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Investigation Progress: 100%';
+                addTerminalLine('<span class="important">CASE SOLVED! All flags collected and network mapped!</span>');
+                showNotification('Case Solved! All Flags Collected!', true);
+            }
+        }
+        
+        function showNotification(message, isImportant = false) {
+            notificationText.textContent = message;
+            if (isImportant) {
+                notification.style.borderColor = 'var(--warning)';
+                notification.style.boxShadow = '0 0 15px rgba(255, 204, 0, 0.7)';
+            } else {
+                notification.style.borderColor = 'var(--primary)';
+                notification.style.boxShadow = '0 0 15px rgba(0, 255, 204, 0.3)';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            
+            currentTab = tabId;
+        }
+        
+        function openFile(file) {
+            addTerminalLine(`<span class="prompt">root@cyberlab:~#</span> <span class="command">open ${file}</span>`);
+            
+            switch(file) {
+                case 'financial-records':
+                    addTerminalLine('<span class="output">Opening financial_records.xlsx...</span>');
+                    addTerminalLine('<span class="output">File is encrypted with AES-256</span>');
+                    addTerminalLine('<span class="output">Attempting to crack encryption...</span>');
+                    break;
+                    
+                case 'customer-list':
+                    addTerminalLine('<span class="output">Opening customer_list.csv...</span>');
+                    addTerminalLine('<span class="output">File partially corrupted</span>');
+                    addTerminalLine('<span class="output">Recovering data... 42% complete</span>');
+                    break;
+            }
+        }
+        
+        function manualNetworkSearch() {
+            const searchQuery = document.getElementById('network-search').value;
+            if (!searchQuery) return;
+            
+            const results = document.getElementById('network-results');
+            results.innerHTML = '';
+            
+            addTerminalLine(`<span class="prompt">root@cyberlab:~#</span> <span class="command">manual scan ${searchQuery}</span>`);
+            addTerminalLine('<span class="output">Manual network scan initiated...</span>');
+            
+            // Simulate different results based on input
+            setTimeout(() => {
+                if (searchQuery.includes('192.168.1')) {
+                    results.innerHTML = '<div class="output">Found 3 active hosts</div>';
+                    results.innerHTML += '<div class="output">192.168.1.45 - Linux server</div>';
+                    results.innerHTML += '<div class="output">192.168.1.67 - Web server</div>';
+                    results.innerHTML += '<div class="output">192.168.1.102 - Unknown device</div>';
+                } else if (searchQuery.includes('sweet4u4j3z.onion')) {
+                    results.innerHTML = '<div class="output">Tor hidden service found</div>';
+                    results.innerHTML += '<div class="output">Marketplace: Sweet Delights</div>';
+                    results.innerHTML += '<div class="output">Status: Online</div>';
+                    results.innerHTML += '<div class="output">Security: High</div>';
+                } else {
+                    results.innerHTML = '<div class="output">No results found for: ' + searchQuery + '</div>';
+                    results.innerHTML += '<div class="output">Try different search terms or IP ranges</div>';
+                }
+            }, 2000);
+        }
+        
+        function attemptAESDecryption() {
+            const key = document.getElementById('aes-key').value;
+            if (!key) return;
+            
+            if (key.toLowerCase() === 'sweetdreams2015') {
+                addTerminalLine('<span class="success">AES Decryption successful!</span>');
+                addTerminalLine('<span class="output">Financial records decrypted</span>');
+                addTerminalLine('<span class="output">Hidden transactions revealed</span>');
+                
+                if (!evidenceFound.includes('CTF{aes_encryption_cracked}')) {
+                    evidenceFound.push('CTF{aes_encryption_cracked}');
+                    addTerminalLine('<span class="important">Flag 4: CTF{aes_encryption_cracked}</span>');
+                    showNotification('AES Encryption Broken - Financial Records Revealed');
+                    updateProgress(10);
+                }
+                
+                if (!evidenceFound.includes('CTF{financial_records_decrypted}')) {
+                    evidenceFound.push('CTF{financial_records_decrypted}');
+                    addTerminalLine('<span class="important">Flag 6: CTF{financial_records_decrypted}</span>');
+                    showNotification('Financial Records Decrypted - Evidence Found');
+                    updateProgress(10);
+                }
+            } else {
+                addTerminalLine('<span class="error">AES Decryption failed with key: ' + key + '</span>');
+            }
+        }
+        
+        function attemptRSADecryption() {
+            const key = document.getElementById('rsa-key').value;
+            if (!key) return;
+            
+            addTerminalLine('<span class="output">RSA decryption attempted...</span>');
+            addTerminalLine('<span class="output">This feature is not yet implemented in this simulation</span>');
+        }
+        
+        function startFirewallGame() {
+            addTerminalLine('<span class="output">Initializing firewall bypass game...</span>');
+            addTerminalLine('<span class="output">Use packet timing to bypass security...</span>');
+            // Firewall game implementation would go here
+        }
+        
+        function submitCompletion() {
+            if (evidenceFound.length >= 8) {
+                addTerminalLine('<span class="success">Investigation submitted successfully!</span>');
+                addTerminalLine('<span class="important">Case marked as solved. Good work, investigator!</span>');
+                completionMessage.innerHTML = '<span class="success">✓ Investigation completed! All 8 flags found!</span>';
+                
+                // Simulate completion - in a real scenario, this would redirect
+                setTimeout(() => {
+                    alert("Investigation completed successfully! All 8 flags collected. In a real game, you would be returned to the town now.");
+                }, 1000);
+            } else {
+                addTerminalLine('<span class="error">You haven\'t collected all flags yet!</span>');
+                addTerminalLine(`<span class="output">Flags collected: ${evidenceFound.length}/8 required</span>`);
+                completionMessage.innerHTML = `<span class="error">✗ Only ${evidenceFound.length}/8 flags collected. Keep investigating!</span>`;
+            }
+        }
+        
+        function returnToTown() {
+            // Simulate returning to town - in a real scenario, this would redirect
+            addTerminalLine('<span class="output">Returning to town...</span>');
+            setTimeout(() => {
+                alert("In a real game, you would be returned to the town now.");
+            }, 1000);
+        }
+        
+        // Initialize the interface
+        window.onload = function() {
+            commandInput.focus();
+            drawNetworkConnections();
+            
+            // Add click handlers to nodes
+            document.querySelectorAll('.node').forEach(node => {
+                node.addEventListener('click', function() {
+                    const nodeType = this.classList[1];
+                    investigateNode(nodeType);
+                });
+            });
+        };
+        
+        function drawNetworkConnections() {
+            const map = document.querySelector('.network-map');
+            
+            // Draw connections between nodes
+            const nodes = {
+                'router': {x: 150, y: 100},
+                'main-server': {x: 300, y: 150},
+                'workstation': {x: 150, y: 250},
+                'darkweb-node': {x: 450, y: 100},
+                'crypto-wallet': {x: 450, y: 250}
+            };
+            
+            // Connection from router to main server
+            drawConnection(nodes['router'], nodes['main-server']);
+            
+            // Connection from router to workstation
+            drawConnection(nodes['router'], nodes['workstation']);
+            
+            // Connection from main server to darkweb node
+            drawConnection(nodes['main-server'], nodes['darkweb-node']);
+            
+            // Connection from main server to crypto wallet
+            drawConnection(nodes['main-server'], nodes['crypto-wallet']);
+        }
+        
+        function drawConnection(from, to) {
+            const map = document.querySelector('.network-map');
+            const line = document.createElement('div');
+            line.className = 'connection';
+            
+            const length = Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2));
+            const angle = Math.atan2(to.y - from.y, to.x - from.x) * 180 / Math.PI;
+            
+            line.style.width = length + 'px';
+            line.style.left = (from.x + 35) + 'px';
+            line.style.top = (from.y + 35) + 'px';
+            line.style.transform = 'rotate(' + angle + 'deg)';
+            
+            map.appendChild(line);
+        }
+    </script>
+</body>
+</html>
