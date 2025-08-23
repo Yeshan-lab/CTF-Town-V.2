@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Mafia Cyber Hideout - CTF Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: #0a0a1a;
+            color: #00ffcc;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 204, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 102, 255, 0.05) 0%, transparent 20%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #00ffcc;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 255, 204, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px #00ffcc;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            color: #00ccff;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: rgba(10, 15, 30, 0.8);
+            border: 1px solid #00ffcc;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            color: #00ccff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #00ffcc;
+            padding-bottom: 10px;
+        }
+        
+        .building {
+            background: rgba(5, 5, 15, 0.9);
+            border: 1px solid #ff00cc;
+            position: relative;
+            min-height: 400px;
+            overflow: hidden;
+        }
+        
+        .floor {
+            position: absolute;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to bottom, #1a1a40, #0d0d26);
+            border-bottom: 1px solid #00ffcc;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            color: #00ffcc;
+            font-weight: bold;
+        }
+        
+        .floor-1 { bottom: 0; }
+        .floor-2 { bottom: 80px; }
+        .floor-3 { bottom: 160px; }
+        .floor-4 { bottom: 240px; }
+        .roof { bottom: 320px; height: 80px; background: linear-gradient(to bottom, #262673, #1a1a40); }
+        
+        .room {
+            width: 60px;
+            height: 60px;
+            background: rgba(20, 20, 60, 0.8);
+            border: 1px solid #00ccff;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.7rem;
+            text-align: center;
+        }
+        
+        .room:hover {
+            background: rgba(40, 40, 100, 0.8);
+            box-shadow: 0 0 10px #00ccff;
+        }
+        
+        .server-room {
+            background: rgba(30, 30, 80, 0.8);
+            border-color: #ff00cc;
+        }
+        
+        .server-room:hover {
+            box-shadow: 0 0 10px #ff00cc;
+        }
+        
+        .hint {
+            font-size: 0.9rem;
+            color: #00cc99;
+            font-style: italic;
+            margin-top: 10px;
+        }
+        
+        .terminal-container {
+            background: rgba(0, 5, 15, 0.9);
+            border: 1px solid #00ffcc;
+            border-radius: 5px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .prompt {
+            color: #00ff00;
+        }
+        
+        .command {
+            color: #00ccff;
+        }
+        
+        .output {
+            color: #cccccc;
+        }
+        
+        .success {
+            color: #00ff00;
+        }
+        
+        .error {
+            color: #ff3366;
+        }
+        
+        .important {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+        
+        .flag {
+            color: #ffcc00;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+        }
+        
+        .input-area {
+            display: flex;
+            margin-top: 10px;
+        }
+        
+        #command-input {
+            flex-grow: 1;
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid #00ffcc;
+            color: #00ff00;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        #execute-btn {
+            background: #0044cc;
+            color: white;
+            border: 1px solid #00ccff;
+            padding: 8px 15px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        #execute-btn:hover {
+            background: #0066ff;
+        }
+        
+        .progress {
+            margin-top: 20px;
+            background: rgba(10, 20, 40, 0.8);
+            border-radius: 5px;
+            padding: 15px;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background: linear-gradient(to right, #0066ff, #00ccff);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 1s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #00ccff;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid #00ffcc;
+            color: #00cc99;
+            font-size: 0.9rem;
+            grid-column: 1 / -1;
+            font-size: 0.8rem;
+        }
+        
+        .glitch {
+            animation: glitch 1s linear infinite;
+        }
+        
+        @keyframes glitch {
+            0% { text-shadow: 2px 2px 0px #ff00cc, -2px -2px 0px #00ccff; }
+            50% { text-shadow: -2px 2px 0px #ff00cc, 2px -2px 0px #00ccff; }
+            100% { text-shadow: 2px -2px 0px #ff00cc, -2px 2px 0px #00ccff; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 204, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 204, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 204, 0); }
+        }
+        
+        .challenge-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid #00ccff;
+            border-radius: 5px;
+        }
+        
+        .password-hint {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 30, 60, 0.8);
+            border: 1px solid #00ccff;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="glitch">ADVANCED MAFIA CYBER HIDEOUT</h1>
+            <p class="subtitle">Expert Level Infiltration Challenge - Manual Commands Only</p>
+        </header>
+        
+        <div class="card">
+            <h2>Mafia Building Layout</h2>
+            <p>Explore the building to find hidden virtual machines and secret IP addresses.</p>
+            
+            <div class="building">
+                <div class="roof floor">
+                    <div class="room" title="Roof Access">Roof</div>
+                    <div class="room" title="Satellite Dish">Satellite</div>
+                </div>
+                <div class="floor-4 floor">
+                    <div class="room" title="Office">Office</div>
+                    <div class="room" title="Storage">Storage</div>
+                    <div class="room server-room" id="server-room" title="Server Room">Server Room</div>
+                </div>
+                <div class="floor-3 floor">
+                    <div class="room" title="Lounge">Lounge</div>
+                    <div class="room" title="Meeting Room">Meeting</div>
+                    <div class="room" title="Security Office">Security</div>
+                </div>
+                <div class="floor-2 floor">
+                    <div class="room" title="Kitchen">Kitchen</div>
+                    <div class="room" title="Dining Room">Dining</div>
+                    <div class="room" title="Storage">Storage</div>
+                </div>
+                <div class="floor-1 floor">
+                    <div class="room" title="Entrance">Entrance</div>
+                    <div class="room" title="Reception">Reception</div>
+                    <div class="room" title="Guard Post">Guard Post</div>
+                </div>
+            </div>
+            
+            <p class="hint">💡 Hint: You'll need to manually type commands to progress</p>
+        </div>
+        
+        <div class="card">
+            <h2>Hacking Terminal</h2>
+            <p>Type commands to discover hidden information (e.g. 'nmap 192.168.1.0/24')</p>
+            
+            <div class="terminal-container" id="terminal">
+                <div class="terminal-line">
+                    <span class="prompt">hacker@infiltrator:~$</span>
+                    <span class="output">Welcome to Advanced Mafia Cyber Hideout CTF</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">hacker@infiltrator:~$</span>
+                    <span class="output">Type 'help' for available commands</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">hacker@infiltrator:~$</span>
+                    <span class="output">You need to find 5 hidden flags to complete the challenge</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">hacker@infiltrator:~$</span>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="command-input" placeholder="Type command here..." autofocus>
+                <button id="execute-btn">EXECUTE</button>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+                <div class="progress-text" id="progress-text">Infiltration Progress: 0%</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Network Information</h2>
+            <p>Discovered network segments and devices:</p>
+            <div class="terminal-container">
+                <div class="terminal-line output">Primary Network: 192.168.1.0/24</div>
+                <div class="terminal-line output">- 192.168.1.1 - Router</div>
+                <div class="terminal-line output">- 192.168.1.100 - Main Server</div>
+                <div class="terminal-line output">- 192.168.1.101 - Security System</div>
+                <div class="terminal-line output">- 192.168.1.102 - Unknown Device</div>
+                <div class="terminal-line output">Hidden Network: 10.0.5.0/24 (Firewalled)</div>
+                <div class="terminal-line output">Dark Web Node: xyz789.onion (Tor Required)</div>
+            </div>
+            
+            <div class="challenge-info">
+                <h3>Challenge Flags:</h3>
+                <div class="terminal-line output">1. Find the hidden VM in the server room</div>
+                <div class="terminal-line output">2. Crack the password protected archive</div>
+                <div class="terminal-line output">3. Decrypt the secret message</div>
+                <div class="terminal-line output">4. Find the Tor hidden service</div>
+                <div class="terminal-line output">5. Access the exfiltration server</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Password Cracking Challenge</h2>
+            <p>You found these hashes in /etc/shadow on the server:</p>
+            <div class="terminal-container">
+                <div class="terminal-line output">boss:$6$Zy7VWYFw$YH7DovZ...:19185:0:99999:7:::</div>
+                <div class="terminal-line output">admin:$6$8Sd9KjsH$mC62Az...:19185:0:99999:7:::</div>
+                <div class="terminal-line output">guest:$6$Lk32MsdA$pQ91Xv...:19185:0:99999:7:::</div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="hash-input" placeholder="Try password (rockyou.txt common)">
+                <button id="crack-btn">CRACK</button>
+            </div>
+            
+            <div class="password-hint">
+                <p>💡 Hint: Try common passwords from rockyou.txt like "password", "welcome", "admin"</p>
+                <p>💡 To crack passwords, use the command: <span class="command">john --wordlist=rockyou.txt hash.txt</span></p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>EXPERT LEVEL CYBER SECURITY CTF CHALLENGE | MANUAL COMMANDS REQUIRED</p>
+            <p>This is a simulation for educational purposes only.</p>
+            <p>All progress must be made through the terminal interface - no shortcuts!</p>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let progress = 0;
+        let discoveredFlags = [];
+        let accessedSystems = [];
+        let commandHistory = [];
+        let historyIndex = -1;
+        
+        // Initialize the application when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const terminal = document.getElementById('terminal');
+            const commandInput = document.getElementById('command-input');
+            const executeBtn = document.getElementById('execute-btn');
+            const crackBtn = document.getElementById('crack-btn');
+            const hashInput = document.getElementById('hash-input');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const serverRoom = document.getElementById('server-room');
+            
+            // Set up event listeners
+            executeBtn.addEventListener('click', executeCommand);
+            crackBtn.addEventListener('click', crackPassword);
+            
+            commandInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    executeCommand();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    navigateHistory(-1);
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    navigateHistory(1);
+                }
+            });
+            
+            // Server room click event
+            serverRoom.addEventListener('click', handleServerRoomClick);
+            
+            // Focus on the command input
+            commandInput.focus();
+            
+            function navigateHistory(direction) {
+                if (commandHistory.length === 0) return;
+                
+                historyIndex += direction;
+                
+                if (historyIndex < 0) historyIndex = 0;
+                if (historyIndex >= commandHistory.length) historyIndex = commandHistory.length - 1;
+                
+                commandInput.value = commandHistory[historyIndex];
+            }
+            
+            function executeCommand() {
+                const command = commandInput.value.trim();
+                if (!command) return;
+                
+                // Add to history
+                commandHistory.push(command);
+                historyIndex = commandHistory.length;
+                
+                // Display command
+                addTerminalLine(`<span class="prompt">hacker@infiltrator:~$</span> <span class="command">${command}</span>`);
+                
+                // Process command
+                processCommand(command);
+                
+                // Clear input
+                commandInput.value = '';
+                commandInput.focus();
+            }
+            
+            function processCommand(cmd) {
+                const command = cmd.toLowerCase();
+                
+                if (command === 'help') {
+                    showHelp();
+                } else if (command === 'clear') {
+                    clearTerminal();
+                } else if (command === 'exit') {
+                    addTerminalLine('<span class="output">Logging out...</span>');
+                } else if (command === 'ls' || command === 'dir') {
+                    addTerminalLine('<span class="output">secret.txt  server_backup.zip  passwords.txt  readme.md</span>');
+                } else if (command === 'whoami') {
+                    addTerminalLine('<span class="output">hacker</span>');
+                } else if (command === 'pwd') {
+                    addTerminalLine('<span class="output">/home/hacker</span>');
+                } else if (command.startsWith('nmap') || command.startsWith('scan')) {
+                    processNmap(command);
+                } else if (command.startsWith('ssh')) {
+                    processSSH(command);
+                } else if (command.startsWith('find')) {
+                    processFind(command);
+                } else if (command.startsWith('john')) {
+                    processJohn(command);
+                } else if (command.startsWith('steghide')) {
+                    processSteghide(command);
+                } else if (command.startsWith('cat') || command.startsWith('more') || command.startsWith('less')) {
+                    processCat(command);
+                } else if (command.startsWith('cd')) {
+                    addTerminalLine('<span class="output">Directory changed</span>');
+                } else if (command === 'show flags') {
+                    showFlags();
+                } else if (command === 'show progress') {
+                    showProgress();
+                } else {
+                    addTerminalLine(`<span class="error">Command not found: ${cmd}</span>`);
+                }
+            }
+            
+            function processNmap(cmd) {
+                if (cmd.includes('192.168.1.0/24') || cmd.includes('-sp') || cmd.includes('-sn')) {
+                    addTerminalLine('<span class="output">Starting Nmap 7.92 scan...</span>');
+                    addTerminalLine('<span class="output">Discovered hosts:</span>');
+                    addTerminalLine('<span class="output">192.168.1.1 - Router</span>');
+                    addTerminalLine('<span class="output">192.168.1.100 - Main Server</span>');
+                    addTerminalLine('<span class="output">192.168.1.101 - Security System</span>');
+                    addTerminalLine('<span class="output">192.168.1.102 - Unknown Linux Device</span>');
+                    addTerminalLine('<span class="output">Nmap scan completed</span>');
+                    
+                    if (!accessedSystems.includes('network_scan')) {
+                        accessedSystems.push('network_scan');
+                        updateProgress(5);
+                    }
+                } else if (cmd.includes('192.168.1.100')) {
+                    addTerminalLine('<span class="output">Scanning 192.168.1.100...</span>');
+                    addTerminalLine('<span class="output">Open ports: 22, 80, 443, 8080</span>');
+                    addTerminalLine('<span class="output">Running: Apache 2.4.52, OpenSSH 8.4p1</span>');
+                } else if (cmd.includes('192.168.1.102')) {
+                    addTerminalLine('<span class="output">Scanning 192.168.1.102...</span>');
+                    addTerminalLine('<span class="output">Open ports: 22, 80, 9000</span>');
+                    addTerminalLine('<span class="output">Running: Custom application on port 9000</span>');
+                    addTerminalLine('<span class="important">Vulnerability: CVE-2022-39952 (CVSS 9.8)</span>');
+                    
+                    if (!accessedSystems.includes('vuln_scan')) {
+                        accessedSystems.push('vuln_scan');
+                        updateProgress(10);
+                    }
+                } else {
+                    addTerminalLine('<span class="error">Invalid nmap command. Try: nmap 192.168.1.0/24</span>');
+                }
+            }
+            
+            function processSSH(cmd) {
+                if (cmd === 'ssh admin@192.168.1.100') {
+                    addTerminalLine('<span class="output">Connecting to admin@192.168.1.100...</span>');
+                    addTerminalLine('<span class="output">Password required</span>');
+                } else if (cmd === 'ssh admin@192.168.1.102') {
+                    addTerminalLine('<span class="output">Connecting to admin@192.168.1.102...</span>');
+                    addTerminalLine('<span class="output">Password: ********</span>');
+                    addTerminalLine('<span class="error">Access denied. Password incorrect.</span>');
+                } else if (cmd === 'ssh boss@192.168.1.100') {
+                    addTerminalLine('<span class="output">Connecting to boss@192.168.1.100...</span>');
+                    addTerminalLine('<span class="output">Password: ********</span>');
+                    addTerminalLine('<span class="success">Access granted. Welcome boss.</span>');
+                    addTerminalLine('<span class="output">boss@server:~$ whoami</span>');
+                    addTerminalLine('<span class="output">boss</span>');
+                    addTerminalLine('<span class="output">boss@server:~$ ls -la</span>');
+                    addTerminalLine('<span class="output">secret_documents/  financial_records.xlsx  .hidden_vm</span>');
+                    
+                    if (!accessedSystems.includes('ssh_access')) {
+                        accessedSystems.push('ssh_access');
+                        updateProgress(15);
+                    }
+                } else {
+                    addTerminalLine('<span class="error">Invalid SSH command. Try: ssh admin@192.168.1.100</span>');
+                }
+            }
+            
+            function processFind(cmd) {
+                if (cmd.includes('secret.txt') || cmd.includes('secret')) {
+                    addTerminalLine('<span class="output">Searching for secret files...</span>');
+                    addTerminalLine('<span class="output">/home/boss/secret_documents/secret.txt</span>');
+                    addTerminalLine('<span class="output">/var/www/html/secret.php</span>');
+                    addTerminalLine('<span class="output">/opt/.hidden/secret_backup</span>');
+                } else if (cmd.includes('password') || cmd.includes('passwd')) {
+                    addTerminalLine('<span class="output">Searching for password files...</span>');
+                    addTerminalLine('<span class="output">/etc/passwd</span>');
+                    addTerminalLine('<span class="output">/etc/shadow</span>');
+                    addTerminalLine('<span class="output">/home/boss/.password_backup</span>');
+                } else {
+                    addTerminalLine('<span class="error">Specify what to find. Try: find / -name secret.txt</span>');
+                }
+            }
+            
+            function processJohn(cmd) {
+                if (cmd.includes('hash.txt') || cmd.includes('shadow')) {
+                    addTerminalLine('<span class="output">Loading password hashes...</span>');
+                    addTerminalLine('<span class="output">Using default wordlist (rockyou.txt)</span>');
+                    addTerminalLine('<span class="output">Press "q" or Ctrl-C to show status</span>');
+                    
+                    setTimeout(() => {
+                        addTerminalLine('<span class="output">Loaded 3 password hashes</span>');
+                        addTerminalLine('<span class="success">Cracked password for boss: welcome123</span>');
+                        addTerminalLine('<span class="output">Session completed</span>');
+                        
+                        if (!discoveredFlags.includes('password_cracked')) {
+                            discoveredFlags.push('password_cracked');
+                            addTerminalLine('<span class="important">Flag 2: CTF{password_cracking_master}</span>');
+                            updateProgress(20);
+                        }
+                    }, 2000);
+                } else {
+                    addTerminalLine('<span class="error">Specify hash file. Try: john --wordlist=rockyou.txt hash.txt</span>');
+                }
+            }
+            
+            function processSteghide(cmd) {
+                if (cmd.includes('photo.jpg')) {
+                    addTerminalLine('<span class="output">Extracting data from photo.jpg...</span>');
+                    addTerminalLine('<span class="output">Enter passphrase: *******</span>');
+                    addTerminalLine('<span class="error">Invalid passphrase</span>');
+                } else if (cmd.includes('extract') && cmd.includes('secret.jpg')) {
+                    addTerminalLine('<span class="output">Extracting data from secret.jpg...</span>');
+                    addTerminalLine('<span class="output">Enter passphrase: *******</span>');
+                    addTerminalLine('<span class="success">Extracted "hidden_message.txt"</span>');
+                    
+                    if (!discoveredFlags.includes('steganography')) {
+                        discoveredFlags.push('steganography');
+                        addTerminalLine('<span class="important">Flag 3: CTF{hidden_in_plain_sight}</span>');
+                        updateProgress(15);
+                    }
+                } else {
+                    addTerminalLine('<span class="error">Invalid steghide command. Try: steghide extract -sf photo.jpg</span>');
+                }
+            }
+            
+            function processCat(cmd) {
+                if (cmd.includes('secret.txt')) {
+                    addTerminalLine('<span class="output">The secret meeting will be on Thursday.</span>');
+                    addTerminalLine('<span class="output">Passcode: 47829</span>');
+                    addTerminalLine('<span class="output">VM IP: 192.168.1.200</span>');
+                    
+                    if (!discoveredFlags.includes('secret_document')) {
+                        discoveredFlags.push('secret_document');
+                        addTerminalLine('<span class="important">Flag 1: CTF{document_recovered}</span>');
+                        updateProgress(10);
+                    }
+                } else if (cmd.includes('hidden_message.txt')) {
+                    addTerminalLine('<span class="output">The exfiltration server is at xyz789.onion</span>');
+                    addTerminalLine('<span class="output">Access code: DR4G0N5</span>');
+                    
+                    if (!discoveredFlags.includes('hidden_message')) {
+                        discoveredFlags.push('hidden_message');
+                        updateProgress(10);
+                    }
+                } else {
+                    addTerminalLine('<span class="error">File not found. Try: cat secret.txt</span>');
+                }
+            }
+            
+            function crackPassword() {
+                const password = hashInput.value.trim().toLowerCase();
+                
+                if (password === 'welcome123') {
+                    addTerminalLine('<span class="success">Password cracked: welcome123 (boss account)</span>');
+                    hashInput.value = '';
+                    
+                    if (!discoveredFlags.includes('password_cracked')) {
+                        discoveredFlags.push('password_cracked');
+                        addTerminalLine('<span class="important">Flag 2: CTF{password_cracking_master}</span>');
+                        updateProgress(20);
+                    }
+                } else if (password === 'password' || password === 'admin' || password === '123456') {
+                    addTerminalLine(`<span class="error">Password "${password}" failed to crack the hash</span>`);
+                } else if (password) {
+                    addTerminalLine(`<span class="error">Password "${password}" not found in rockyou.txt</span>`);
+                }
+            }
+            
+            function handleServerRoomClick() {
+                addTerminalLine('<span class="output">Accessing server room...</span>');
+                addTerminalLine('<span class="output">Found hidden VM at 192.168.1.200</span>');
+                addTerminalLine('<span class="output">Running port scan on hidden VM...</span>');
+                addTerminalLine('<span class="output">Discovered open port: 3389 (Remote Desktop)</span>');
+                addTerminalLine('<span class="important">Flag 4: CTF{hidden_vm_discovered}</span>');
+                
+                if (!discoveredFlags.includes('server_room_access')) {
+                    discoveredFlags.push('server_room_access');
+                    updateProgress(15);
+                }
+                
+                this.classList.add('pulse');
+                setTimeout(() => {
+                    this.classList.remove('pulse');
+                }, 4000);
+            }
+            
+            function showHelp() {
+                addTerminalLine('<span class="output">Available commands:</span>');
+                addTerminalLine('<span class="output">- nmap [target] - Network scanning</span>');
+                addTerminalLine('<span class="output">- ssh [user]@[host] - Remote access</span>');
+                addTerminalLine('<span class="output">- find [options] - File searching</span>');
+                addTerminalLine('<span class="output">- john [options] - Password cracking</span>');
+                addTerminalLine('<span class="output">- steghide [options] - Steganography</span>');
+                addTerminalLine('<span class="output">- cat [file] - Display file contents</span>');
+                addTerminalLine('<span class="output">- ls, dir - List files</span>');
+                addTerminalLine('<span class="output">- clear - Clear terminal</span>');
+                addTerminalLine('<span class="output">- show flags - Display found flags</span>');
+                addTerminalLine('<span class="output">- show progress - Display progress</span>');
+            }
+            
+            function showFlags() {
+                if (discoveredFlags.length === 0) {
+                    addTerminalLine('<span class="output">No flags discovered yet</span>');
+                } else {
+                    addTerminalLine('<span class="output">Discovered flags:</span>');
+                    discoveredFlags.forEach(flag => {
+                        addTerminalLine(`<span class="important">- ${flag}</span>`);
+                    });
+                }
+            }
+            
+            function showProgress() {
+                addTerminalLine(`<span class="output">Infiltration progress: ${progress}%</span>`);
+                addTerminalLine(`<span class="output">Systems accessed: ${accessedSystems.length}</span>`);
+                addTerminalLine(`<span class="output">Flags discovered: ${discoveredFlags.length}/5</span>`);
+            }
+            
+            function clearTerminal() {
+                terminal.innerHTML = '';
+                // Add the initial prompt back
+                addTerminalLine('<span class="prompt">hacker@infiltrator:~$</span>');
+            }
+            
+            function addTerminalLine(content) {
+                const line = document.createElement('div');
+                line.className = 'terminal-line';
+                line.innerHTML = content;
+                terminal.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+            
+            function updateProgress(value) {
+                progress += value;
+                if (progress > 100) progress = 100;
+                
+                progressBar.style.width = progress + '%';
+                progressText.textContent = `Infiltration Progress: ${progress}%`;
+                
+                if (progress >= 80) {
+                    progressBar.style.background = 'linear-gradient(to right, #00ff00, #00cc00)';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
