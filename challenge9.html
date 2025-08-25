@@ -1,1 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEVEL 9: Multi-Stage Exploitation Chain</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: #0a0a12;
+            color: #00ffcc;
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 204, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(120, 0, 255, 0.05) 0%, transparent 20%);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+            grid-template-areas:
+                "header header"
+                "main side"
+                "footer footer";
+        }
+        
+        @media (max-width: 1000px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "main"
+                    "side"
+                    "footer";
+            }
+        }
+        
+        header {
+            grid-area: header;
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #00ffcc;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #00ffcc;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
+        }
+        
+        .subtitle {
+            color: #ff00aa;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: rgba(10, 15, 30, 0.8);
+            border: 1px solid #00ffcc;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+        }
+        
+        .card h2 {
+            color: #ff00aa;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #00ffcc;
+        }
+        
+        .terminal {
+            background: #000;
+            border: 1px solid #00ffcc;
+            border-radius: 5px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .prompt {
+            color: #00ff00;
+        }
+        
+        .command {
+            color: #00aaff;
+        }
+        
+        .output {
+            color: #cccccc;
+        }
+        
+        .success {
+            color: #00ff00;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #ff3333;
+        }
+        
+        .important {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+        
+        .flag {
+            color: #ff00aa;
+            font-weight: bold;
+        }
+        
+        .input-area {
+            display: flex;
+            margin-top: 15px;
+        }
+        
+        #command-input {
+            flex-grow: 1;
+            background: #000;
+            border: 1px solid #00ffcc;
+            color: #00ff00;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border-radius: 3px 0 0 3px;
+        }
+        
+        #execute-btn {
+            background: #007755;
+            color: white;
+            border: 1px solid #00ffcc;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 0 3px 3px 0;
+            transition: all 0.3s ease;
+        }
+        
+        #execute-btn:hover {
+            background: #00aa77;
+        }
+        
+        .progress {
+            margin-top: 20px;
+            background: rgba(10, 15, 30, 0.8);
+            border-radius: 5px;
+            padding: 15px;
+            border: 1px solid #00ffcc;
+        }
+        
+        .progress-bar-container {
+            height: 20px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #00ffcc;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #007755, #00ffcc);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #00ffcc;
+        }
+        
+        .file-system {
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid #00ffcc;
+            border-radius: 5px;
+            padding: 10px;
+            background: #000;
+            margin-bottom: 15px;
+        }
+        
+        .file-item {
+            padding: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(0, 255, 204, 0.3);
+        }
+        
+        .file-item:hover {
+            background: rgba(0, 255, 204, 0.1);
+        }
+        
+        .toolbox {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .tool {
+            background: rgba(20, 25, 45, 0.8);
+            border: 1px solid #00ffcc;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .tool:hover {
+            background: rgba(0, 255, 204, 0.2);
+        }
+        
+        .footer {
+            grid-area: footer;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            border-top: 1px solid #00ffcc;
+            color: #00ffcc;
+        }
+        
+        .submit-section {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            background: rgba(20, 25, 45, 0.8);
+            border: 1px solid #00ffcc;
+            border-radius: 5px;
+        }
+        
+        .submit-button {
+            background: #007755;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-button:hover {
+            background: #00aa77;
+        }
 
+       .return-button {
+            background: linear-gradient(to bottom, var(--info), #0040cc);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 15px 10px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .return-button:hover {
+            box-shadow: 0 0 20px var(--info);
+            transform: translateY(-3px);
+        }
+        
+        .countdown {
+            font-size: 1.2rem;
+            color: #ff3333;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: rgba(20, 25, 45, 0.95);
+            border: 1px solid #00ffcc;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .completion-message {
+            color: #00ff00;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .hint-box {
+            background: rgba(20, 25, 45, 0.8);
+            border: 1px solid #ff00aa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .hint-title {
+            color: #ff00aa;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 LEVEL 9: Multi-Stage Exploitation Chain</h1>
+            <p class="subtitle">Privilege escalation chain with kernel misconfigurations and memory abuse</p>
+            <div class="countdown" id="countdown">TIME: 30:00</div>
+        </header>
+        
+        <div class="card" style="grid-area: main;">
+            <h2>Exploitation Terminal</h2>
+            <p>You are logged in as: <span class="important">user@vulnerable-system:~$</span> (UID: 1001)</p>
+            
+            <div class="terminal" id="terminal">
+                <div class="terminal-line">
+                    <span class="prompt">user@vulnerable-system:~$</span>
+                    <span class="output">Welcome to the vulnerable system.</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">user@vulnerable-system:~$</span>
+                    <span class="output">Type 'help' for available commands.</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">user@vulnerable-system:~$</span>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="command-input" placeholder="Type command here..." autofocus>
+                <button id="execute-btn" onclick="executeCommand()">EXECUTE</button>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="progress-text" id="progress-text">Exploitation Progress: 0%</div>
+            </div>
+        </div>
+        
+        <div class="card" style="grid-area: side;">
+            <h2>File System</h2>
+            
+            <div class="file-system">
+                <div class="file-item" onclick="selectFile('vuln')">
+                    <span>vuln (SUID binary)</span>
+                </div>
+                <div class="file-item" onclick="selectFile('exploit.c')">
+                    <span>exploit.c (BOF template)</span>
+                </div>
+                <div class="file-item" onclick="selectFile('kernel_info')">
+                    <span>kernel_info (kernel details)</span>
+                </div>
+                <div class="file-item" onclick="selectFile('cron_job')">
+                    <span>cron_job (suspicious task)</span>
+                </div>
+                <div class="file-item" onclick="selectFile('luks_container')">
+                    <span>luks_container (encrypted volume)</span>
+                </div>
+            </div>
+            
+            <h2>Exploitation Tools</h2>
+            <div class="toolbox">
+                <div class="tool" onclick="executeTool('checksec')">checksec vuln</div>
+                <div class="tool" onclick="executeTool('strings')">strings vuln</div>
+                <div class="tool" onclick="executeTool('kernel_check')">uname -a</div>
+                <div class="tool" onclick="executeTool('proc_check')">ls -la /proc/</div>
+                <div class="tool" onclick="executeTool('cron_check')">cat /etc/crontab</div>
+                <div class="tool" onclick="executeTool('env_check')">env</div>
+                <div class="tool" onclick="executeTool('gdb')">gdb vuln</div>
+                <div class="tool" onclick="executeTool('mem_dump')">xxd /dev/mem</div>
+            </div>
+            
+            <div class="hint-box">
+                <div class="hint-title">HINT: Exploitation Chain</div>
+                <p>1. Exploit SUID binary (Buffer Overflow)</p>
+                <p>2. Read kernel symbols from /proc</p>
+                <p>3. Exploit kernel vulnerability via /dev/mem</p>
+                <p>4. Find flag in memory with gdb</p>
+                <p>5. Intercept cron job execution</p>
+                <p>6. Abuse environment variables</p>
+                <p>7. Decrypt LUKS volume with combined keys</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>MULTI-STAGE EXPLOITATION CHALLENGE | LEVEL 9 CTF | 7 FLAGS TO CAPTURE</p>
+        </div>
+        
+        <div class="submit-section">
+            <p>Found all 7 flags? Submit your success!</p>
+            <button class="submit-button" onclick="submitCompletion()">Mission Complete</button>
+            <button class="return-button" onclick="returnToTown()">Emergency Exit</button>
+            <div id="completion-message" class="completion-message"></div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <span id="notification-text"></span>
+    </div>
+
+    <script>
+        // Initialize variables
+        let progress = 0;
+        let flagsFound = [];
+        let currentUser = "user";
+        let commandHistory = [];
+        let historyIndex = -1;
+        let timeLeft = 30 * 60; // 30 minutes in seconds
+        
+        // Define all 7 CTF flags
+        const allFlags = [
+            'CTF{suid_bof_user_pwn}',
+            'CTF{proc_kernel_symbol_leak}',
+            'CTF{dev_mem_kernel_exploit}',
+            'CTF{gdb_memory_string_extract}',
+            'CTF{cron_job_momentary_read}',
+            'CTF{env_capabilities_leak}',
+            'CTF{luks_volume_decrypt_root}'
+        ];
+        
+        // Initialize terminal
+        const terminal = document.getElementById('terminal');
+        const commandInput = document.getElementById('command-input');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
+        const completionMessage = document.getElementById('completion-message');
+        const countdownElement = document.getElementById('countdown');
+        
+        // Add event listener for Enter key
+        commandInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                executeCommand();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                navigateHistory(-1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                navigateHistory(1);
+            }
+        });
+        
+        function navigateHistory(direction) {
+            if (commandHistory.length === 0) return;
+            
+            historyIndex += direction;
+            
+            if (historyIndex < 0) historyIndex = 0;
+            if (historyIndex >= commandHistory.length) historyIndex = commandHistory.length - 1;
+            
+            commandInput.value = commandHistory[historyIndex];
+        }
+        
+        function executeCommand() {
+            const command = commandInput.value.trim();
+            if (!command) return;
+            
+            // Add to history
+            commandHistory.push(command);
+            historyIndex = commandHistory.length;
+            
+            // Display command
+            addTerminalLine(`<span class="prompt">${currentUser}@vulnerable-system:~$</span> <span class="command">${command}</span>`);
+            
+            // Process command
+            processCommand(command);
+            
+            // Clear input
+            commandInput.value = '';
+            commandInput.focus();
+        }
+        
+        function processCommand(cmd) {
+            const command = cmd.toLowerCase();
+            
+            if (command === 'help') {
+                showHelp();
+            } else if (command === 'clear') {
+                clearTerminal();
+            } else if (command === 'exit') {
+                addTerminalLine('<span class="output">Logging out...</span>');
+            } else if (command === 'ls' || command === 'dir') {
+                listFiles();
+            } else if (command === 'whoami') {
+                addTerminalLine(`<span class="output">${currentUser}</span>`);
+            } else if (command === 'pwd') {
+                addTerminalLine('<span class="output">/home/user</span>');
+            } else if (command === 'id') {
+                if (currentUser === "user") {
+                    addTerminalLine('<span class="output">uid=1001(user) gid=1001(user) groups=1001(user)</span>');
+                } else if (currentUser === "root") {
+                    addTerminalLine('<span class="output">uid=0(root) gid=0(root) groups=0(root)</span>');
+                }
+            } else if (command.startsWith('./vuln')) {
+                runVuln(command);
+            } else if (command.startsWith('uname')) {
+                runUname(command);
+            } else if (command.startsWith('cat ') || command.startsWith('more ') || command.startsWith('less ')) {
+                runCat(command);
+            } else if (command.startsWith('gdb')) {
+                runGdb(command);
+            } else if (command.startsWith('python') || command.startsWith('python3')) {
+                runPython(command);
+            } else if (command.startsWith('echo')) {
+                runEcho(command);
+            } else if (command === 'show flags') {
+                showFlags();
+            } else if (command === 'show progress') {
+                showProgress();
+            } else {
+                addTerminalLine(`<span class="error">Command not recognized: ${cmd}. Type 'help' for available commands.</span>`);
+            }
+        }
+        
+        function runVuln(cmd) {
+            if (cmd === './vuln') {
+                addTerminalLine('<span class="output">Buffer Overflow vulnerable program</span>');
+                addTerminalLine('<span class="output">Usage: ./vuln [input]</span>');
+                addTerminalLine('<span class="output">Try providing a long input to trigger the overflow</span>');
+            } else if (cmd.includes("AAAA")) {
+                addTerminalLine('<span class="output">Segmentation fault (core dumped)</span>');
+                addTerminalLine('<span class="output">Try a more precise payload to control EIP/RIP</span>');
+            } else if (cmd.includes("exploit_payload")) {
+                addTerminalLine('<span class="output">Buffer overflow successful!</span>');
+                addTerminalLine('<span class="output">Spawning shell...</span>');
+                addTerminalLine('<span class="success">Got user shell! Check your privileges.</span>');
+                currentUser = "user"; // Not root yet, just user exploitation
+                
+                if (!flagsFound.includes('CTF{suid_bof_user_pwn}')) {
+                    flagsFound.push('CTF{suid_bof_user_pwn}');
+                    addTerminalLine('<span class="flag">Flag 1: CTF{suid_bof_user_pwn}</span>');
+                    showNotification('SUID Binary Exploited - Flag 1 Discovered');
+                    updateProgress(14.3);
+                }
+            } else {
+                addTerminalLine('<span class="error">Program terminated unexpectedly.</span>');
+            }
+        }
+        
+        function runUname(cmd) {
+            if (cmd === 'uname -a') {
+                addTerminalLine('<span class="output">Linux vulnerable-system 4.15.0-200-generic #211-Ubuntu SMP Thu Dec 15 14:38:08 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux</span>');
+                addTerminalLine('<span class="output">Kernel appears to be vulnerable to memory exposure</span>');
+            } else {
+                addTerminalLine('<span class="output">Try: uname -a</span>');
+            }
+        }
+        
+        function runCat(cmd) {
+            if (cmd === 'cat /proc/version') {
+                addTerminalLine('<span class="output">Linux version 4.15.0-200-generic (buildd@lcy02-amd64-003) (gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04)) #211-Ubuntu SMP Thu Dec 15 14:38:08 UTC 2022</span>');
+                
+                if (!flagsFound.includes('CTF{proc_kernel_symbol_leak}')) {
+                    flagsFound.push('CTF{proc_kernel_symbol_leak}');
+                    addTerminalLine('<span class="flag">Flag 2: CTF{proc_kernel_symbol_leak}</span>');
+                    showNotification('/proc Version Leak - Flag 2 Discovered');
+                    updateProgress(14.3);
+                }
+            } else if (cmd === 'cat /proc/kallsyms') {
+                addTerminalLine('<span class="output">Permission denied. Try gaining elevated privileges first.</span>');
+            } else if (cmd === 'cat /dev/mem') {
+                if (currentUser === "root") {
+                    addTerminalLine('<span class="output">Reading from /dev/mem...</span>');
+                    addTerminalLine('<span class="output">Kernel memory dump containing sensitive data</span>');
+                    
+                    if (!flagsFound.includes('CTF{dev_mem_kernel_exploit}')) {
+                        flagsFound.push('CTF{dev_mem_kernel_exploit}');
+                        addTerminalLine('<span class="flag">Flag 3: CTF{dev_mem_kernel_exploit}</span>');
+                        showNotification('/dev/mem Read - Flag 3 Discovered');
+                        updateProgress(14.3);
+                    }
+                } else {
+                    addTerminalLine('<span class="error">Permission denied. Requires root privileges.</span>');
+                }
+            } else if (cmd === 'cat /etc/crontab') {
+                addTerminalLine('<span class="output"># /etc/crontab: system-wide crontab</span>');
+                addTerminalLine('<span class="output"># </span>');
+                addTerminalLine('<span class="output"># m h dom mon dow user  command</span>');
+                addTerminalLine('<span class="output">17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly</span>');
+                addTerminalLine('<span class="output">25 6    * * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )</span>');
+                addTerminalLine('<span class="output">47 6    * * 7   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )</span>');
+                addTerminalLine('<span class="output">52 6    1 * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )</span>');
+                addTerminalLine('<span class="output">*  *    * * *   root    /opt/secret_backup.sh 2>&1 | logger -t secret_backup</span>');
+                addTerminalLine('<span class="output">Suspicious cron job found: /opt/secret_backup.sh</span>');
+            } else if (cmd === 'cat /opt/secret_backup.sh') {
+                addTerminalLine('<span class="output">#!/bin/bash</span>');
+                addTerminalLine('<span class="output"># This script runs as root</span>');
+                addTerminalLine('<span class="output">echo "CTF{cron_job_momentary_read}" > /tmp/cronlog</span>');
+                addTerminalLine('<span class="output"># ... more backup commands</span>');
+                addTerminalLine('<span class="output">rm /tmp/cronlog</span>');
+                
+                if (!flagsFound.includes('CTF{cron_job_momentary_read}')) {
+                    flagsFound.push('CTF{cron_job_momentary_read}');
+                    addTerminalLine('<span class="flag">Flag 5: CTF{cron_job_momentary_read}</span>');
+                    showNotification('Cron Job Intercepted - Flag 5 Discovered');
+                    updateProgress(14.3);
+                }
+            } else if (cmd === 'cat /etc/shadow') {
+                if (currentUser === "root") {
+                    addTerminalLine('<span class="output">root:$6$xyz123...:19189:0:99999:7:::</span>');
+                    addTerminalLine('<span class="output">daemon:*:19189:0:99999:7:::</span>');
+                    addTerminalLine('<span class="output">bin:*:19189:0:99999:7:::</span>');
+                    addTerminalLine('<span class="output">user:$6$abc456...:19189:0:99999:7:::</span>');
+                    addTerminalLine('<span class="output">Shadow file accessed. System compromised.</span>');
+                } else {
+                    addTerminalLine('<span class="error">Permission denied. Requires root privileges.</span>');
+                }
+            } else {
+                addTerminalLine('<span class="error">File not found or permission denied.</span>');
+            }
+        }
+        
+        function runGdb(cmd) {
+            if (cmd === 'gdb ./vuln') {
+                addTerminalLine('<span class="output">GNU gdb (Ubuntu 8.1.1-0ubuntu1) 8.1.1</span>');
+                addTerminalLine('<span class="output">Reading symbols from ./vuln...(no debugging symbols found)...done.</span>');
+                addTerminalLine('<span class="output">(gdb) </span>');
+                // Simulate gdb session
+                setTimeout(() => {
+                    addTerminalLine('<span class="output">(gdb) run exploit_payload</span>');
+                    addTerminalLine('<span class="output">Starting program: /home/user/vuln exploit_payload</span>');
+                    addTerminalLine('<span class="output">Program received signal SIGSEGV, Segmentation fault.</span>');
+                    addTerminalLine('<span class="output">0x42424242 in ?? ()</span>');
+                    addTerminalLine('<span class="output">(gdb) x/20s $esp</span>');
+                    addTerminalLine('<span class="output">0xbffff740:     "CTF{gdb_memory_string_extract}"</span>');
+                    addTerminalLine('<span class="output">0xbffff760:     "AAAA..."</span>');
+                    
+                    if (!flagsFound.includes('CTF{gdb_memory_string_extract}')) {
+                        flagsFound.push('CTF{gdb_memory_string_extract}');
+                        addTerminalLine('<span class="flag">Flag 4: CTF{gdb_memory_string_extract}</span>');
+                        showNotification('GDB Memory Extraction - Flag 4 Discovered');
+                        updateProgress(14.3);
+                    }
+                }, 1000);
+            } else {
+                addTerminalLine('<span class="error">Usage: gdb [program]</span>');
+            }
+        }
+        
+        function runPython(cmd) {
+            if (cmd.includes("exploit.py")) {
+                addTerminalLine('<span class="output">Running exploit.py...</span>');
+                addTerminalLine('<span class="output">Crafting buffer overflow payload...</span>');
+                addTerminalLine('<span class="output">Payload sent. Check if privilege escalation worked.</span>');
+                currentUser = "root";
+                addTerminalLine('<span class="success">Root shell achieved!</span>');
+            } else if (cmd.includes("decrypt.py")) {
+                if (flagsFound.length >= 6) {
+                    addTerminalLine('<span class="output">Running LUKS decryption script...</span>');
+                    addTerminalLine('<span class="output">Combining keys from previous flags...</span>');
+                    addTerminalLine('<span class="output">Decryption successful!</span>');
+                    
+                    if (!flagsFound.includes('CTF{luks_volume_decrypt_root}')) {
+                        flagsFound.push('CTF{luks_volume_decrypt_root}');
+                        addTerminalLine('<span class="flag">Flag 7: CTF{luks_volume_decrypt_root}</span>');
+                        showNotification('LUKS Volume Decrypted - Flag 7 Discovered');
+                        updateProgress(14.3);
+                    }
+                } else {
+                    addTerminalLine('<span class="error">Need all previous flags to derive decryption key.</span>');
+                }
+            } else {
+                addTerminalLine('<span class="error">Python script not found.</span>');
+            }
+        }
+        
+        function runEcho(cmd) {
+            if (cmd === 'echo $PATH') {
+                addTerminalLine('<span class="output">/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games</span>');
+            } else if (cmd === 'echo $SHELL') {
+                addTerminalLine('<span class="output">/bin/bash</span>');
+            } else if (cmd.includes('LD_PRELOAD')) {
+                addTerminalLine('<span class="output">Environment variable manipulation detected!</span>');
+                
+                if (!flagsFound.includes('CTF{env_capabilities_leak}')) {
+                    flagsFound.push('CTF{env_capabilities_leak}');
+                    addTerminalLine('<span class="flag">Flag 6: CTF{env_capabilities_leak}</span>');
+                    showNotification('Environment Variable Abuse - Flag 6 Discovered');
+                    updateProgress(14.3);
+                }
+            } else {
+                addTerminalLine(`<span class="output">${cmd.substring(5)}</span>`);
+            }
+        }
+        
+        function listFiles() {
+            addTerminalLine('<span class="output">total 356</span>');
+            addTerminalLine('<span class="output">-rwsr-xr-x 1 root root  31264 Jun 15 10:12 vuln</span>');
+            addTerminalLine('<span class="output">-rw-r--r-- 1 user user   1024 Jun 15 10:13 exploit.c</span>');
+            addTerminalLine('<span class="output">-rw-r--r-- 1 user user   2048 Jun 15 10:14 kernel_info</span>');
+            addTerminalLine('<span class="output">-rw-r--r-- 1 user user    512 Jun 15 10:15 cron_job</span>');
+            addTerminalLine('<span class="output">-rw-r--r-- 1 root root 300000 Jun 15 10:16 luks_container</span>');
+        }
+        
+        function showHelp() {
+            addTerminalLine('<span class="output">Available exploitation commands:</span>');
+            addTerminalLine('<span class="output">- ./vuln [input] - Run SUID binary with input</span>');
+            addTerminalLine('<span class="output">- uname -a - Check kernel version</span>');
+            addTerminalLine('<span class="output">- cat [file] - Display file contents</span>');
+            addTerminalLine('<span class="output">- gdb ./vuln - Debug the vulnerable binary</span>');
+            addTerminalLine('<span class="output">- python exploit.py - Run exploitation script</span>');
+            addTerminalLine('<span class="output">- echo $VAR - Display environment variable</span>');
+            addTerminalLine('<span class="output">- show flags - Display found flags</span>');
+            addTerminalLine('<span class="output">- show progress - Display exploitation progress</span>');
+            addTerminalLine('<span class="output">- clear - Clear terminal</span>');
+        }
+        
+        function showFlags() {
+            if (flagsFound.length === 0) {
+                addTerminalLine('<span class="output">No flags collected yet</span>');
+            } else {
+                addTerminalLine('<span class="output">Flags collected:</span>');
+                flagsFound.forEach(flag => {
+                    addTerminalLine(`<span class="flag">- ${flag}</span>`);
+                });
+            }
+        }
+        
+        function showProgress() {
+            addTerminalLine(`<span class="output">Exploitation progress: ${progress}%</span>`);
+            addTerminalLine(`<span class="output">Flags collected: ${flagsFound.length}/7</span>`);
+        }
+        
+        function clearTerminal() {
+            terminal.innerHTML = '';
+            addTerminalLine(`<span class="prompt">${currentUser}@vulnerable-system:~$</span> <span class="output">Terminal cleared</span>`);
+        }
+        
+        function addTerminalLine(content) {
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.innerHTML = content;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        function updateProgress(value) {
+            progress += value;
+            if (progress > 100) progress = 100;
+            
+            progressBar.style.width = progress + '%';
+            progressText.textContent = `Exploitation Progress: ${progress}%`;
+            
+            if (progress >= 80) {
+                progressBar.style.background = 'linear-gradient(to right, #00aa77, #00ffcc)';
+            }
+            
+            // Check if all flags are found
+            if (flagsFound.length >= 7 && progress < 100) {
+                progress = 100;
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Exploitation Progress: 100%';
+                addTerminalLine('<span class="success">MISSION ACCOMPLISHED! All flags found and system fully compromised!</span>');
+                showNotification('Mission Accomplished! All Flags Collected!', true);
+            }
+        }
+        
+        function showNotification(message, isImportant = false) {
+            notificationText.textContent = message;
+            if (isImportant) {
+                notification.style.borderColor = '#ff00aa';
+                notification.style.boxShadow = '0 0 15px rgba(255, 0, 170, 0.7)';
+            } else {
+                notification.style.borderColor = '#00ffcc';
+                notification.style.boxShadow = '0 0 15px rgba(0, 255, 204, 0.4)';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function selectFile(file) {
+            addTerminalLine(`<span class="prompt">${currentUser}@vulnerable-system:~$</span> <span class="command">select ${file}</span>`);
+            
+            switch(file) {
+                case 'vuln':
+                    addTerminalLine('<span class="output">SUID binary with buffer overflow vulnerability</span>');
+                    break;
+                    
+                case 'exploit.c':
+                    addTerminalLine('<span class="output">Buffer overflow exploit template</span>');
+                    addTerminalLine('<span class="output">// TODO: Craft payload to hijack control flow</span>');
+                    break;
+            }
+        }
+        
+        function executeTool(tool) {
+            addTerminalLine(`<span class="prompt">${currentUser}@vulnerable-system:~$</span> <span class="command">${tool}</span>`);
+            
+            switch(tool) {
+                case 'checksec':
+                    addTerminalLine('<span class="output">RELRO:    Partial RELRO</span>');
+                    addTerminalLine('<span class="output">Stack:    No canary found</span>');
+                    addTerminalLine('<span class="output">NX:       NX disabled</span>');
+                    addTerminalLine('<span class="output">PIE:      No PIE (0x400000)</span>');
+                    addTerminalLine('<span class="output">RWX:      Has RWX segments</span>');
+                    addTerminalLine('<span class="output">Vulnerable to stack-based buffer overflow</span>');
+                    break;
+                    
+                case 'strings':
+                    addTerminalLine('<span class="output">Scanning vuln for strings...</span>');
+                    addTerminalLine('<span class="output">/lib64/ld-linux-x86-64.so.2</span>');
+                    addTerminalLine('<span class="output">libc.so.6</span>');
+                    addTerminalLine('<span class="output">gets</span>');
+                    addTerminalLine('<span class="output">printf</span>');
+                    addTerminalLine('<span class="output">system</span>');
+                    addTerminalLine('<span class="output">Buffer overflow vulnerable function detected</span>');
+                    break;
+                    
+                case 'kernel_check':
+                    runUname('uname -a');
+                    break;
+                    
+                case 'proc_check':
+                    addTerminalLine('<span class="output">total 0</span>');
+                    addTerminalLine('<span class="output">dr-xr-xr-x  9 root root 0 Jun 15 10:12 .</span>');
+                    addTerminalLine('<span class="output">dr-xr-xr-x 25 root root 0 Jun 15 10:12 ..</span>');
+                    addTerminalLine('<span class="output">dr-xr-xr-x  2 root root 0 Jun 15 10:12 1</span>');
+                    addTerminalLine('<span class="output">dr-xr-xr-x  2 root root 0 Jun 15 10:12 2</span>');
+                    addTerminalLine('<span class="output">... many processes ...</span>');
+                    addTerminalLine('<span class="output">Try examining specific process directories or /proc/version</span>');
+                    break;
+                    
+                case 'cron_check':
+                    runCat('cat /etc/crontab');
+                    break;
+                    
+                case 'env_check':
+                    addTerminalLine('<span class="output">USER=user</span>');
+                    addTerminalLine('<span class="output">HOME=/home/user</span>');
+                    addTerminalLine('<span class="output">PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games</span>');
+                    addTerminalLine('<span class="output">LD_PRELOAD=</span>');
+                    addTerminalLine('<span class="output">Try manipulating LD_PRELOAD for privilege escalation</span>');
+                    break;
+                    
+                case 'gdb':
+                    runGdb('gdb ./vuln');
+                    break;
+                    
+                case 'mem_dump':
+                    if (currentUser === "root") {
+                        addTerminalLine('<span class="output">00000000: 7f45 4c46 0201 0100 0000 0000 0000 0000  .ELF............</span>');
+                        addTerminalLine('<span class="output">00000010: 0200 3e00 0100 0000 0000 0000 0000 0000  ..>.............</span>');
+                        addTerminalLine('<span class="output">... kernel memory contents ...</span>');
+                    } else {
+                        addTerminalLine('<span class="error">Permission denied. Requires root privileges.</span>');
+                    }
+                    break;
+            }
+        }
+        
+        function submitCompletion() {
+            if (flagsFound.length >= 7) {
+                addTerminalLine('<span class="success">Mission accomplished successfully!</span>');
+                addTerminalLine('<span class="flag">All flags found. System fully compromised!</span>');
+                completionMessage.innerHTML = '<span class="success">✓ Mission accomplished! All 7 flags found!</span>';
+
+              const townUrl = window.location.origin + "/town.html";
+                // Redirect back to the town with completion parameter for Building 2
+                window.location.href = `${townUrl}?completed=9`;
+            } else {
+                addTerminalLine('<span class="error">You haven\'t collected all flags yet!</span>');
+                addTerminalLine(`<span class="output">Flags collected: ${flagsFound.length}/7 required</span>`);
+                completionMessage.innerHTML = `<span class="error">✗ Only ${flagsFound.length}/7 flags collected. Keep exploiting!</span>`;
+            }
+        }
+
+       function returnToTown() {
+            sessionStorage.setItem('returningFromChallenge', 'true');
+            const townUrl = window.location.origin + "/town.html";
+            window.location.href = townUrl;
+        }
+        
+        // Update countdown timer
+        function updateCountdown() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownElement.textContent = `TIME: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft > 0) {
+                timeLeft--;
+                setTimeout(updateCountdown, 1000);
+            } else {
+                addTerminalLine('<span class="error">TIME CRITICAL: Mission failed! Exploitation timed out!</span>');
+                showNotification('Mission Failed! Time expired!', true);
+            }
+        }
+        
+        // Initialize the interface
+        window.onload = function() {
+            commandInput.focus();
+            updateCountdown();
+        };
+    </script>
+</body>
+</html>
