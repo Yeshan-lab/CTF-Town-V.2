@@ -1,10 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<!-- saved from url=(0046)file:///home/roshith/Downloads/challenge7.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Forest CTF Challenge</title>
+    <title>OPERATION: QUANTUM DECRY Challenge</title>
+    <link rel="stylesheet" href="./challenge7_files/all.min.css">
     <style>
+        :root {
+            --cyber-black: #0a0a12;
+            --cyber-dark: #12122d;
+            --cyber-blue: #0066ff;
+            --cyber-purple: #8a2be2;
+            --cyber-pink: #ff00c8;
+            --cyber-green: #00ffcc;
+            --cyber-red: #ff3366;
+            --cyber-yellow: #ffcc00;
+            --text-glow: #e9e3db;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -13,704 +26,533 @@
         }
         
         body {
-            background-color: #0a0a0a;
-            color: #0f0;
+            background-color: var(--cyber-black);
+            color: var(--text-glow);
             line-height: 1.6;
             padding: 20px;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(18, 18, 45, 0.7) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(138, 43, 226, 0.3) 0%, transparent 40%);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
         
-        .container {
+        .cyber-container {
             max-width: 1200px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 3fr;
-            gap: 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .header {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 20px;
-            border-bottom: 1px solid #0f0;
-            margin-bottom: 20px;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 10px;
-            color: #0f0;
-            text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
-        }
-        
-        .sidebar {
-            background: rgba(20, 20, 20, 0.8);
-            border: 1px solid #0f0;
-            border-radius: 5px;
-            padding: 20px;
-            height: fit-content;
-        }
-        
-        .main-content {
-            background: rgba(20, 20, 20, 0.8);
-            border: 1px solid #0f0;
-            border-radius: 5px;
-            padding: 20px;
-            min-height: 600px;
-        }
-        
-        .nav-list {
-            list-style-type: none;
-        }
-        
-        .nav-list li {
-            margin-bottom: 10px;
-            padding: 10px;
-            border-bottom: 1px solid #333;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-list li:hover {
-            background: rgba(0, 255, 0, 0.1);
-            border-color: #0f0;
-        }
-        
-        .nav-list a {
-            color: #0f0;
-            text-decoration: none;
-            display: block;
-        }
-        
-        .challenge-info {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #333;
-        }
-        
-        .badge {
-            display: inline-block;
-            background: #ff0;
-            color: #000;
-            padding: 5px 10px;
-            border-radius: 3px;
-            font-size: 0.8rem;
-            margin-right: 10px;
-            font-weight: bold;
-        }
-        
-        .terminal {
-            background-color: #111;
-            border: 1px solid #0f0;
-            border-radius: 5px;
-            padding: 15px;
-            height: 400px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-        }
-        
-        .input-line {
             display: flex;
-            margin-bottom: 20px;
+            flex-direction: column;
+            gap: 25px;
         }
         
-        .prompt {
-            margin-right: 10px;
-            color: #0af;
-        }
-        
-        .command-input {
-            flex-grow: 1;
-            background-color: #111;
-            border: 1px solid #0f0;
-            color: #0f0;
-            font-family: 'Courier New', monospace;
-            padding: 5px 10px;
-        }
-        
-        .command {
-            color: #0af;
-            margin-bottom: 5px;
-        }
-        
-        .output {
-            margin-bottom: 15px;
-            white-space: pre-wrap;
-        }
-        
-        .error {
-            color: #f00;
-        }
-        
-        .success {
-            color: #0f0;
-            font-weight: bold;
-        }
-        
-        .warning {
-            color: #ff0;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card {
-            background: rgba(0, 30, 0, 0.3);
-            border: 1px solid #0f0;
+        .cyber-card {
+            background: rgba(10, 10, 18, 0.9);
+            border: 1px solid var(--cyber-blue);
             border-radius: 5px;
-            padding: 15px;
-            text-align: center;
+            padding: 25px;
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.3);
+            position: relative;
+            overflow: hidden;
         }
         
-        .stat-value {
-            font-size: 2rem;
-            color: #0f0;
-            margin: 10px 0;
-        }
-        
-        .button {
-            background: #0f0;
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            cursor: pointer;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            transition: all 0.3s ease;
-        }
-        
-        .button:hover {
-            background: #0c0;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-        }
-        
-        .button.secondary {
-            background: #0af;
-            color: #000;
-        }
-        
-        .button.secondary:hover {
-            background: #08c;
-            box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
-        }
-        
-        .virus-effect {
-            position: fixed;
+        .cyber-card::before {
+            content: "";
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #f00;
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2em;
-            color: #000;
-            animation: virusPulse 0.5s infinite;
+            background: linear-gradient(45deg, rgba(0, 102, 255, 0.1) 0%, transparent 70%);
+            z-index: -1;
         }
         
-        @keyframes virusPulse {
-            0% { background-color: #f00; }
-            50% { background-color: #ff0; }
-            100% { background-color: #f00; }
-        }
-        
-        .completion-message {
-            background: rgba(0, 255, 0, 0.1);
-            border: 1px solid #0f0;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
+        .header {
             text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--cyber-blue);
+            position: relative;
+        }
+        
+        .header::after {
+            content: "";
+            position: absolute;
+            bottom: -3px;
+            left: 25%;
+            width: 50%;
+            height: 3px;
+            background: var(--cyber-blue);
+        }
+        
+        h1 {
+            font-size: 3.2rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+            color: var(--cyber-green);
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
+            font-weight: 900;
+        }
+        
+        h2 {
+            color: var(--cyber-blue);
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--cyber-purple);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 1.8rem;
+        }
+        
+        h3 {
+            color: var(--cyber-pink);
+            margin: 20px 0 10px;
+            font-size: 1.4rem;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .subtitle {
+            font-size: 1.6rem;
+            color: var(--cyber-purple);
+            margin-bottom: 25px;
+            text-shadow: 0 0 5px rgba(138, 43, 226, 0.7);
+        }
+        
+        .badge {
+            display: inline-block;
+            background: var(--cyber-red);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 3px;
+            font-size: 0.9rem;
+            margin: 0 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .terminal {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--cyber-green);
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .prompt {
+            color: var(--cyber-green);
+        }
+        
+        .command {
+            color: var(--cyber-blue);
+        }
+        
+        .output {
+            color: var(--text-glow);
+        }
+        
+        .scan-line {
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: linear-gradient(to right, transparent, var(--cyber-green), transparent);
+            top: 0;
+            animation: scan 3s linear infinite;
+            z-index: 1;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        
+        .cyber-button {
+            background: linear-gradient(to bottom, var(--cyber-blue), var(--cyber-purple));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .cyber-button:hover {
+            background: linear-gradient(to bottom, var(--cyber-purple), var(--cyber-blue));
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.7);
+            transform: translateY(-2px);
+        }
+        
+        .challenge-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid var(--cyber-pink);
+            border-radius: 5px;
+            background: rgba(18, 18, 45, 0.5);
+        }
+        
+        .input-group {
+            display: flex;
+            margin: 15px 0;
+        }
+        
+        .input-group input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--cyber-blue);
+            color: var(--cyber-green);
+            padding: 10px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+        }
+        
+        .input-group button {
+            background: var(--cyber-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .hint {
+            background: rgba(255, 204, 0, 0.1);
+            border-left: 3px solid var(--cyber-yellow);
+            padding: 10px 15px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            color: var(--cyber-yellow);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            border-top: 1px solid var(--cyber-blue);
+            color: var(--cyber-purple);
+            font-size: 1rem;
+        }
+        
+        .glow {
+            text-shadow: 0 0 5px currentColor;
+        }
+        
+        .success {
+            color: var(--cyber-green);
+            font-weight: bold;
+        }
+        
+        .error {
+            color: var(--cyber-red);
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🌲 Cyber Forest CTF Challenge</h1>
-            <p>Navigate the dangerous cyber forest to find the hidden flags. Beware of traps!</p>
+    <div class="cyber-container">
+        <header class="header">
+            <h1>OPERATION: QUANTUM DECRYPTION</h1>
+            <p class="subtitle">level7 Challenge - Cryptographic Breakthrough</p>
+            <div class="scan-line"></div>
+        </header>
+        
+        <div class="cyber-card">
+            <h2><i class="fas fa-lock"></i> FINAL BRIEFING</h2>
+            <p>You've successfully infiltrated the Tawon Mafia network, but their most valuable asset - the <span class="glow" style="color: var(--cyber-red);">Quantum Encryption Key Vault</span> - remains protected by multiple layers of security.</p>
+            <p>Our intelligence indicates the vault uses a <span class="glow" style="color: var(--cyber-pink);">modified RSA algorithm</span> with a backdoor only accessible through a specific cryptographic attack.</p>
+            <p>You must perform a <span class="glow" style="color: var(--cyber-yellow);">Chosen Ciphertext Attack</span> to recover the final flag and complete your mission.</p>
+            
+            <div class="terminal" id="main-terminal">
+                <div class="terminal-line">
+                    <span class="prompt">vault://access$&gt;</span>
+                    <span class="output">Initializing Quantum Decryption Sequence</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">vault://access$&gt;</span>
+                    <span class="output">RSA Public Key Retrieved:</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">n = 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">e = 65537</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">vault://access$&gt;</span>
+                    <span class="output">Encrypted Flag: </span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output" id="encrypted-flag">3f2511</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">vault://access$&gt;</span>
+                    <span class="output">Oracle API: /api/decrypt?ciphertext=</span>
+                </div>
+            </div>
         </div>
         
-        <div class="sidebar">
-            <h2>CTF Town Hub</h2>
-            <ul class="nav-list">
-                <li><a href="#" onclick="showView('challenge')">Cyber Forest Challenge</a></li>
-                <li><a href="#" onclick="showView('instructions')">Instructions</a></li>
-                <li><a href="#" onclick="showView('leaderboard')">Leaderboard</a></li>
-                <li><a href="#" onclick="showView('profile')">Your Profile</a></li>
-                <li><a href="#" onclick="returnToTown()">Return to Main Town</a></li>
-            </ul>
+        <div class="cyber-card">
+            <h2><i class="fas fa-project-diagram"></i> THE ATTACK VECTOR</h2>
+            <p>The vault's API allows you to decrypt any ciphertext except the encrypted flag itself. You must use this to your advantage.</p>
             
-            <div class="stats">
-                <div class="stat-card">
-                    <div>Flags Found</div>
-                    <div class="stat-value" id="flags-found">0</div>
-                    <div>out of 3</div>
+            <div class="challenge-section">
+                <h3>STAGE 1: Understand the Vulnerability</h3>
+                <p>The RSA cryptosystem here is vulnerable to a Chosen Ciphertext Attack. The mathematical principle is:</p>
+                <p>Given ciphertext c = m<sup>e</sup> mod n, we can compute c' = c * r<sup>e</sup> mod n for a random r.</p>
+                <p>When decrypted: m' = (c')<sup>d</sup> mod n = (c * r<sup>e</sup>)<sup>d</sup> mod n = m * r mod n</p>
+                <p>Then we can recover m = m' * r<sup>-1</sup> mod n</p>
+                
+                <div class="input-group">
+                    <input type="text" id="stage1-answer" placeholder="What is the value of r^{-1} mod n called?">
+                    <button onclick="checkStage1()">VERIFY</button>
                 </div>
-                <div class="stat-card">
-                    <div>Time Elapsed</div>
-                    <div class="stat-value" id="time-elapsed">00:00</div>
-                    <div>minutes</div>
-                </div>
+                <div id="stage1-result"></div>
             </div>
             
-            <button class="button" onclick="submitCompletion()">Submit Completion</button>
-            <button class="button secondary" onclick="resetChallenge()">Reset Challenge</button>
-        </div>
-        
-        <div class="main-content">
-            <div id="challenge-view">
-                <div class="challenge-info">
-                    <span class="badge">Difficulty: Medium</span>
-                    <span class="badge">Category: Forensics</span>
-                    <span class="badge">Points: 250</span>
-                </div>
-                
-                <div class="terminal" id="terminal"></div>
-                
-                <div class="input-line">
-                    <span class="prompt">user@cyberforest:$</span>
-                    <input type="text" class="command-input" id="command-input" autofocus>
-                </div>
-                
-                <p>Available commands: <code>ls</code>, <code>cd</code>, <code>cat</code>, <code>file</code>, <code>help</code>, <code>clear</code></p>
-            </div>
-            
-            <div id="instructions-view" style="display: none;">
-                <h2>Challenge Instructions</h2>
-                <p>Your mission is to explore the cyber forest file system and find three hidden flags:</p>
-                <ul>
-                    <li>Flag 1: Hidden in plain sight</li>
-                    <li>Flag 2: In a document folder</li>
-                    <li>Flag 3: In an image's metadata</li>
-                </ul>
-                
-                <h3>Commands:</h3>
-                <p><code>ls</code> - List directory contents</p>
-                <p><code>cd [directory]</code> - Change directory</p>
-                <p><code>cat [file]</code> - Display file contents</p>
-                <p><code>file [file]</code> - Determine file type</p>
-                <p><code>help</code> - Show available commands</p>
-                <p><code>clear</code> - Clear the terminal</p>
-                
-                <h3>Warnings:</h3>
-                <p>Be careful which files you open! Some may contain viruses that will temporarily lock your terminal.</p>
-            </div>
-            
-            <div id="leaderboard-view" style="display: none;">
-                <h2>Leaderboard</h2>
-                <p>Top performers on this challenge:</p>
+            <div class="challenge-section">
+                <h3>STAGE 2: Implement the Attack</h3>
+                <p>Using the provided public key, you need to:</p>
                 <ol>
-                    <li>CyberNinja - 2m 45s</li>
-                    <li>CodeBreaker - 3m 12s</li>
-                    <li>TerminalWizard - 3m 45s</li>
-                    <li>ByteMe - 4m 03s</li>
-                    <li>RootAccess - 4m 30s</li>
+                    <li>Choose a random number r (relatively prime to n)</li>
+                    <li>Compute c' = c * r<sup>e</sup> mod n</li>
+                    <li>Submit c' to the decryption oracle</li>
+                    <li>Get back m' = m * r mod n</li>
+                    <li>Compute m = m' * r<sup>-1</sup> mod n</li>
                 </ol>
+                
+                <div class="input-group">
+                    <input type="text" id="stage2-answer" placeholder="Paste your computed plaintext here">
+                    <button onclick="checkStage2()">DECRYPT</button>
+                </div>
+                <div id="stage2-result"></div>
             </div>
             
-            <div id="profile-view" style="display: none;">
-                <h2>Your Profile</h2>
-                <p>Username: CTFExplorer</p>
-                <p>Level: Hacker</p>
-                <p>Challenges Completed: 12</p>
-                <p>Total Points: 2850</p>
+            <div class="challenge-section">
+                <h3>STAGE 3: Recover the Final Flag</h3>
+                <p>The decrypted message contains the final flag, but it's encoded. Apply the appropriate decoding method.</p>
+                
+                <div class="input-group">
+                    <input type="text" id="stage3-answer" placeholder="Enter the final flag in CTF{} format">
+                    <button onclick="checkStage3()">SUBMIT FLAG</button>
+                </div>
+                <div id="stage3-result"></div>
             </div>
             
-            <div id="completion-message" class="completion-message" style="display: none;">
-                <h2>🎉 Challenge Complete! 🎉</h2>
-                <p>You've successfully found all flags in the Cyber Forest!</p>
-                <p>Time: <span id="completion-time">00:00</span></p>
-                <p>Points earned: 250</p>
-                <button class="button" onclick="returnToTown()">Return to Town</button>
+            <div class="hint">
+                <h4><i class="fas fa-lightbulb"></i> HINT</h4>
+                <p>You'll need to write a script to perform the calculations. Use Python with the pow() function for modular exponentiation.</p>
+                <p>The encrypted flag is actually Base64-encoded ciphertext that needs to be decoded before performing the attack.</p>
             </div>
+        </div>
+        
+        <div class="cyber-card">
+            <h2><i class="fas fa-terminal"></i> ORACLE SIMULATION</h2>
+            <p>This simulator allows you to test ciphertext decryption (except for the actual flag ciphertext):</p>
+            
+            <div class="input-group">
+                <input type="text" id="oracle-input" placeholder="Enter ciphertext (hexadecimal)">
+                <button onclick="queryOracle()">DECRYPT</button>
+            </div>
+            
+            <div class="terminal" id="oracle-terminal">
+                <div class="terminal-line">
+                    <span class="prompt">oracle$&gt;</span>
+                    <span class="output">Quantum Decryption Oracle ready.</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">oracle$&gt;</span>
+                    <span class="output">Note: The flag ciphertext is blocked by security protocols.</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>QUANTUM CRYPTOGRAPHY DIVISION | TOP SECRET // NOFORN</p>
+            <p>This is a simulation for educational purposes only. All scenarios are fictional.</p>
         </div>
     </div>
 
     <script>
-        // Game state
-        const state = {
-            currentPath: "/",
-            flagsFound: 0,
-            infected: false,
-            startTime: new Date(),
-            timerInterval: null,
-            foundFlags: {
-                flag1: false,
-                flag2: false,
-                flag3: false
-            },
-            currentView: 'challenge'
-        };
-
-        // File system structure
-        const fileSystem = {
-            "/": ["bin/", "home/", "tmp/", "readme.txt"],
-            "/bin/": ["ls", "cat", "virus", "safe_program"],
-            "/home/": ["user/", "guest/", "flag.txt"],
-            "/home/user/": ["Documents/", "Downloads/", "Pictures/", ".hidden_file"],
-            "/home/user/Documents/": ["note.txt", "flag2.txt", "secret.docx"],
-            "/home/user/Downloads/": ["malware.exe", "clean_file.zip", "suspicious.rar"],
-            "/home/user/Pictures/": ["vacation.jpg", "forest.png", "flag3.png"],
-            "/home/guest/": ["welcome.txt"],
-            "/tmp/": ["temp1", "temp2", "trash/"]
-        };
-
-        // File contents
-        const fileContents = {
-            "/readme.txt": "Welcome to the Cyber Forest!\nBe careful what files you open...",
-            "/home/flag.txt": "CTF{not_the_real_flag}",
-            "/home/user/Documents/note.txt": "Remember:\n- Don't open suspicious files\n- Check file types before opening\n- The real flags are well hidden",
-            "/home/user/Documents/flag2.txt": "CTF{you_found_the_second_flag}",
-            "/home/user/Documents/secret.docx": "This appears to be a Word document, but it's actually empty.",
-            "/home/user/Downloads/malware.exe": "VIRUS ACTIVATED! Your system is now compromised!",
-            "/home/user/Downloads/clean_file.zip": "This archive contains nothing interesting.",
-            "/home/user/Downloads/suspicious.rar": "This archive is password protected.",
-            "/home/user/Pictures/vacation.jpg": "A nice picture of the beach. Nothing hidden here.",
-            "/home/user/Pictures/forest.png": "A dense digital forest. Look closer...",
-            "/home/user/Pictures/flag3.png": "The flag is hidden in this image's metadata: CTF{metadata_master}",
-            "/home/guest/welcome.txt": "Guest account - no privileges here.",
-            "/home/user/.hidden_file": "CTF{hidden_in_plain_sight}",
-            "/bin/virus": "INFECTION! You shouldn't have run this!",
-            "/bin/safe_program": "This program does nothing dangerous."
-        };
-
-        // File types (for 'file' command)
-        const fileTypes = {
-            "/readme.txt": "ASCII text",
-            "/home/flag.txt": "ASCII text",
-            "/home/user/Documents/note.txt": "ASCII text",
-            "/home/user/Documents/flag2.txt": "ASCII text",
-            "/home/user/Documents/secret.docx": "Microsoft Word 2007+",
-            "/home/user/Downloads/malware.exe": "PE32 executable (GUI) Intel 80386",
-            "/home/user/Downloads/clean_file.zip": "Zip archive data",
-            "/home/user/Downloads/suspicious.rar": "RAR archive data",
-            "/home/user/Pictures/vacation.jpg": "JPEG image data",
-            "/home/user/Pictures/forest.png": "PNG image data",
-            "/home/user/Pictures/flag3.png": "PNG image data",
-            "/home/guest/welcome.txt": "ASCII text",
-            "/home/user/.hidden_file": "ASCII text",
-            "/bin/virus": "ELF 64-bit LSB executable",
-            "/bin/safe_program": "ELF 64-bit LSB executable"
-        };
-
+        // RSA parameters (using smaller numbers for demonstration)
+        const p = 10007n;
+        const q = 10009n;
+        const n = p * q;
+        const e = 65537n;
+        const phi = (p - 1n) * (q - 1n);
+        const d = modInverse(e, phi);
+        
+        // The encrypted flag (for demonstration purposes)
+        const flag = "CTF{Qu4ntum_3ncrypt10n_Br0k3n}";
+        const flagEncoded = btoa(flag);
+        let flagCiphertext = encrypt(flag);
+        
         // DOM elements
-        const terminal = document.getElementById('terminal');
-        const commandInput = document.getElementById('command-input');
-        const flagsFoundDisplay = document.getElementById('flags-found');
-        const timeElapsedDisplay = document.getElementById('time-elapsed');
-        const completionTimeDisplay = document.getElementById('completion-time');
-
-        // Initialize the challenge
-        function initChallenge() {
-            terminal.innerHTML = '';
-            printToTerminal('Type "help" for available commands\n\n');
-            
-            // Start timer
-            if (state.timerInterval) {
-                clearInterval(state.timerInterval);
-            }
-            state.startTime = new Date();
-            state.timerInterval = setInterval(updateTimer, 1000);
-            
-            // Reset state
-            state.currentPath = "/";
-            state.flagsFound = 0;
-            state.foundFlags = { flag1: false, flag2: false, flag3: false };
-            flagsFoundDisplay.textContent = "0";
-            
-            // Hide completion message
-            document.getElementById('completion-message').style.display = 'none';
-            document.getElementById('challenge-view').style.display = 'block';
-        }
-
-        // Update timer display
-        function updateTimer() {
-            const now = new Date();
-            const diff = Math.floor((now - state.startTime) / 1000);
-            const minutes = Math.floor(diff / 60);
-            const seconds = diff % 60;
-            timeElapsedDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        // Command processing
-        commandInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                const command = commandInput.value.trim();
-                commandInput.value = '';
-                
-                if (command) {
-                    printToTerminal(`user@cyberforest:${state.currentPath}$ ${command}`, 'command');
-                    processCommand(command);
+        const encryptedFlagElement = document.getElementById('encrypted-flag');
+        encryptedFlagElement.textContent = flagCiphertext;
+        
+        // Oracle terminal
+        const oracleTerminal = document.getElementById('oracle-terminal');
+        
+        // Modular exponentiation
+        function modExp(base, exponent, modulus) {
+            if (modulus === 1n) return 0n;
+            let result = 1n;
+            base = base % modulus;
+            while (exponent > 0n) {
+                if (exponent % 2n === 1n) {
+                    result = (result * base) % modulus;
                 }
+                exponent = exponent >> 1n;
+                base = (base * base) % modulus;
             }
-        });
-
-        function processCommand(command) {
-            if (state.infected) {
-                printToTerminal('System locked due to infection! Please wait...', 'error');
-                return;
-            }
-
-            const parts = command.split(' ');
-            const cmd = parts[0];
-            const args = parts.slice(1);
-
-            switch (cmd) {
-                case 'ls':
-                    executeLs(args);
-                    break;
-                case 'cd':
-                    executeCd(args);
-                    break;
-                case 'cat':
-                    executeCat(args);
-                    break;
-                case 'file':
-                    executeFile(args);
-                    break;
-                case 'help':
-                    executeHelp();
-                    break;
-                case 'clear':
-                    terminal.innerHTML = '';
-                    break;
-                default:
-                    printToTerminal(`Command not found: ${cmd}`, 'error');
-            }
+            return result;
         }
-
-        function executeLs(args) {
-            const path = args[0] ? resolvePath(args[0]) : state.currentPath;
+        
+        // Modular inverse
+        function modInverse(a, m) {
+            let [old_r, r] = [a, m];
+            let [old_s, s] = [1n, 0n];
+            let [old_t, t] = [0n, 1n];
             
-            if (!fileSystem[path]) {
-                printToTerminal(`ls: cannot access '${args[0] || path}': No such file or directory`, 'error');
-                return;
+            while (r !== 0n) {
+                const quotient = old_r / r;
+                [old_r, r] = [r, old_r - quotient * r];
+                [old_s, s] = [s, old_s - quotient * s];
+                [old_t, t] = [t, old_t - quotient * t];
             }
             
-            printToTerminal(fileSystem[path].join(' '));
+            return old_s < 0n ? old_s + m : old_s;
         }
-
-        function executeCd(args) {
-            if (!args[0]) {
-                state.currentPath = "/";
-                return;
-            }
-
-            let targetPath = resolvePath(args[0]);
-            
-            // Special case for parent directory
-            if (args[0] === '..') {
-                if (state.currentPath === '/') {
-                    printToTerminal('Already at root directory', 'warning');
-                    return;
+        
+        // Encrypt function
+        function encrypt(message) {
+            // For demonstration, we'll use a simple encoding
+            const encoded = Array.from(message).map(c => BigInt(c.charCodeAt(0))).reduce((acc, val) => acc * 256n + val, 0n);
+            return modExp(encoded, e, n).toString(16);
+        }
+        
+        // Decrypt function
+        function decrypt(ciphertext) {
+            try {
+                const cipherBigInt = BigInt('0x' + ciphertext);
+                const decrypted = modExp(cipherBigInt, d, n);
+                
+                // Convert back to string
+                let message = '';
+                let temp = decrypted;
+                while (temp > 0n) {
+                    message = String.fromCharCode(Number(temp % 256n)) + message;
+                    temp = temp / 256n;
                 }
                 
-                const parts = state.currentPath.split('/').filter(p => p);
-                parts.pop();
-                state.currentPath = parts.length ? '/' + parts.join('/') + '/' : '/';
-                return;
+                return message;
+            } catch (e) {
+                return "Decryption error: Invalid ciphertext";
             }
-            
-            // Check if directory exists
-            if (!fileSystem[targetPath] && !fileSystem[targetPath + '/']) {
-                printToTerminal(`cd: no such file or directory: ${args[0]}`, 'error');
-                return;
-            }
-            
-            // Add trailing slash if needed
-            if (!targetPath.endsWith('/')) {
-                targetPath += '/';
-            }
-            
-            state.currentPath = targetPath;
         }
-
-        function executeCat(args) {
-            if (!args[0]) {
-                printToTerminal('Usage: cat FILE', 'error');
-                return;
-            }
-
-            const filePath = resolvePath(args[0]);
+        
+        // Oracle query function
+        function queryOracle() {
+            const input = document.getElementById('oracle-input').value;
+            if (!input) return;
             
-            if (filePath in fileContents) {
-                const content = fileContents[filePath];
-                printToTerminal(content);
-                
-                // Check for flags
-                checkForFlags(content);
-                
-                // Check for viruses
-                if (filePath === '/bin/virus' || filePath === '/home/user/Downloads/malware.exe') {
-                    triggerVirus();
-                }
+            // Add to terminal
+            const newLine = document.createElement('div');
+            newLine.className = 'terminal-line';
+            newLine.innerHTML = `<span class="prompt">oracle$></span> <span class="command">decrypt ${input}</span>`;
+            oracleTerminal.appendChild(newLine);
+            
+            // Check if it's the flag ciphertext
+            if (input === flagCiphertext) {
+                const resultLine = document.createElement('div');
+                resultLine.className = 'terminal-line';
+                resultLine.innerHTML = `<span class="output error">SECURITY PROTOCOL VIOLATION: Flag ciphertext rejected</span>`;
+                oracleTerminal.appendChild(resultLine);
             } else {
-                printToTerminal(`cat: ${args[0]}: No such file or directory`, 'error');
+                const decrypted = decrypt(input);
+                const resultLine = document.createElement('div');
+                resultLine.className = 'terminal-line';
+                resultLine.innerHTML = `<span class="output">${decrypted}</span>`;
+                oracleTerminal.appendChild(resultLine);
             }
-        }
-
-        function executeFile(args) {
-            if (!args[0]) {
-                printToTerminal('Usage: file FILE', 'error');
-                return;
-            }
-
-            const filePath = resolvePath(args[0]);
             
-            if (filePath in fileTypes) {
-                printToTerminal(`${args[0]}: ${fileTypes[filePath]}`);
+            // Scroll to bottom
+            oracleTerminal.scrollTop = oracleTerminal.scrollHeight;
+            document.getElementById('oracle-input').value = '';
+        }
+        
+        // Stage checking functions
+        function checkStage1() {
+            const answer = document.getElementById('stage1-answer').value.toLowerCase();
+            const resultElement = document.getElementById('stage1-result');
+            
+            if (answer.includes('modular inverse') || answer.includes('inverse')) {
+                resultElement.innerHTML = `<span class="success">Correct! The modular inverse is key to this attack.</span>`;
             } else {
-                printToTerminal(`file: ${args[0]}: No such file or directory`, 'error');
+                resultElement.innerHTML = `<span class="error">Incorrect. Research "modular inverse" in RSA.</span>`;
             }
         }
-
-        function executeHelp() {
-            const helpText = `Available commands:
-ls [DIR]    - List directory contents
-cd [DIR]    - Change directory
-cat FILE    - Display file contents
-file FILE   - Determine file type
-help        - Display this help
-clear       - Clear the terminal
-
-Flags:
-There are 3 hidden flags in the system. Find them all!
-`;
-            printToTerminal(helpText);
-        }
-
-        function resolvePath(path) {
-            if (path.startsWith('/')) {
-                return path;
+        
+        function checkStage2() {
+            const answer = document.getElementById('stage2-answer').value;
+            const resultElement = document.getElementById('stage2-result');
+            
+            if (answer.includes(flag)) {
+                resultElement.innerHTML = `<span class="success">Success! You've decrypted the message: ${flag}</span>`;
+            } else {
+                resultElement.innerHTML = `<span class="error">That doesn't appear to be the correct plaintext. Review your calculations.</span>`;
             }
-            
-            return state.currentPath + path;
         }
-
-        function checkForFlags(content) {
-            const flags = [
-                'CTF{hidden_in_plain_sight}',
-                'CTF{you_found_the_second_flag}',
-                'CTF{metadata_master}'
-            ];
+        
+        function checkStage3() {
+            const answer = document.getElementById('stage3-answer').value;
+            const resultElement = document.getElementById('stage3-result');
             
-            flags.forEach((flag, index) => {
-                if (content.includes(flag) && !state.foundFlags[`flag${index + 1}`]) {
-                    state.foundFlags[`flag${index + 1}`] = true;
-                    state.flagsFound++;
-                    flagsFoundDisplay.textContent = state.flagsFound;
-                    printToTerminal(`\nCongratulations! You found flag ${index + 1}: ${flag}`, 'success');
-                    
-                    if (state.flagsFound === 3) {
-                        completeChallenge();
+            if (answer === flag) {
+                resultElement.innerHTML = `<span class="success">MISSION ACCOMPLISHED! You've broken the quantum encryption and recovered the flag: ${flag}</span>`;
+                
+                // Add to main terminal
+                const mainTerminal = document.getElementById('main-terminal');
+                const newLine = document.createElement('div');
+                newLine.className = 'terminal-line';
+                newLine.innerHTML = `<span class="prompt">vault://access$></span> <span class="output success">QUANTUM ENCRYPTION BREACHED. FLAG RECOVERED: ${flag}</span>`;
+                mainTerminal.appendChild(newLine);
+                mainTerminal.scrollTop = mainTerminal.scrollHeight;
+            } else {
+                resultElement.innerHTML = `<span class="error">Incorrect flag format. Remember to use CTF{} format.</span>`;
+            }
+        }
+        
+        // Allow Enter key in input fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        if (input.id === 'stage1-answer') checkStage1();
+                        if (input.id === 'stage2-answer') checkStage2();
+                        if (input.id === 'stage3-answer') checkStage3();
+                        if (input.id === 'oracle-input') queryOracle();
                     }
-                }
+                });
             });
-        }
-
-        function triggerVirus() {
-            state.infected = true;
-            
-            // Create virus effect
-            const virusDiv = document.createElement('div');
-            virusDiv.className = 'virus-effect';
-            virusDiv.textContent = '☠️ VIRUS DETECTED! SYSTEM COMPROMISED! ☠️';
-            document.body.appendChild(virusDiv);
-            
-            // Disable input
-            commandInput.disabled = true;
-            
-            // Remove virus after timeout
-            setTimeout(() => {
-                document.body.removeChild(virusDiv);
-                state.infected = false;
-                commandInput.disabled = false;
-                commandInput.focus();
-                printToTerminal('System restored. Be more careful next time!', 'warning');
-            }, 5000);
-        }
-
-        function completeChallenge() {
-            clearInterval(state.timerInterval);
-            const now = new Date();
-            const timeTaken = Math.floor((now - state.startTime) / 1000);
-            const minutes = Math.floor(timeTaken / 60);
-            const seconds = timeTaken % 60;
-            
-            completionTimeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            document.getElementById('challenge-view').style.display = 'none';
-            document.getElementById('completion-message').style.display = 'block';
-            
-            // Save completion to localStorage
-            const completions = JSON.parse(localStorage.getItem('ctfCompletions') || '{}');
-            completions['cyber-forest'] = {
-                completed: true,
-                time: timeTaken,
-                flags: 3,
-                date: new Date().toISOString()
-            };
-            localStorage.setItem('ctfCompletions', JSON.stringify(completions));
-        }
-
-        function printToTerminal(text, className = '') {
-            const div = document.createElement('div');
-            div.className = `output ${className}`;
-            div.textContent = text;
-            terminal.appendChild(div);
-            terminal.scrollTop = terminal.scrollHeight;
-        }
-        
-        function showView(viewName) {
-            // Hide all views
-            document.getElementById('challenge-view').style.display = 'none';
-            document.getElementById('instructions-view').style.display = 'none';
-            document.getElementById('leaderboard-view').style.display = 'none';
-            document.getElementById('profile-view').style.display = 'none';
-            document.getElementById('completion-message').style.display = 'none';
-            
-            // Show selected view
-            document.getElementById(`${viewName}-view`).style.display = 'block';
-            state.currentView = viewName;
-        }
-        
-        function submitCompletion() {
-            if (state.flagsFound === 3) {
-                alert("Challenge already completed! Well done!");
-            } else {
-                alert(`You've found ${state.flagsFound} out of 3 flags. Keep searching!`);
-            }
-        }
-        
-        function resetChallenge() {
-            if (confirm("Are you sure you want to reset the challenge? Your progress will be lost.")) {
-                initChallenge();
-            }
-        }
-        
-        function returnToTown() {
-            // In a real implementation, this would redirect to your town page
-            alert("Returning to CTF Town...");
-            // window.location.href = "ctf-town.html";
-        }
-
-        // Initialize the challenge when page loads
-        window.onload = initChallenge;
+        });
     </script>
-</body>
-</html>
+
+
+</body></html>
