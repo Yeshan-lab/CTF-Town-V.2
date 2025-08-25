@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌲 Cyber Forest CTF Chapter 03: The Encrypted Vault</title>
     <style>
+        /* Your existing CSS remains the same */
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Source+Code+Pro:wght@300;400;600&display=swap');
         
         :root {
@@ -425,8 +426,8 @@
         
         <div id="submit-section">
             <p>Found all flags? Submit your completion!</p>
-            <button id="submit-button" onclick="submitCompletion()">Submit Completion</button>
-            <button id="return-button" onclick="returnToTown()">Return to Town</button>
+            <button id="submit-button">Submit Completion</button>
+            <button id="return-button">Return to Town</button>
         </div>
     </div>
 
@@ -449,9 +450,6 @@
             completed: false,
             decodedMessages: 0
         };
-
-        // Leaderboard data (stored in localStorage)
-        let leaderboard = JSON.parse(localStorage.getItem('cyberForestLeaderboard')) || [];
         
         // File system structure
         const fileSystem = {
@@ -601,7 +599,6 @@
             "/home/user/Documents/Work/Reports/template.doc": "Microsoft Word 2007+",
             "/home/user/Documents/Work/Reports/2024/Q1_Report.pdf": "PDF document",
             "/home/user/Documents/Work/Reports/2024/Q2_Report.pdf": "PDF document",
-            "/home/user/Documents/Work/Reports/
             "/home/user/Documents/Work/Reports/2024/confidential.enc": "AES-256 encrypted data",
             "/home/user/Documents/Personal/notes.txt": "ASCII text",
             "/home/user/Documents/Personal/Taxes/2023.pdf": "PDF document",
@@ -680,6 +677,8 @@
         const commandInput = document.getElementById('command-input');
         const flagsFoundElement = document.getElementById('flags-found');
         const timerElement = document.getElementById('timer');
+        const submitButton = document.getElementById('submit-button');
+        const returnButton = document.getElementById('return-button');
 
         // Initialize the terminal
         function initTerminal() {
@@ -696,6 +695,20 @@
             
             // Start matrix rain animation
             initMatrixRain();
+            
+            // Add event listeners
+            commandInput.addEventListener('keypress', handleCommandInput);
+            submitButton.addEventListener('click', submitCompletion);
+            returnButton.addEventListener('click', returnToTown);
+        }
+
+        // Handle command input
+        function handleCommandInput(e) {
+            if (e.key === 'Enter') {
+                const command = commandInput.value.trim();
+                commandInput.value = '';
+                processCommand(command);
+            }
         }
 
         // Update the command prompt
@@ -709,8 +722,17 @@
             const outputElement = document.createElement('div');
             if (className) {
                 outputElement.className = className;
+            } else {
+                outputElement.className = 'output';
             }
-            outputElement.textContent = text;
+            
+            // Handle HTML content for styled output
+            if (typeof text === 'string' && text.includes('<')) {
+                outputElement.innerHTML = text;
+            } else {
+                outputElement.textContent = text;
+            }
+            
             terminal.appendChild(outputElement);
             terminal.scrollTop = terminal.scrollHeight;
         }
@@ -751,7 +773,7 @@
                     base64Operation(args[1], args[2]);
                     break;
                 case 'xor':
-                    xorOperation(args[1], args[2], args[3]);
+                    xorOperation(args[1], args[2]);
                     break;
                 case 'cipher':
                     cipherOperation(args[1], args[2], args[3]);
@@ -787,16 +809,14 @@
             if (path) {
                 if (path.startsWith('/')) {
                     targetPath = path;
-                } else {
-                    targetPath = state.currentPath + (state.currentPath.endsWith('/') ? '' : '/') + path;
-                }
-                
-                // Handle parent directory
-                if (path === '..') {
+                } else if (path === '..') {
+                    // Handle parent directory
                     const parts = state.currentPath.split('/').filter(part => part);
                     parts.pop();
                     targetPath = '/' + parts.join('/');
                     if (targetPath === '') targetPath = '/';
+                } else {
+                    targetPath = state.currentPath + (state.currentPath.endsWith('/') ? '' : '/') + path;
                 }
             }
             
@@ -840,20 +860,18 @@
             
             if (path.startsWith('/')) {
                 targetPath = path;
+            } else if (path === '..') {
+                // Handle parent directory
+                const parts = state.currentPath.split('/').filter(part => part);
+                parts.pop();
+                targetPath = '/' + parts.join('/');
+                if (targetPath === '') targetPath = '/';
             } else {
                 if (state.currentPath.endsWith('/')) {
                     targetPath = state.currentPath + path;
                 } else {
                     targetPath = state.currentPath + '/' + path;
                 }
-            }
-            
-            // Handle parent directory
-            if (path === '..') {
-                const parts = state.currentPath.split('/').filter(part => part);
-                parts.pop();
-                targetPath = '/' + parts.join('/');
-                if (targetPath === '') targetPath = '/';
             }
             
             // Ensure path ends with slash for directory lookup
@@ -1349,37 +1367,13 @@
         // Submit completion
         function submitCompletion() {
             if (state.flagsFound === 5) {
-                state.endTime = new Date();
-                const timeTaken = new Date(state.endTime - state.startTime);
-                
-                const hours = timeTaken.getUTCHours().toString().padStart(2, '0');
-                const minutes = timeTaken.getUTCMinutes().toString().padStart(2, '0');
-                const seconds = timeTaken.getUTCSeconds().toString().padStart(2, '0');
-                
-                const completionTime = `${hours}:${minutes}:${seconds}`;
-                
-                // Add to leaderboard
-                leaderboard.push({
-                    name: 'Player',
-                    time: completionTime,
-                    date: new Date().toLocaleDateString()
-                });
-                
-                // Sort by time
-                leaderboard.sort((a, b) => {
-                    const aTime = a.time.split(':').reduce((acc, time) => (60 * acc) + +time, 0);
-                    const bTime = b.time.split(':').reduce((acc, time) => (60 * acc) + +time, 0);
-                    return aTime - bTime;
-                });
-                
-                // Keep top 10
-                leaderboard = leaderboard.slice(0, 10);
-                
-                // Save to localStorage
-                localStorage.setItem('cyberForestLeaderboard', JSON.stringify(leaderboard));
-                
-                addOutput('Challenge completed! Your time has been recorded.', 'success');
+                addOutput('Congratulations! You found all 5 flags!', 'success');
+                addOutput('Challenge completed successfully!', 'success');
                 state.completed = true;
+                
+                const townUrl = window.location.origin + "/town.html";
+                // Redirect back to the town with completion parameter for Building 2
+            window.location.href = `${townUrl}?completed=3`;
             } else {
                 addOutput(`You have found ${state.flagsFound} out of 5 flags. Keep searching!`, 'warning');
             }
@@ -1387,18 +1381,12 @@
 
         // Return to town
         function returnToTown() {
-            addOutput('Returning to Cyber Forest Town...', 'success');
-            // In a real implementation, this would redirect to the main town page
+            addOutput('Returning to town...', 'warning');
+            // This would typically redirect to another page
+          sessionStorage.setItem('returningFromChallenge', 'true');
+        const townUrl = window.location.origin + "/town.html";
+        window.location.href = 'town.html';
         }
-
-        // Event listeners
-        commandInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const command = commandInput.value.trim();
-                commandInput.value = '';
-                processCommand(command);
-            }
-        });
 
         // Initialize the terminal when the page loads
         window.onload = initTerminal;
