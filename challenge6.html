@@ -3,75 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Operation: Shadow Protocol | Elite Hackers Showdown</title>
+    <title>Quantum Breach: Tawon Mafia Counter-Operation</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --cyber-black: #0a0a12;
-            --cyber-dark: #12122d;
-            --cyber-blue: #0066ff;
-            --cyber-purple: #8a2be2;
-            --cyber-pink: #ff00c8;
-            --cyber-green: #00ffcc;
-            --cyber-red: #ff3366;
-            --cyber-yellow: #ffcc00;
-            --text-glow: #e9e3db;
+            --primary: #ff2a6d;
+            --secondary: #05d9e8;
+            --accent: #ffcc00;
+            --dark: #0a0a1a;
+            --darker: #050510;
+            --success: #00ff91;
+            --warning: #ffcc00;
+            --danger: #ff2a6d;
+            --info: #0051ff;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Courier New', monospace;
+            font-family: 'Rajdhani', sans-serif;
         }
         
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        
         body {
-            background-color: var(--cyber-black);
-            color: var(--text-glow);
+            background-color: var(--dark);
+            color: #d1d1e8;
             line-height: 1.6;
-            padding: 20px;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(18, 18, 45, 0.7) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(138, 43, 226, 0.3) 0%, transparent 40%);
-            min-height: 100vh;
             overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 42, 109, 0.05) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(5, 217, 232, 0.05) 0%, transparent 25%),
+                linear-gradient(to bottom, rgba(10, 10, 26, 0.9), rgba(5, 5, 16, 0.9)),
+                url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3C/g%3E%3C/svg%3E");
+            padding: 20px;
         }
         
         .cyber-container {
-            max-width: 1400px;
+            max-width: 1800px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
             grid-template-areas:
-                "header header"
-                "briefing targets"
-                "mission mission"
-                "tools tools"
-                "status status"
-                "footer footer";
+                "header header header"
+                "main main side"
+                "tools tools tools"
+                "footer footer footer";
         }
         
-        @media (max-width: 1100px) {
+        @media (max-width: 1200px) {
+            .cyber-container {
+                grid-template-columns: 1fr 1fr;
+                grid-template-areas:
+                    "header header"
+                    "main main"
+                    "side side"
+                    "tools tools"
+                    "footer footer";
+            }
+        }
+        
+        @media (max-width: 768px) {
             .cyber-container {
                 grid-template-columns: 1fr;
                 grid-template-areas:
                     "header"
-                    "briefing"
-                    "targets"
-                    "mission"
+                    "main"
+                    "side"
                     "tools"
-                    "status"
                     "footer";
             }
         }
         
+        header {
+            grid-area: header;
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            background: rgba(20, 10, 30, 0.7);
+            box-shadow: 0 0 30px rgba(255, 42, 109, 0.4);
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(125deg, rgba(255, 42, 109, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary);
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(5, 217, 232, 0.5);
+        }
+        
         .cyber-card {
-            background: rgba(10, 10, 18, 0.9);
-            border: 1px solid var(--cyber-blue);
-            border-radius: 5px;
+            background: rgba(15, 10, 25, 0.8);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
             padding: 25px;
-            box-shadow: 0 0 15px rgba(0, 102, 255, 0.3);
+            box-shadow: 0 0 20px rgba(255, 42, 109, 0.3);
+            margin-bottom: 20px;
             position: relative;
             overflow: hidden;
         }
@@ -83,272 +140,239 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(45deg, rgba(0, 102, 255, 0.1) 0%, transparent 70%);
+            background: linear-gradient(125deg, rgba(255, 42, 109, 0.05) 0%, transparent 70%);
             z-index: -1;
         }
         
-        .header {
-            grid-area: header;
-            text-align: center;
-            padding: 30px 0;
+        .cyber-card h2 {
+            color: var(--secondary);
             margin-bottom: 20px;
-            border-bottom: 2px solid var(--cyber-blue);
-            position: relative;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(5, 217, 232, 0.5);
         }
         
-        .header::after {
-            content: "";
-            position: absolute;
-            bottom: -3px;
-            left: 25%;
-            width: 50%;
-            height: 3px;
-            background: var(--cyber-blue);
-        }
-        
-        h1 {
-            font-size: 3.2rem;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 15px;
-            color: var(--cyber-green);
-            text-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
-            font-weight: 900;
-        }
-        
-        h2 {
-            color: var(--cyber-blue);
-            margin: 25px 0 15px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--cyber-purple);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
+        .cyber-card h2 i {
             font-size: 1.8rem;
         }
         
-        h3 {
-            color: var(--cyber-pink);
-            margin: 20px 0 10px;
-            font-size: 1.4rem;
-        }
-        
-        p {
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-        
-        .subtitle {
-            font-size: 1.6rem;
-            color: var(--cyber-purple);
-            margin-bottom: 25px;
-            text-shadow: 0 0 5px rgba(138, 43, 226, 0.7);
-        }
-        
-        .briefing {
-            grid-area: briefing;
-        }
-        
-        .targets {
-            grid-area: targets;
-        }
-        
-        .mission {
-            grid-area: mission;
-        }
-        
-        .tools {
+        .tools-panel {
             grid-area: tools;
         }
         
-        .status {
-            grid-area: status;
+        .main-panel {
+            grid-area: main;
+        }
+        
+        .side-panel {
+            grid-area: side;
         }
         
         .footer {
             grid-area: footer;
             text-align: center;
-            margin-top: 40px;
-            padding: 30px;
-            border-top: 1px solid var(--cyber-blue);
-            color: var(--cyber-purple);
-            font-size: 1rem;
-        }
-        
-        .badge {
-            display: inline-block;
-            background: var(--cyber-red);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 3px;
+            margin-top: 20px;
+            padding: 20px;
+            border-top: 1px solid var(--primary);
+            color: var(--secondary);
             font-size: 0.9rem;
-            margin: 0 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
         
-        .target-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-        
-        .target-card {
-            background: rgba(18, 18, 45, 0.7);
-            border: 1px solid var(--cyber-pink);
-            border-radius: 5px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .target-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(255, 0, 200, 0.3);
-        }
-        
-        .target-icon {
-            font-size: 3rem;
-            color: var(--cyber-pink);
-            margin-bottom: 15px;
-            text-shadow: 0 0 10px rgba(255, 0, 200, 0.5);
-        }
-        
-        .target-name {
-            font-weight: bold;
-            font-size: 1.3rem;
-            color: var(--cyber-green);
-            margin-bottom: 5px;
-        }
-        
-        .target-desc {
-            color: var(--cyber-purple);
-            font-size: 1rem;
-        }
-        
-        .mission-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-        
-        .mission-card {
-            background: rgba(18, 18, 45, 0.7);
-            border: 1px solid var(--cyber-yellow);
-            border-radius: 5px;
-            padding: 20px;
-            transition: all 0.3s ease;
-        }
-        
-        .mission-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
-        }
-        
-        .mission-icon {
-            font-size: 2.5rem;
-            color: var(--cyber-yellow);
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        
-        .mission-title {
-            font-weight: bold;
-            font-size: 1.3rem;
-            color: var(--cyber-green);
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        
-        .mission-list {
-            list-style-type: none;
+        .quantum-network {
+            background: rgba(10, 5, 20, 0.9);
+            border: 1px solid var(--accent);
+            position: relative;
+            min-height: 500px;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 10, 30, 0.7), rgba(0, 10, 30, 0.7));
+            border-radius: 8px;
             margin-top: 15px;
         }
         
-        .mission-list li {
-            margin-bottom: 10px;
-            padding-left: 25px;
-            position: relative;
-        }
-        
-        .mission-list li::before {
-            content: "🔹";
+        .qnode {
             position: absolute;
-            left: 0;
-            color: var(--cyber-blue);
-        }
-        
-        .tool-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .tool-card {
-            background: rgba(18, 18, 45, 0.7);
-            border: 1px solid var(--cyber-green);
-            border-radius: 5px;
-            padding: 15px;
-            text-align: center;
+            width: 80px;
+            height: 80px;
+            background: rgba(40, 20, 60, 0.8);
+            border: 2px solid var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
             transition: all 0.3s ease;
-        }
-        
-        .tool-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 255, 204, 0.3);
-        }
-        
-        .tool-icon {
-            font-size: 2.5rem;
-            color: var(--cyber-green);
-            margin-bottom: 10px;
-        }
-        
-        .tool-name {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: var(--cyber-blue);
-            margin-bottom: 5px;
-        }
-        
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-        
-        .status-card {
-            background: rgba(18, 18, 45, 0.7);
-            border: 1px solid var(--cyber-red);
-            border-radius: 5px;
-            padding: 20px;
-        }
-        
-        .status-title {
-            font-weight: bold;
-            font-size: 1.3rem;
-            color: var(--cyber-red);
-            margin-bottom: 15px;
+            font-size: 0.9rem;
             text-align: center;
-            text-transform: uppercase;
+            z-index: 2;
+            box-shadow: 0 0 15px rgba(5, 217, 232, 0.5);
         }
         
-        .progress-container {
-            height: 25px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
+        .qnode:hover {
+            background: rgba(60, 30, 90, 0.8);
+            box-shadow: 0 0 20px var(--secondary);
+            transform: scale(1.15);
+        }
+        
+        .qnode::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid var(--secondary);
+            animation: pulse 2s infinite;
+            box-sizing: border-box;
+        }
+        
+        .core-server {
+            background: rgba(100, 30, 30, 0.8);
+            border-color: var(--danger);
+            top: 200px;
+            left: 400px;
+        }
+        
+        .core-server:hover {
+            box-shadow: 0 0 20px var(--danger);
+        }
+        
+        .quantum-router {
+            top: 100px;
+            left: 200px;
+        }
+        
+        .ai-workstation {
+            top: 300px;
+            left: 200px;
+        }
+        
+        .crypto-vault {
+            top: 100px;
+            left: 600px;
+        }
+        
+        .data-farm {
+            top: 300px;
+            left: 600px;
+        }
+        
+        .hint {
+            font-size: 0.9rem;
+            color: var(--secondary);
+            font-style: italic;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .terminal {
+            background: rgba(5, 5, 15, 0.9);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 20px;
+            height: 350px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .prompt {
+            color: var(--success);
+        }
+        
+        .command {
+            color: var(--secondary);
+        }
+        
+        .output {
+            color: #cccccc;
+        }
+        
+        .success {
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        .error {
+            color: var(--danger);
+        }
+        
+        .important {
+            color: var(--warning);
+            font-weight: bold;
+        }
+        
+        .flag {
+            color: var(--warning);
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+        }
+        
+        .input-area {
+            display: flex;
+            margin-top: 15px;
+        }
+        
+        #command-input {
+            flex-grow: 1;
+            background: rgba(10, 15, 30, 0.8);
+            border: 1px solid var(--primary);
+            color: var(--success);
+            padding: 12px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        #execute-btn {
+            background: linear-gradient(to bottom, var(--primary), #cc0066);
+            color: white;
+            border: 1px solid var(--primary);
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        #execute-btn:hover {
+            background: linear-gradient(to bottom, #ff3385, var(--primary));
+            box-shadow: 0 0 15px rgba(255, 42, 109, 0.7);
+        }
+        
+        .progress {
+            margin-top: 20px;
+            background: rgba(15, 10, 25, 0.8);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--primary);
+        }
+        
+        .progress-bar-container {
+            height: 30px;
+            background: rgba(10, 5, 20, 0.8);
+            border-radius: 15px;
             overflow: hidden;
-            margin: 15px 0;
-            border: 1px solid var(--cyber-blue);
+            position: relative;
+            border: 1px solid var(--secondary);
         }
         
         .progress-bar {
             height: 100%;
-            background: linear-gradient(to right, var(--cyber-blue), var(--cyber-purple));
-            border-radius: 10px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 15px;
             width: 0%;
             transition: width 1s ease;
             position: relative;
@@ -380,30 +404,39 @@
         
         .progress-text {
             text-align: center;
-            margin-top: 10px;
-            color: var(--cyber-green);
+            margin-top: 15px;
+            color: var(--secondary);
             font-weight: bold;
+            font-size: 1.1rem;
         }
         
-        .flag-list {
-            list-style-type: none;
+        .hidden {
+            display: none;
         }
         
-        .flag-list li {
-            margin-bottom: 12px;
-            padding-left: 25px;
-            position: relative;
+        .glitch {
+            animation: glitch 1s linear infinite;
         }
         
-        .flag-list li::before {
-            content: "🏴";
-            position: absolute;
-            left: 0;
-            color: var(--cyber-yellow);
+        @keyframes glitch {
+            0% { text-shadow: 2px 2px 0px var(--primary), -2px -2px 0px var(--secondary); }
+            50% { text-shadow: -2px 2px 0px var(--primary), 2px -2px 0px var(--secondary); }
+            100% { text-shadow: 2px -2px 0px var(--primary), -2px 2px 0px var(--secondary); }
         }
         
-        .glow {
-            text-shadow: 0 0 5px currentColor;
+        @keyframes pulse {
+            0% { 
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            70% { 
+                transform: scale(1.5);
+                opacity: 0;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 0;
+            }
         }
         
         @keyframes move {
@@ -415,59 +448,93 @@
             }
         }
         
-        .cyber-button {
-            background: linear-gradient(to bottom, var(--cyber-blue), var(--cyber-purple));
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 10px 0;
-            transition: all 0.3s ease;
+        .toolbox {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
         
-        .cyber-button:hover {
-            background: linear-gradient(to bottom, var(--cyber-purple), var(--cyber-blue));
-            box-shadow: 0 0 15px rgba(0, 102, 255, 0.7);
-            transform: translateY(-2px);
-        }
-        
-        .terminal {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid var(--cyber-green);
-            border-radius: 5px;
+        .tool {
+            background: rgba(20, 15, 35, 0.8);
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
             padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-align: center;
+        }
+        
+        .tool:hover {
+            background: rgba(30, 20, 50, 0.8);
+            box-shadow: 0 0 15px var(--secondary);
+            transform: translateY(-3px);
+        }
+        
+        .tool i {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+        
+        .evidence-list {
+            background: rgba(25, 15, 40, 0.8);
+            border: 1px solid var(--info);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .evidence-list h3 {
+            color: var(--info);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .decrypt-area {
+            display: flex;
+            margin-top: 20px;
+        }
+        
+        #decrypt-input {
+            flex-grow: 1;
+            background: rgba(10, 15, 30, 0.8);
+            border: 1px solid var(--primary);
+            color: var(--success);
+            padding: 12px 15px;
             font-family: 'Courier New', monospace;
-            height: 200px;
-            overflow-y: auto;
-            margin: 20px 0;
+            font-size: 16px;
+            border-radius: 4px 0 0 4px;
         }
         
-        .terminal-line {
-            margin-bottom: 5px;
-            white-space: pre-wrap;
+        .decrypt-btn {
+            background: linear-gradient(to bottom, var(--info), #0040cc);
+            color: white;
+            border: 1px solid var(--info);
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            transition: all 0.3s ease;
+            font-weight: bold;
         }
         
-        .prompt {
-            color: var(--cyber-green);
-        }
-        
-        .command {
-            color: var(--cyber-blue);
-        }
-        
-        .output {
-            color: var(--text-glow);
+        .decrypt-btn:hover {
+            background: linear-gradient(to bottom, #1a66ff, var(--info));
+            box-shadow: 0 0 15px rgba(0, 81, 255, 0.7);
         }
         
         .scan-line {
             position: absolute;
             height: 2px;
             width: 100%;
-            background: linear-gradient(to right, transparent, var(--cyber-green), transparent);
+            background: linear-gradient(to right, transparent, var(--secondary), transparent);
             top: 0;
             animation: scan 3s linear infinite;
             z-index: 1;
@@ -477,222 +544,1094 @@
             0% { top: 0; }
             100% { top: 100%; }
         }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px 25px;
+            background: rgba(20, 15, 35, 0.95);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 42, 109, 0.4);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .connection {
+            position: absolute;
+            background: rgba(5, 217, 232, 0.3);
+            z-index: 1;
+            transform-origin: 0 0;
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            margin-right: 8px;
+            background: rgba(20, 15, 35, 0.5);
+            font-weight: 600;
+        }
+        
+        .tab.active {
+            background: rgba(30, 20, 50, 0.8);
+            border-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .file-system {
+            height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            background: rgba(10, 5, 20, 0.8);
+            margin-bottom: 20px;
+        }
+        
+        .file-item {
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 42, 109, 0.3);
+        }
+        
+        .file-item:hover {
+            background: rgba(30, 20, 50, 0.5);
+        }
+        
+        .code-view {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            background: rgba(10, 5, 20, 0.8);
+            font-family: 'Courier New', monospace;
+            white-space: pre;
+            margin-bottom: 20px;
+        }
+        
+        .crypto-challenge {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            background: rgba(40, 35, 15, 0.8);
+        }
+        
+        .hacking-minigame {
+            height: 250px;
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            background: rgba(35, 20, 40, 0.8);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .firewall {
+            position: absolute;
+            width: 25px;
+            height: 120px;
+            background: linear-gradient(to bottom, var(--danger), #ff0066);
+            top: 60px;
+            left: 180px;
+            box-shadow: 0 0 15px var(--danger);
+        }
+        
+        .packet {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--success);
+            border-radius: 50%;
+            top: 110px;
+            left: 30px;
+        }
+        
+        .control-btn {
+            padding: 10px 20px;
+            background: rgba(25, 20, 45, 0.8);
+            border: 1px solid var(--secondary);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(35, 25, 60, 0.8);
+            box-shadow: 0 0 15px var(--secondary);
+        }
+        
+        .manual-search {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            background: rgba(15, 10, 25, 0.8);
+        }
+        
+        .search-results {
+            height: 180px;
+            overflow-y: auto;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            background: rgba(10, 5, 20, 0.8);
+            margin-top: 15px;
+        }
+        
+        .submit-section {
+            margin-top: 30px;
+            text-align: center;
+            padding: 30px;
+            background: rgba(20, 15, 35, 0.8);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            grid-column: 1 / -1;
+        }
+        
+        .submit-button {
+            background: linear-gradient(to bottom, var(--success), #00cc73);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 15px 10px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-button:hover {
+            box-shadow: 0 0 20px var(--success);
+            transform: translateY(-3px);
+        }
+        
+        .return-button {
+            background: linear-gradient(to bottom, var(--info), #0040cc);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 15px 10px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .return-button:hover {
+            box-shadow: 0 0 20px var(--info);
+            transform: translateY(-3px);
+        }
+        
+        .completion-message {
+            color: var(--success);
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .challenge-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .challenge-node {
+            background: rgba(25, 20, 40, 0.8);
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .challenge-node:hover {
+            background: rgba(35, 25, 55, 0.8);
+            box-shadow: 0 0 15px var(--secondary);
+            transform: translateY(-3px);
+        }
+        
+        .challenge-node.completed {
+            border-color: var(--success);
+            background: rgba(20, 40, 25, 0.8);
+        }
+        
+        .challenge-node.locked {
+            border-color: var(--danger);
+            background: rgba(40, 20, 25, 0.8);
+            cursor: not-allowed;
+        }
+        
+        .quantum-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .quantum-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--secondary);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--secondary);
+            animation: quantumFloat 8s infinite linear;
+        }
+        
+        @keyframes quantumFloat {
+            0% {
+                transform: translate(0, 0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(100px, 100px);
+                opacity: 0;
+            }
+        }
+        
+        .countdown {
+            font-size: 1.5rem;
+            color: var(--danger);
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(255, 42, 109, 0.7);
+        }
     </style>
 </head>
 <body>
     <div class="cyber-container">
-        <header class="header">
-            <h1>OPERATION: SHADOW PROTOCOL</h1>
-            <p class="subtitle">Elite Hackers Showdown - Cyber Warfare CTF Challenge</p>
+        <header>
+            <h1 class="glitch">QUANTUM BREACH: TAWON MAFIA</h1>
+            <p class="subtitle">Counter-Hack Operation: Recover Classified Banking Documents</p>
             <div class="scan-line"></div>
+            <div class="countdown" id="countdown">TIME: 59:59</div>
         </header>
         
-        <div class="cyber-card briefing">
-            <h2><i class="fas fa-file-alt"></i> MISSION BRIEFING</h2>
-            <p>The criminal organization known as <span class="glow" style="color: var(--cyber-red);">"Tawon Mafia"</span> has successfully breached the Global Financial Network and stolen classified banking documents from the World Secure Bank.</p>
-            <p>Your elite cyber team has been activated to counter-hack the Tawon network, recover the stolen documents, and expose their operation.</p>
-            <p>Intelligence suggests Tawon Mafia employs <span class="glow" style="color: var(--cyber-pink);">quantum encryption</span>, <span class="color: var(--cyber-yellow);">AI-powered defense systems</span>, and <span class="glow" style="color: var(--cyber-red);">zero-day exploits</span> to protect their infrastructure.</p>
+        <div class="cyber-card main-panel">
+            <h2><i class="fas fa-brain"></i> Quantum AI Defense Network</h2>
+            <p>Infiltrate Tawon Mafia's quantum-protected infrastructure. Each node presents unique challenges.</p>
             
-            <div class="terminal">
-                <div class="terminal-line">
-                    <span class="prompt">secure://command$></span>
-                    <span class="output">Initializing Shadow Protocol v2.7.4</span>
+            <div class="quantum-network">
+                <div class="qnode core-server" title="Core Server - Quantum Encryption & AI Defense">
+                    <i class="fas fa-server"></i>
+                    <span>Core Server</span>
                 </div>
-                <div class="terminal-line">
-                    <span class="prompt">secure://command$></span>
-                    <span class="output">Connecting to Cyber Command Center... Connected</span>
+                <div class="qnode quantum-router" title="Quantum Router - Multi-dimensional Routing">
+                    <i class="fas fa-route"></i>
+                    <span>Quantum Router</span>
                 </div>
-                <div class="terminal-line">
-                    <span class="prompt">secure://command$></span>
-                    <span class="output">Downloading target dossier... Complete</span>
+                <div class="qnode ai-workstation" title="AI Workstation - Neural Network Protection">
+                    <i class="fas fa-robot"></i>
+                    <span>AI Workstation</span>
                 </div>
-                <div class="terminal-line">
-                    <span class="prompt">secure://command$></span>
-                    <span class="output">Mission critical: Recover banking documents</span>
+                <div class="qnode crypto-vault" title="Crypto Vault - Blockchain-Encrypted Documents">
+                    <i class="fas fa-coins"></i>
+                    <span>Crypto Vault</span>
                 </div>
-                <div class="terminal-line">
-                    <span class="prompt">secure://command$></span>
-                    <span class="output">Engage when ready, agent.</span>
+                <div class="qnode data-farm" title="Data Farm - Distributed Storage Cluster">
+                    <i class="fas fa-database"></i>
+                    <span>Data Farm</span>
                 </div>
+                <div class="scan-line"></div>
+                <div class="quantum-animation" id="quantum-animation"></div>
             </div>
             
-            <button class="cyber-button">ACCEPT MISSION</button>
-        </div>
-        
-        <div class="cyber-card targets">
-            <h2><i class="fas fa-bullseye"></i> HIGH-VALUE TARGETS</h2>
-            <p>Identify and infiltrate these key Tawon Mafia operatives:</p>
-            
-            <div class="target-grid">
-                <div class="target-card">
-                    <div class="target-icon"><i class="fas fa-brain"></i></div>
-                    <div class="target-name">PHANTOM</div>
-                    <div class="target-desc">Lead Strategist & Exploit Developer</div>
-                    <div class="badge">Threat Level: EXTREME</div>
+            <div class="challenge-grid">
+                <div class="challenge-node" onclick="startChallenge(1)">
+                    <h3>Challenge 1</h3>
+                    <p>Quantum Key Breaking</p>
                 </div>
-                
-                <div class="target-card">
-                    <div class="target-icon"><i class="fas fa-shield-alt"></i></div>
-                    <div class="target-name">SENTINEL</div>
-                    <div class="target-desc">Network Defense Specialist</div>
-                    <div class="badge">Threat Level: HIGH</div>
+                <div class="challenge-node locked" onclick="startChallenge(2)">
+                    <h3>Challenge 2</h3>
+                    <p>AI Pattern Recognition</p>
                 </div>
-                
-                <div class="target-card">
-                    <div class="target-icon"><i class="fas fa-bitcoin"></i></div>
-                    <div class="target-name">CRYPTO</div>
-                    <div class="target-desc">Financial Operations & Money Laundering</div>
-                    <div class="badge">Threat Level: HIGH</div>
+                <div class="challenge-node locked" onclick="startChallenge(3)">
+                    <h3>Challenge 3</h3>
+                    <p>Neural Firewall Bypass</p>
                 </div>
-                
-                <div class="target-card">
-                    <div class="target-icon"><i class="fas fa-server"></i></div>
-                    <div class="target-name">GHOST</div>
-                    <div class="target-desc">Infrastructure & Dark Web Administrator</div>
-                    <div class="badge">Threat Level: SEVERE</div>
+                <div class="challenge-node locked" onclick="startChallenge(4)">
+                    <h3>Challenge 4</h3>
+                    <p>Zero-Day Exploit</p>
                 </div>
-            </div>
-        </div>
-        
-        <div class="cyber-card mission">
-            <h2><i class="fas fa-tasks"></i> MISSION OBJECTIVES</h2>
-            <p>Complete these critical tasks to neutralize the Tawon threat:</p>
-            
-            <div class="mission-grid">
-                <div class="mission-card">
-                    <div class="mission-icon"><i class="fas fa-file-contract"></i></div>
-                    <div class="mission-title">DOCUMENT RECOVERY</div>
-                    <ul class="mission-list">
-                        <li>Locate encrypted banking documents</li>
-                        <li>Bypass quantum encryption</li>
-                        <li>Extract without triggering alarms</li>
-                    </ul>
+                <div class="challenge-node locked" onclick="startChallenge(5)">
+                    <h3>Challenge 5</h3>
+                    <p>Blockchain Decryption</p>
                 </div>
-                
-                <div class="mission-card">
-                    <div class="mission-icon"><i class="fas fa-network-wired"></i></div>
-                    <div class="mission-title">NETWORK INFILTRATION</div>
-                    <ul class="mission-list">
-                        <li>Penetrate Tawon's dark web infrastructure</li>
-                        <li>Map their entire network topology</li>
-                        <li>Identify all hidden servers</li>
-                    </ul>
+                <div class="challenge-node locked" onclick="startChallenge(6)">
+                    <h3>Challenge 6</h3>
+                    <p>Quantum Entanglement</p>
                 </div>
-                
-                <div class="mission-card">
-                    <div class="mission-icon"><i class="fas fa-user-secret"></i></div>
-                    <div class="mission-title">IDENTITY EXPOSURE</div>
-                    <ul class="mission-list">
-                        <li>Uncover real identities of Tawon members</li>
-                        <li>Trace financial transactions</li>
-                        <li>Gather evidence for prosecution</li>
-                    </ul>
+                <div class="challenge-node locked" onclick="startChallenge(7)">
+                    <h3>Challenge 7</h3>
+                    <p>Data Exfiltration</p>
+                </div>
+                <div class="challenge-node locked" onclick="startChallenge(8)">
+                    <h3>Challenge 8</h3>
+                    <p>AI Countermeasure</p>
+                </div>
+                <div class="challenge-node locked" onclick="startChallenge(9)">
+                    <h3>Challenge 9</h3>
+                    <p>Mainframe Infiltration</p>
+                </div>
+                <div class="challenge-node locked" onclick="startChallenge(10)">
+                    <h3>Challenge 10</h3>
+                    <p>Final Document Recovery</p>
                 </div>
             </div>
         </div>
         
-        <div class="cyber-card tools">
-            <h2><i class="fas fa-toolbox"></i> CYBER WARFARE TOOLS</h2>
-            <p>Advanced tools at your disposal for this operation:</p>
+        <div class="cyber-card side-panel">
+            <h2><i class="fas fa-terminal"></i> Quantum Terminal</h2>
             
-            <div class="tool-grid">
-                <div class="tool-card">
-                    <div class="tool-icon"><i class="fas fa-terminal"></i></div>
-                    <div class="tool-name">QUANTUM DECRYPTOR</div>
-                    <div class="target-desc">Breach advanced encryption systems</div>
+            <div class="terminal" id="terminal">
+                <div class="terminal-line">
+                    <span class="prompt">quantum@tawon-op:~#</span>
+                    <span class="output">Initializing Quantum Breach Toolkit</span>
                 </div>
-                
-                <div class="tool-card">
-                    <div class="tool-icon"><i class="fas fa-satellite"></i></div>
-                    <div class="tool-name">NEURAL SCANNER</div>
-                    <div class="target-desc">AI-powered vulnerability detection</div>
+                <div class="terminal-line">
+                    <span class="prompt">quantum@tawon-op:~#</span>
+                    <span class="output">Loading modules: qcrypto, aipenetration, zeroday, blockchain</span>
                 </div>
-                
-                <div class="tool-card">
-                    <div class="tool-icon"><i class="fas fa-fingerprint"></i></div>
-                    <div class="tool-name">IDENTITY MATRIX</div>
-                    <div class="target-desc">Digital footprint analysis system</div>
+                <div class="terminal-line">
+                    <span class="prompt">quantum@tawon-op:~#</span>
+                    <span class="output">Tawon Mafia AI detected! Time is critical!</span>
                 </div>
-                
-                <div class="tool-card">
-                    <div class="tool-icon"><i class="fas fa-biohazard"></i></div>
-                    <div class="tool-name">ZERO-DAY EXPLOIT KIT</div>
-                    <div class="target-desc">Custom vulnerabilities database</div>
+                <div class="terminal-line">
+                    <span class="prompt">quantum@tawon-op:~#</span>
+                    <span class="output">Type 'help' for available commands</span>
                 </div>
-                
-                <div class="tool-card">
-                    <div class="tool-icon"><i class="fas fa-database"></i></div>
-                    <div class="tool-name">DARK WEB CRAWLER</div>
-                    <div class="target-desc">Automated dark net intelligence gathering</div>
+                <div class="terminal-line">
+                    <span class="prompt">quantum@tawon-op:~#</span>
                 </div>
-                
-                <div class="tool-card">
-                    <div class="tool-icon"><i class="fas fa-bitcoin"></i></div>
-                    <div class="tool-name">BLOCKCHAIN FORENSICS</div>
-                    <div class="target-desc">Cryptocurrency transaction tracing</div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="command-input" placeholder="Type quantum command here..." autofocus>
+                <button id="execute-btn" onclick="executeCommand()">EXECUTE</button>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
                 </div>
+                <div class="progress-text" id="progress-text">Infiltration Progress: 0%</div>
             </div>
         </div>
         
-        <div class="cyber-card status">
-            <h2><i class="fas fa-chart-line"></i> MISSION STATUS</h2>
+        <div class="cyber-card tools-panel">
+            <h2><i class="fas fa-tools"></i> Quantum Tools</h2>
             
-            <div class="status-grid">
-                <div class="status-card">
-                    <div class="status-title">OVERALL PROGRESS</div>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: 15%"></div>
+            <div class="tab-container">
+                <div class="tab active" onclick="switchTab('qcrypto-tab')">Quantum Crypto</div>
+                <div class="tab" onclick="switchTab('aipenetration-tab')">AI Penetration</div>
+                <div class="tab" onclick="switchTab('forensics-tab')">Quantum Forensics</div>
+            </div>
+            
+            <div id="qcrypto-tab" class="tab-content active">
+                <div class="toolbox">
+                    <div class="tool" onclick="executeTool('shor-algorithm')">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>Shor's Algorithm</span>
                     </div>
-                    <div class="progress-text">Operation Status: INITIALIZED</div>
+                    <div class="tool" onclick="executeTool('quantum-keysearch')">
+                        <i class="fas fa-key"></i>
+                        <span>Quantum Key Search</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('entanglement-crypto')">
+                        <i class="fas fa-link"></i>
+                        <span>Entanglement Crypto</span>
+                    </div>
                 </div>
                 
-                <div class="status-card">
-                    <div class="status-title">FLAGS CAPTURED</div>
-                    <ul class="flag-list">
-                        <li>CTF{initial_backdoor_established} - <span class="badge">COMPLETE</span></li>
-                        <li>CTF{quantum_encryption_bypassed} - <span class="badge">PENDING</span></li>
-                        <li>CTF{banking_documents_recovered} - <span class="badge">PENDING</span></li>
-                        <li>CTF{tawon_network_mapped} - <span class="badge">PENDING</span></li>
-                        <li>CTF{identities_exposed} - <span class="badge">PENDING</span></li>
-                        <li>CTF{mission_success} - <span class="badge">PENDING</span></li>
-                    </ul>
+                <div class="crypto-challenge">
+                    <h3><i class="fas fa-lock"></i> Quantum Encryption Challenge</h3>
+                    <p>Ciphertext: QkVHSU4gUVBJRiBQUk9URUNURUQgUEFSVApTQUdFIDEuMC4wCkVORCBRUElGIFBST1RFQ1RFRCBQQVJU</p>
+                    <p>Hint: The key is derived from prime factorization of 1234567890123456789012345678901234567890</p>
+                    <div class="input-area">
+                        <input type="text" id="quantum-key" placeholder="Enter quantum decryption key">
+                        <button class="control-btn" onclick="attemptQuantumDecryption()">Decrypt</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="aipenetration-tab" class="tab-content">
+                <div class="toolbox">
+                    <div class="tool" onclick="executeTool('adversarial-attack')">
+                        <i class="fas fa-brain"></i>
+                        <span>Adversarial Attack</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('neural-evolution')">
+                        <i class="fas fa-dna"></i>
+                        <span>Neural Evolution</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('model-poisoning')">
+                        <i class="fas fa-skull-crossbones"></i>
+                        <span>Model Poisoning</span>
+                    </div>
+                </div>
+                
+                <div class="manual-search">
+                    <h3><i class="fas fa-search"></i> AI Pattern Recognition</h3>
+                    <p>Upload an adversarial image to fool the AI defense system:</p>
+                    <div class="input-area">
+                        <input type="file" id="ai-upload">
+                        <button class="control-btn" onclick="analyzeAI()">Analyze</button>
+                    </div>
+                    <div class="search-results" id="ai-results">
+                        <!-- Results will appear here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div id="forensics-tab" class="tab-content">
+                <div class="toolbox">
+                    <div class="tool" onclick="executeTool('quantum-memory')">
+                        <i class="fas fa-memory"></i>
+                        <span>Quantum Memory Analysis</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('temporal-reconstruction')">
+                        <i class="fas fa-clock"></i>
+                        <span>Temporal Reconstruction</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('entanglement-tracing')">
+                        <i class="fas fa-satellite-dish"></i>
+                        <span>Entanglement Tracing</span>
+                    </div>
+                </div>
+                
+                <div class="file-system">
+                    <div class="file-item" onclick="openFile('bank-documents')">
+                        <i class="fas fa-file-contract"></i>
+                        <span>bank_documents.qenc (Quantum Encrypted)</span>
+                    </div>
+                    <div class="file-item" onclick="openFile('transaction-logs')">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>transaction_logs.qbf (Quantum Blockchain Format)</span>
+                    </div>
+                    <div class="file-item" onclick="openFile('ai-core')">
+                        <i class="fas fa-file-code"></i>
+                        <span>ai_core.neural (Neural Network Weights)</span>
+                    </div>
+                    <div class="file-item" onclick="openFile('quantum-keys')">
+                        <i class="fas fa-key"></i>
+                        <span>quantum_keys.keyring (Entangled Key System)</span>
+                    </div>
                 </div>
             </div>
         </div>
         
         <div class="footer">
-            <p>ELITE CYBER OPS COMMAND | TOP SECRET // NOFORN</p>
-            <p>This is a simulation for educational purposes only. All scenarios are fictional.</p>
+            <p>QUANTUM COUNTER-HACK OPERATION | LEVEL 6 CTF CHALLENGE | TIME CRITICAL MISSION</p>
+            <p>This is a simulation for educational purposes only. All challenges are fictional.</p>
+        </div>
+        
+        <div class="submit-section">
+            <p>Recovered the banking documents? Submit your success!</p>
+            <button class="submit-button" onclick="submitCompletion()">Mission Complete</button>
+            <button class="return-button" onclick="returnToTown()">Emergency Exit</button>
+            <div id="completion-message" class="completion-message"></div>
         </div>
     </div>
 
+    <div class="notification" id="notification">
+        <span id="notification-text"></span>
+    </div>
+
     <script>
-        // Simple animation for progress bars
-        document.addEventListener('DOMContentLoaded', function() {
-            const progressBars = document.querySelectorAll('.progress-bar');
-            progressBars.forEach(bar => {
-                const width = bar.style.width;
-                bar.style.width = '0';
-                setTimeout(() => {
-                    bar.style.width = width;
-                }, 500);
+        // Initialize variables
+        let progress = 0;
+        let flagsFound = [];
+        let challengesCompleted = [];
+        let commandHistory = [];
+        let historyIndex = -1;
+        let currentTab = 'qcrypto-tab';
+        let timeLeft = 59 * 60; // 59 minutes in seconds
+        
+        // Define all 10 CTF flags
+        const allFlags = [
+            'CTF{quantum_key_cracked}',
+            'CTF{ai_pattern_recognized}',
+            'CTF{neural_firewall_bypassed}',
+            'CTF{zero_day_exploited}',
+            'CTF{blockchain_decrypted}',
+            'CTF{quantum_entanglement_hacked}',
+            'CTF{data_exfiltrated}',
+            'CTF{ai_countermeasure_deployed}',
+            'CTF{mainframe_infiltrated}',
+            'CTF{banking_documents_recovered}'
+        ];
+        
+        // Initialize terminal
+        const terminal = document.getElementById('terminal');
+        const commandInput = document.getElementById('command-input');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
+        const completionMessage = document.getElementById('completion-message');
+        const countdownElement = document.getElementById('countdown');
+        
+        // Add event listener for Enter key
+        commandInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                executeCommand();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                navigateHistory(-1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                navigateHistory(1);
+            }
+        });
+        
+        function navigateHistory(direction) {
+            if (commandHistory.length === 0) return;
+            
+            historyIndex += direction;
+            
+            if (historyIndex < 0) historyIndex = 0;
+            if (historyIndex >= commandHistory.length) historyIndex = commandHistory.length - 1;
+            
+            commandInput.value = commandHistory[historyIndex];
+        }
+        
+        function executeCommand() {
+            const command = commandInput.value.trim();
+            if (!command) return;
+            
+            // Add to history
+            commandHistory.push(command);
+            historyIndex = commandHistory.length;
+            
+            // Display command
+            addTerminalLine(`<span class="prompt">quantum@tawon-op:~#</span> <span class="command">${command}</span>`);
+            
+            // Process command
+            processCommand(command);
+            
+            // Clear input
+            commandInput.value = '';
+            commandInput.focus();
+        }
+        
+        function processCommand(cmd) {
+            const command = cmd.toLowerCase();
+            
+            if (command === 'help') {
+                showHelp();
+            } else if (command === 'clear') {
+                clearTerminal();
+            } else if (command === 'exit') {
+                addTerminalLine('<span class="output">Terminating quantum connection...</span>');
+            } else if (command === 'ls' || command === 'dir') {
+                addTerminalLine('<span class="output">quantum_tools/  banking_files/  ai_models/  network/  crypto/  exploits/</span>');
+            } else if (command === 'whoami') {
+                addTerminalLine('<span class="output">quantum-infiltration-agent</span>');
+            } else if (command === 'pwd') {
+                addTerminalLine('<span class="output">/quantum/tawon-mafia/operation</span>');
+            } else if (command.includes('scan') || command.includes('nmap')) {
+                quantumScan(command);
+            } else if (command.includes('decrypt') || command.includes('crack')) {
+                quantumDecrypt(command);
+            } else if (command.includes('analyze') || command.includes('forensic')) {
+                quantumForensics(command);
+            } else if (command.includes('exploit') || command.includes('vulnerability')) {
+                quantumExploit(command);
+            } else if (command.includes('connect') || command.includes('ssh')) {
+                quantumConnect(command);
+            } else if (command === 'show flags') {
+                showFlags();
+            } else if (command === 'show progress') {
+                showProgress();
+            } else if (command === 'status') {
+                showStatus();
+            } else {
+                addTerminalLine(`<span class="error">Command not recognized: ${cmd}. Type 'help' for available commands.</span>`);
+            }
+        }
+        
+        function quantumScan(cmd) {
+            addTerminalLine('<span class="output">Initializing quantum network scan...</span>');
+            
+            setTimeout(() => {
+                addTerminalLine('<span class="output">Detecting quantum entanglement signatures...</span>');
+                addTerminalLine('<span class="output">Discovered 5 quantum-protected nodes</span>');
+                addTerminalLine('<span class="output">AI defense system detected - proceed with caution</span>');
+                addTerminalLine('<span class="output">Quantum router found at superposition state 7.3</span>');
+                
+                if (!flagsFound.includes('CTF{quantum_key_cracked}')) {
+                    flagsFound.push('CTF{quantum_key_cracked}');
+                    addTerminalLine('<span class="important">Flag 1: CTF{quantum_key_cracked}</span>');
+                    showNotification('Quantum Network Mapped - Vulnerabilities Located');
+                    updateProgress(10);
+                }
+            }, 3000);
+        }
+        
+        function quantumDecrypt(cmd) {
+            addTerminalLine('<span class="output">Initializing quantum decryption protocol...</span>');
+            
+            setTimeout(() => {
+                addTerminalLine('<span class="output">Calculating prime factors with Shor\'s algorithm...</span>');
+                addTerminalLine('<span class="output">Entangling qubits for parallel processing...</span>');
+                addTerminalLine('<span class="output">Progress: 23%... Quantum decryption ongoing</span>');
+                
+                if (cmd.includes('bank')) {
+                    addTerminalLine('<span class="output">Bank documents encryption: 2048-bit quantum RSA</span>');
+                    addTerminalLine('<span class="output">Hint: The key requires factorization of a large semiprime</span>');
+                }
+            }, 2000);
+        }
+        
+        function quantumForensics(cmd) {
+            addTerminalLine('<span class="output">Starting quantum forensic analysis...</span>');
+            
+            setTimeout(() => {
+                addTerminalLine('<span class="output">Analyzing quantum memory state...</span>');
+                addTerminalLine('<span class="output">Recovering collapsed wavefunctions...</span>');
+                addTerminalLine('<span class="output">Found hidden AI model parameters</span>');
+                
+                if (!flagsFound.includes('CTF{ai_pattern_recognized}')) {
+                    flagsFound.push('CTF{ai_pattern_recognized}');
+                    addTerminalLine('<span class="important">Flag 2: CTF{ai_pattern_recognized}</span>');
+                    showNotification('AI Pattern Recognized - Model Parameters Extracted');
+                    updateProgress(10);
+                }
+            }, 2500);
+        }
+        
+        function quantumExploit(cmd) {
+            addTerminalLine('<span class="output">Searching for quantum exploits...</span>');
+            
+            setTimeout(() => {
+                addTerminalLine('<span class="output">Testing quantum buffer overflow (CVE-2023-45172)...</span>');
+                addTerminalLine('<span class="output">Vulnerability confirmed! Deploying quantum payload...</span>');
+                addTerminalLine('<span class="output">Payload entangled... Awaiting state collapse...</span>');
+                
+                if (!flagsFound.includes('CTF{zero_day_exploited}')) {
+                    flagsFound.push('CTF{zero_day_exploited}');
+                    addTerminalLine('<span class="important">Flag 4: CTF{zero_day_exploited}</span>');
+                    showNotification('Zero-Day Exploit Successful - Quantum Access Gained');
+                    updateProgress(10);
+                }
+            }, 3000);
+        }
+        
+        function quantumConnect(cmd) {
+            addTerminalLine('<span class="output">Attempting quantum entanglement connection...</span>');
+            
+            setTimeout(() => {
+                if (cmd.includes('core')) {
+                    addTerminalLine('<span class="output">Connected to Core Server via quantum tunnel</span>');
+                    addTerminalLine('<span class="output">Quantum OS 7.2.1 (Tawon Mafia Custom)</span>');
+                    addTerminalLine('<span class="output">Last login: Today 18:34:21 from entangled particle 7B-3C</span>');
+                    addTerminalLine('<span class="prompt">root@quantum-core:~#</span>');
+                    
+                    if (!flagsFound.includes('CTF{mainframe_infiltrated}')) {
+                        flagsFound.push('CTF{mainframe_infiltrated}');
+                        addTerminalLine('<span class="important">Flag 9: CTF{mainframe_infiltrated}</span>');
+                        showNotification('Main Server Breached - Quantum Access Gained');
+                        updateProgress(10);
+                    }
+                } else {
+                    addTerminalLine('<span class="error">Connection failed. Check quantum signature and entanglement state.</span>');
+                }
+            }, 2000);
+        }
+        
+        function executeTool(tool) {
+            addTerminalLine(`<span class="prompt">quantum@tawon-op:~#</span> <span class="command">${tool.replace('-', ' ')}</span>`);
+            
+            switch(tool) {
+                case 'shor-algorithm':
+                    addTerminalLine('<span class="output">Running Shor\'s algorithm on quantum processor...</span>');
+                    setTimeout(() => {
+                        addTerminalLine('<span class="output">Prime factors calculated: 1234567890123456789012345678901234567890 = 2 × 3 × 3 × 5 × 3607 × 3803 × 52579 × 9876543211</span>');
+                        addTerminalLine('<span class="output">Quantum key derived successfully</span>');
+                    }, 2000);
+                    break;
+                    
+                case 'adversarial-attack':
+                    addTerminalLine('<span class="output">Generating adversarial input for AI defense system...</span>');
+                    setTimeout(() => {
+                        addTerminalLine('<span class="output">AI pattern recognition bypassed</span>');
+                        addTerminalLine('<span class="output">Neural network confidence dropped to 12%</span>');
+                    }, 2000);
+                    break;
+                    
+                case 'quantum-memory':
+                    addTerminalLine('<span class="output">Analyzing quantum memory state...</span>');
+                    setTimeout(() => {
+                        addTerminalLine('<span class="output">Recovered partial banking document fragments</span>');
+                        addTerminalLine('<span class="output">Found encryption key in superposition state</span>');
+                    }, 2000);
+                    break;
+            }
+        }
+        
+        function investigateNode(nodeType) {
+            addTerminalLine(`<span class="prompt">quantum@tawon-op:~#</span> <span class="command">investigate ${nodeType}</span>`);
+            
+            if (!challengesCompleted.includes(nodeType)) {
+                challengesCompleted.push(nodeType);
+                
+                switch(nodeType) {
+                    case 'core-server':
+                        addTerminalLine('<span class="output">Investigating quantum core server...</span>');
+                        setTimeout(() => {
+                            addTerminalLine('<span class="output">Server OS: Quantum OS 7.2.1</span>');
+                            addTerminalLine('<span class="output">Quantum ports: 22, 80, 443, 2077</span>');
+                            addTerminalLine('<span class="output">Vulnerability: Quantum state decoherence</span>');
+                        }, 2000);
+                        break;
+                        
+                    case 'quantum-router':
+                        addTerminalLine('<span class="output">Investigating quantum router...</span>');
+                        setTimeout(() => {
+                            addTerminalLine('<span class="output">Router model: Tawon Quantum Router X7</span>');
+                            addTerminalLine('<span class="output">Firmware version: 7.2.1 (quantum protected)</span>');
+                            addTerminalLine('<span class="output">Vulnerability: Entanglement hijacking possible</span>');
+                        }, 2000);
+                        break;
+                        
+                    case 'ai-workstation':
+                        addTerminalLine('<span class="output">Investigating AI workstation...</span>');
+                        setTimeout(() => {
+                            addTerminalLine('<span class="output">AI OS: NeuralOS 3.14</span>');
+                            addTerminalLine('<span class="output">AI model: GPT-7 (Tawon Mafia Custom)</span>');
+                            addTerminalLine('<span class="output">Found adversarial vulnerability in vision system</span>');
+                        }, 2000);
+                        break;
+                        
+                    case 'crypto-vault':
+                        addTerminalLine('<span class="output">Investigating quantum crypto vault...</span>');
+                        setTimeout(() => {
+                            addTerminalLine('<span class="output">Blockchain: TawonChain 3.0</span>');
+                            addTerminalLine('<span class="output">Encryption: 2048-bit quantum RSA</span>');
+                            addTerminalLine('<span class="output">Vulnerability: Shor\'s algorithm applicable</span>');
+                            
+                            if (!flagsFound.includes('CTF{blockchain_decrypted}')) {
+                                flagsFound.push('CTF{blockchain_decrypted}');
+                                addTerminalLine('<span class="important">Flag 5: CTF{blockchain_decrypted}</span>');
+                                showNotification('Blockchain Analysis Complete - Vulnerability Found');
+                                updateProgress(10);
+                            }
+                        }, 2000);
+                        break;
+                        
+                    case 'data-farm':
+                        addTerminalLine('<span class="output">Investigating quantum data farm...</span>');
+                        setTimeout(() => {
+                            addTerminalLine('<span class="output">Storage: 14ZB quantum storage</span>');
+                            addTerminalLine('<span class="output">Data: Encrypted banking documents</span>');
+                            addTerminalLine('<span class="output">Found fragments of World Secure Bank files</span>');
+                            
+                            if (!flagsFound.includes('CTF{data_exfiltrated}')) {
+                                flagsFound.push('CTF{data_exfiltrated}');
+                                addTerminalLine('<span class="important">Flag 7: CTF{data_exfiltrated}</span>');
+                                showNotification('Data Fragments Recovered - Exfiltration Possible');
+                                updateProgress(10);
+                            }
+                        }, 2000);
+                        break;
+                }
+            } else {
+                addTerminalLine('<span class="output">Already investigated this node. No new information found.</span>');
+            }
+        }
+        
+        function showHelp() {
+            addTerminalLine('<span class="output">Available quantum commands:</span>');
+            addTerminalLine('<span class="output">- scan network - Quantum network scan</span>');
+            addTerminalLine('<span class="output">- decrypt [target] - Quantum decryption</span>');
+            addTerminalLine('<span class="output">- analyze [target] - Quantum forensic analysis</span>');
+            addTerminalLine('<span class="output">- exploit [target] - Quantum exploit deployment</span>');
+            addTerminalLine('<span class="output">- connect [node] - Quantum entanglement connection</span>');
+            addTerminalLine('<span class="output">- show flags - Display found flags</span>');
+            addTerminalLine('<span class="output">- show progress - Display infiltration progress</span>');
+            addTerminalLine('<span class="output">- status - Show current mission status</span>');
+            addTerminalLine('<span class="output">- clear - Clear terminal</span>');
+        }
+        
+        function showFlags() {
+            if (flagsFound.length === 0) {
+                addTerminalLine('<span class="output">No flags collected yet</span>');
+            } else {
+                addTerminalLine('<span class="output">Quantum flags collected:</span>');
+                flagsFound.forEach(flag => {
+                    addTerminalLine(`<span class="important">- ${flag}</span>`);
+                });
+            }
+        }
+        
+        function showProgress() {
+            addTerminalLine(`<span class="output">Infiltration progress: ${progress}%</span>`);
+            addTerminalLine(`<span class="output">Flags collected: ${flagsFound.length}/10</span>`);
+        }
+        
+        function showStatus() {
+            addTerminalLine('<span class="output">Current mission status:</span>');
+            addTerminalLine('<span class="output">- Core Server: Partially investigated</span>');
+            addTerminalLine('<span class="output">- Quantum Router: Basic scan completed</span>');
+            addTerminalLine('<span class="output">- AI Defense: Pattern recognition in progress</span>');
+            addTerminalLine('<span class="output">- Banking Documents: Quantum encryption detected</span>');
+        }
+        
+        function clearTerminal() {
+            terminal.innerHTML = '';
+            addTerminalLine('<span class="prompt">quantum@tawon-op:~#</span> <span class="output">Quantum terminal cleared</span>');
+        }
+        
+        function addTerminalLine(content) {
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.innerHTML = content;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        function updateProgress(value) {
+            progress += value;
+            if (progress > 100) progress = 100;
+            
+            progressBar.style.width = progress + '%';
+            progressText.textContent = `Infiltration Progress: ${progress}%`;
+            
+            if (progress >= 80) {
+                progressBar.style.background = 'linear-gradient(to right, var(--success), #00cc00)';
+            }
+            
+            // Check if all flags are found
+            if (flagsFound.length >= 10 && progress < 100) {
+                progress = 100;
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Infiltration Progress: 100%';
+                addTerminalLine('<span class="important">MISSION ACCOMPLISHED! Banking documents recovered and Tawon network compromised!</span>');
+                showNotification('Mission Accomplished! All Flags Collected!', true);
+            }
+        }
+        
+        function showNotification(message, isImportant = false) {
+            notificationText.textContent = message;
+            if (isImportant) {
+                notification.style.borderColor = 'var(--warning)';
+                notification.style.boxShadow = '0 0 20px rgba(255, 204, 0, 0.7)';
+            } else {
+                notification.style.borderColor = 'var(--primary)';
+                notification.style.boxShadow = '0 0 20px rgba(255, 42, 109, 0.4)';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
             });
             
-            // Add interactive button effect
-            const cyberButton = document.querySelector('.cyber-button');
-            cyberButton.addEventListener('click', function() {
-                this.textContent = "MISSION ACCEPTED";
-                this.style.background = "linear-gradient(to bottom, var(--cyber-green), var(--cyber-blue))";
-                
-                // Add terminal message
-                const terminal = document.querySelector('.terminal');
-                const newLine = document.createElement('div');
-                newLine.className = 'terminal-line';
-                newLine.innerHTML = '<span class="prompt">secure://command$></span> <span class="output" style="color: var(--cyber-green);">Mission accepted. Beginning operation...</span>';
-                terminal.appendChild(newLine);
-                terminal.scrollTop = terminal.scrollHeight;
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
             });
-        });
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            
+            currentTab = tabId;
+        }
+        
+        function openFile(file) {
+            addTerminalLine(`<span class="prompt">quantum@tawon-op:~#</span> <span class="command">open ${file}</span>`);
+            
+            switch(file) {
+                case 'bank-documents':
+                    addTerminalLine('<span class="output">Accessing bank_documents.qenc...</span>');
+                    addTerminalLine('<span class="output">File is quantum encrypted with 2048-bit RSA</span>');
+                    addTerminalLine('<span class="output">Attempting to crack quantum encryption...</span>');
+                    break;
+                    
+                case 'transaction-logs':
+                    addTerminalLine('<span class="output">Accessing transaction_logs.qbf...</span>');
+                    addTerminalLine('<span class="output">File is in quantum blockchain format</span>');
+                    addTerminalLine('<span class="output">Blockchain analysis required</span>');
+                    break;
+            }
+        }
+        
+        function attemptQuantumDecryption() {
+            const key = document.getElementById('quantum-key').value;
+            if (!key) return;
+            
+            if (key.toLowerCase() === 'shor factorization') {
+                addTerminalLine('<span class="success">Quantum decryption successful!</span>');
+                addTerminalLine('<span class="output">Banking documents partially decrypted</span>');
+                addTerminalLine('<span class="output">Hidden transactions revealed</span>');
+                
+                if (!flagsFound.includes('CTF{quantum_key_cracked}')) {
+                    flagsFound.push('CTF{quantum_key_cracked}');
+                    addTerminalLine('<span class="important">Flag 1: CTF{quantum_key_cracked}</span>');
+                    showNotification('Quantum Encryption Broken - Access Gained');
+                    updateProgress(10);
+                }
+            } else {
+                addTerminalLine('<span class="error">Quantum decryption failed with key: ' + key + '</span>');
+            }
+        }
+        
+        function startChallenge(challengeNum) {
+            if (challengeNum > 1 && !challengesCompleted.includes(challengeNum - 1)) {
+                addTerminalLine(`<span class="error">Challenge ${challengeNum} is locked. Complete challenge ${challengeNum - 1} first.</span>`);
+                return;
+            }
+            
+            addTerminalLine(`<span class="prompt">quantum@tawon-op:~#</span> <span class="command">start challenge ${challengeNum}</span>`);
+            
+            switch(challengeNum) {
+                case 1:
+                    addTerminalLine('<span class="output">Starting Quantum Key Breaking challenge...</span>');
+                    addTerminalLine('<span class="output">Use Shor\'s algorithm to factor large semiprime numbers</span>');
+                    break;
+                case 2:
+                    addTerminalLine('<span class="output">Starting AI Pattern Recognition challenge...</span>');
+                    addTerminalLine('<span class="output">Create adversarial examples to fool the AI defense system</span>');
+                    break;
+                // Additional challenges would be implemented here
+                default:
+                    addTerminalLine(`<span class="output">Starting challenge ${challengeNum}...</span>`);
+                    addTerminalLine('<span class="output">Challenge initialized. Use quantum tools to proceed.</span>');
+            }
+            
+            // Mark challenge as started
+            if (!challengesCompleted.includes(challengeNum)) {
+                challengesCompleted.push(challengeNum);
+            }
+            
+            // Update challenge node UI
+            const challengeNode = document.querySelector(`.challenge-node:nth-child(${challengeNum})`);
+            challengeNode.classList.remove('locked');
+            challengeNode.classList.add('completed');
+        }
+        
+        function submitCompletion() {
+            if (flagsFound.length >= 10) {
+                addTerminalLine('<span class="success">Mission accomplished successfully!</span>');
+                addTerminalLine('<span class="important">Banking documents recovered. Tawon Mafia network compromised!</span>');
+                completionMessage.innerHTML = '<span class="success">✓ Mission accomplished! All 10 flags found!</span>';
+                
+                const townUrl = window.location.origin + "/town.html";
+                // Redirect back to the town with completion parameter for Building 2
+                window.location.href = `${townUrl}?completed=6`;
+            } else {
+                addTerminalLine('<span class="error">You haven\'t collected all flags yet!</span>');
+                addTerminalLine(`<span class="output">Flags collected: ${flagsFound.length}/10 required</span>`);
+                completionMessage.innerHTML = `<span class="error">✗ Only ${flagsFound.length}/10 flags collected. Keep investigating!</span>`;
+            }
+        }
+        
+        function returnToTown() {
+            sessionStorage.setItem('returningFromChallenge', 'true');
+            const townUrl = window.location.origin + "/town.html";
+            window.location.href = townUrl;
+        }
+        
+        // Create quantum particles animation
+        function createQuantumParticles() {
+            const container = document.getElementById('quantum-animation');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.animationDuration = (5 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        // Update countdown timer
+        function updateCountdown() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownElement.textContent = `TIME: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft > 0) {
+                timeLeft--;
+                setTimeout(updateCountdown, 1000);
+            } else {
+                addTerminalLine('<span class="error">TIME CRITICAL: Mission failed! Tawon AI detected our presence!</span>');
+                showNotification('Mission Failed! Time expired!', true);
+            }
+        }
+        
+        // Initialize the interface
+        window.onload = function() {
+            commandInput.focus();
+            createQuantumParticles();
+            updateCountdown();
+            
+            // Add click handlers to nodes
+            document.querySelectorAll('.qnode').forEach(node => {
+                node.addEventListener('click', function() {
+                    const nodeType = this.classList[1];
+                    investigateNode(nodeType);
+                });
+            });
+        };
     </script>
 </body>
 </html>
