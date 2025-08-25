@@ -1,1 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 LEVEL 10: Real-World Malware + Obfuscated AI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Share+Tech+Mono&display=swap');
+        
+        :root {
+            --primary: #ff2a6d;
+            --secondary: #05d9e8;
+            --accent: #b300ff;
+            --background: #0a0a12;
+            --darker: #050510;
+            --text: #ffffff;
+            --success: #00ff9d;
+            --warning: #ffcc00;
+            --danger: #ff2a6d;
+            --terminal-bg: #000000;
+            --panel-bg: rgba(15, 15, 35, 0.8);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255, 42, 109, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 75% 75%, rgba(5, 217, 232, 0.1) 0%, transparent 20%),
+                linear-gradient(to bottom, rgba(5, 5, 10, 0.9), rgba(10, 10, 30, 0.9));
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+            grid-template-areas:
+                "header header"
+                "main side"
+                "footer footer";
+        }
+        
+        @media (max-width: 1100px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "main"
+                    "side"
+                    "footer";
+            }
+        }
+        
+        header {
+            grid-area: header;
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--secondary);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+            text-shadow: 0 0 15px rgba(255, 42, 109, 0.7);
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(5, 217, 232, 0.7);
+        }
+        
+        .countdown {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            color: var(--danger);
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid var(--danger);
+            border-radius: 5px;
+            background: rgba(255, 42, 109, 0.1);
+            box-shadow: 0 0 15px rgba(255, 42, 109, 0.3);
+        }
+        
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(5, 217, 232, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .panel-title {
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--secondary);
+            font-size: 1.4rem;
+            text-shadow: 0 0 5px rgba(255, 42, 109, 0.5);
+        }
+        
+        .analysis-terminal {
+            background: var(--terminal-bg);
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            box-shadow: inset 0 0 20px rgba(5, 217, 232, 0.2);
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .prompt {
+            color: var(--success);
+        }
+        
+        .command {
+            color: var(--secondary);
+        }
+        
+        .output {
+            color: #cccccc;
+        }
+        
+        .success {
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        .error {
+            color: var(--danger);
+        }
+        
+        .important {
+            color: var(--warning);
+            font-weight: bold;
+        }
+        
+        .flag {
+            color: var(--accent);
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(179, 0, 255, 0.7);
+        }
+        
+        .input-area {
+            display: flex;
+            margin-top: 15px;
+        }
+        
+        #command-input {
+            flex-grow: 1;
+            background: var(--terminal-bg);
+            border: 1px solid var(--secondary);
+            color: var(--success);
+            padding: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            border-radius: 4px 0 0 4px;
+            outline: none;
+        }
+        
+        #execute-btn {
+            background: linear-gradient(to bottom, var(--secondary), #008e9b);
+            color: var(--darker);
+            border: 1px solid var(--secondary);
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+        }
+        
+        #execute-btn:hover {
+            background: linear-gradient(to bottom, #05e8f7, var(--secondary));
+            box-shadow: 0 0 15px rgba(5, 217, 232, 0.5);
+        }
+        
+        .progress {
+            margin-top: 20px;
+            background: var(--panel-bg);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid var(--secondary);
+        }
+        
+        .progress-bar-container {
+            height: 20px;
+            background: var(--darker);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--secondary);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent), var(--primary));
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: var(--secondary);
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .file-system {
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            padding: 10px;
+            background: var(--terminal-bg);
+            margin-bottom: 15px;
+            box-shadow: inset 0 0 10px rgba(5, 217, 232, 0.1);
+        }
+        
+        .file-item {
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(5, 217, 232, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .file-item:hover {
+            background: rgba(5, 217, 232, 0.1);
+        }
+        
+        .toolbox {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .tool {
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid var(--secondary);
+            border-radius: 5px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        
+        .tool:hover {
+            background: rgba(5, 217, 232, 0.2);
+            box-shadow: 0 0 10px rgba(5, 217, 232, 0.3);
+        }
+        
+        .footer {
+            grid-area: footer;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            border-top: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+        
+        .submit-section {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            background: var(--panel-bg);
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+        }
+        
+        .submit-button {
+            background: linear-gradient(to bottom, var(--success), #00cc7a);
+            color: var(--darker);
+            border: none;
+            padding: 15px 30px;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-button:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+            transform: translateY(-3px);
+        }
+        
+        .return-button {
+            background: linear-gradient(to bottom, var(--accent), #8000cc);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 15px 10px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .return-button:hover {
+            box-shadow: 0 0 20px rgba(179, 0, 255, 0.5);
+            transform: translateY(-3px);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--panel-bg);
+            border: 1px solid var(--secondary);
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(5, 217, 232, 0.4);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .completion-message {
+            color: var(--success);
+            font-weight: bold;
+            margin: 15px 0;
+            font-size: 1.2rem;
+        }
+        
+        .hint-box {
+            background: rgba(30, 20, 50, 0.8);
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .hint-title {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .hex-view {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            padding: 10px;
+            background: var(--terminal-bg);
+            margin-bottom: 15px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            box-shadow: inset 0 0 10px rgba(5, 217, 232, 0.1);
+        }
+        
+        .hex-line {
+            display: flex;
+            margin-bottom: 2px;
+        }
+        
+        .hex-address {
+            color: var(--primary);
+            width: 60px;
+        }
+        
+        .hex-data {
+            color: var(--secondary);
+            flex: 1;
+        }
+        
+        .hex-ascii {
+            color: var(--success);
+            width: 80px;
+            margin-left: 10px;
+        }
+        
+        .network-log {
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            padding: 10px;
+            background: var(--terminal-bg);
+            margin-bottom: 15px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            box-shadow: inset 0 0 10px rgba(5, 217, 232, 0.1);
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            border-bottom: 1px solid rgba(5, 217, 232, 0.2);
+            padding-bottom: 5px;
+        }
+        
+        .log-time {
+            color: var(--primary);
+        }
+        
+        .log-content {
+            color: var(--text);
+        }
+        
+        .ai-visualization {
+            height: 180px;
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+            background: var(--darker);
+        }
+        
+        .neuron {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--secondary);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--secondary);
+            animation: pulse 2s infinite;
+        }
+        
+        .connection {
+            position: absolute;
+            height: 2px;
+            background: rgba(5, 217, 232, 0.3);
+            transform-origin: 0 0;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        
+        .glitch-effect {
+            position: relative;
+        }
+        
+        .glitch-effect::before,
+        .glitch-effect::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch-effect::before {
+            animation: glitch-animation 2s infinite linear alternate-reverse;
+            color: var(--primary);
+            z-index: -1;
+        }
+        
+        .glitch-effect::after {
+            animation: glitch-animation 2.5s infinite linear alternate-reverse;
+            color: var(--secondary);
+            z-index: -2;
+        }
+        
+        @keyframes glitch-animation {
+            0% { transform: translate(0); }
+            20% { transform: translate(-5px, 5px); }
+            40% { transform: translate(-5px, -5px); }
+            60% { transform: translate(5px, 5px); }
+            80% { transform: translate(5px, -5px); }
+            100% { transform: translate(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="glitch-effect" data-text="🧠 LEVEL 10: AI Malware Analysis">🧠 LEVEL 10: AI Malware Analysis</h1>
+            <p class="subtitle">Reverse engineer an obfuscated AI-powered malware binary</p>
+            <div class="countdown" id="countdown">TIME: 45:00</div>
+        </header>
+        
+        <div class="panel" style="grid-area: main;">
+            <h2 class="panel-title">Malware Analysis Terminal</h2>
+            <p>Target: <span class="important">model.ai</span> (AI-powered malware binary)</p>
+            
+            <div class="analysis-terminal" id="terminal">
+                <div class="terminal-line">
+                    <span class="prompt">analyst@malware-lab:~$</span>
+                    <span class="output">Starting AI malware analysis session.</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">analyst@malware-lab:~$</span>
+                    <span class="output">Target: model.ai (disguised as PyTorch model)</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">analyst@malware-lab:~$</span>
+                    <span class="output">Type 'help' for analysis commands.</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">analyst@malware-lab:~$</span>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="command-input" placeholder="Type analysis command here..." autofocus>
+                <button id="execute-btn" onclick="executeCommand()">EXECUTE</button>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="progress-text" id="progress-text">Analysis Progress: 0%</div>
+            </div>
+        </div>
+        
+        <div class="panel" style="grid-area: side;">
+            <h2 class="panel-title">Analysis Tools & Visualizations</h2>
+            
+            <div class="file-system">
+                <div class="file-item" onclick="selectFile('model.ai')">
+                    <span>model.ai (malware binary)</span>
+                </div>
+                <div class="file-item" onclick="selectFile('weights.bin')">
+                    <span>weights.bin (encoded data)</span>
+                </div>
+                <div class="file-item" onclick="selectFile('frontend.js')">
+                    <span>frontend.js (obfuscated script)</span>
+                </div>
+                <div class="file-item" onclick="selectFile('strace.log')">
+                    <span>strace.log (system calls)</span>
+                </div>
+                <div class="file-item" onclick="selectFile('model.service')">
+                    <span>model.service (systemd unit)</span>
+                </div>
+            </div>
+            
+            <h3 class="panel-title">Hex View</h3>
+            <div class="hex-view" id="hex-view">
+                <div class="hex-line"><span class="hex-address">00000000:</span><span class="hex-data">7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00</span><span class="hex-ascii">.ELF............</span></div>
+                <div class="hex-line"><span class="hex-address">00000010:</span><span class="hex-data">02 00 3e 00 01 00 00 00 a0 0f 00 00 00 00 00 00</span><span class="hex-ascii">..>.............</span></div>
+                <div class="hex-line"><span class="hex-address">00000020:</span><span class="hex-data">40 00 00 00 00 00 00 00 30 42 00 00 00 00 00 00</span><span class="hex-ascii">@.......0B......</span></div>
+                <div class="hex-line"><span class="hex-address">00000030:</span><span class="hex-data">00 00 00 00 40 00 38 00 09 00 40 00 1f 00 1e 00</span><span class="hex-ascii">....@.8...@.....</span></div>
+                <div class="hex-line"><span class="hex-address">00000040:</span><span class="hex-data">06 00 00 00 05 00 00 00 40 00 00 00 00 00 00 00</span><span class="hex-ascii">........@.......</span></div>
+                <div class="hex-line"><span class="hex-address">00000050:</span><span class="hex-data">40 00 00 00 00 00 00 00 40 00 00 00 00 00 00 00</span><span class="hex-ascii">@.......@.......</span></div>
+                <div class="hex-line"><span class="hex-address">00000060:</span><span class="hex-data">f8 01 00 00 00 00 00 00 f8 01 00 00 00 00 00 00</span><span class="hex-ascii">................</span></div>
+                <div class="hex-line"><span class="hex-address">00000070:</span><span class="hex-data">08 00 00 00 00 00 00 00 03 00 00 00 04 00 00 00</span><span class="hex-ascii">................</span></div>
+            </div>
+            
+            <h3 class="panel-title">Network Activity</h3>
+            <div class="network-log" id="network-log">
+                <div class="log-entry">
+                    <span class="log-time">[12:34:56]</span>
+                    <span class="log-content">Outbound connection to 192.168.12.34:443</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-time">[12:35:02]</span>
+                    <span class="log-content">DNS query for api.malicious-domain.ai</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-time">[12:35:15]</span>
+                    <span class="log-content">POST request to /collect/data</span>
+                </div>
+            </div>
+            
+            <h3 class="panel-title">AI Model Structure</h3>
+            <div class="ai-visualization" id="ai-visualization">
+                <!-- Neural network visualization will be generated by JS -->
+            </div>
+            
+            <div class="toolbox">
+                <div class="tool" onclick="executeTool('strings')">strings model.ai</div>
+                <div class="tool" onclick="executeTool('hexdump')">hexdump -C weights.bin</div>
+                <div class="tool" onclick="executeTool('strace')">strace ./model.ai</div>
+                <div class="tool" onclick="executeTool('objdump')">objdump -D model.ai</div>
+                <div class="tool" onclick="executeTool('decompile')">python decompile.py</div>
+                <div class="tool" onclick="executeTool('js_deobfuscate')">deobfuscate frontend.js</div>
+                <div class="tool" onclick="executeTool('check_services')">systemctl list-units</div>
+                <div class="tool" onclick="executeTool('xor_tool')">xor_decrypt layers</div>
+            </div>
+            
+            <div class="hint-box">
+                <div class="hint-title">HINT: Analysis Chain</div>
+                <p>1. Extract strings from binary for Flag #1</p>
+                <p>2. Decode hexdump of weights.bin for Flag #2</p>
+                <p>3. Analyze strace logs for suspicious calls (Flag #3)</p>
+                <p>4. Deobfuscate JS to find Flag #4</p>
+                <p>5. Check model cache folder for Flag #5</p>
+                <p>6. Decrypt using neural net layer key for Flag #6</p>
+                <p>7. Find systemd service file for Flag #7</p>
+                <p>8. XOR multiple layer hashes for final Flag #8</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>REAL-WORLD MALWARE ANALYSIS CHALLENGE | LEVEL 10 CTF | 8 FLAGS TO CAPTURE</p>
+        </div>
+        
+        <div class="submit-section">
+            <p>Completed the malware analysis? Submit your findings!</p>
+            <button class="submit-button" onclick="submitCompletion()">Mission Complete</button>
+            <button class="return-button" onclick="returnToTown()">Emergency Exit</button>
+            <div id="completion-message" class="completion-message"></div>
+        </div>
+    </div>
 
+    <div class="notification" id="notification">
+        <span id="notification-text"></span>
+    </div>
+
+    <script>
+        // Initialize variables
+        let progress = 0;
+        let flagsFound = [];
+        let commandHistory = [];
+        let historyIndex = -1;
+        let timeLeft = 45 * 60; // 45 minutes in seconds
+        
+        // Define all 8 CTF flags
+        const allFlags = [
+            'CTF{static_strings_in_binary}',
+            'CTF{hexdump_weight_analysis}',
+            'CTF{strace_suspicious_calls}',
+            'CTF{js_deobfuscation_success}',
+            'CTF{model_cache_persistence}',
+            'CTF{neural_layer_decryption}',
+            'CTF{systemd_service_hidden}',
+            'CTF{xor_hash_correlation}'
+        ];
+        
+        // Initialize terminal
+        const terminal = document.getElementById('terminal');
+        const commandInput = document.getElementById('command-input');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
+        const completionMessage = document.getElementById('completion-message');
+        const countdownElement = document.getElementById('countdown');
+        const aiVisualization = document.getElementById('ai-visualization');
+        
+        // Create neural network visualization
+        function createNeuralNetwork() {
+            const layers = [4, 6, 5, 4]; // Number of neurons in each layer
+            const width = aiVisualization.offsetWidth;
+            const height = aiVisualization.offsetHeight;
+            
+            // Clear previous visualization
+            aiVisualization.innerHTML = '';
+            
+            // Create neurons and connections
+            for (let l = 0; l < layers.length; l++) {
+                const neuronCount = layers[l];
+                const xPos = (l + 1) * width / (layers.length + 1);
+                
+                for (let n = 0; n < neuronCount; n++) {
+                    const yPos = (n + 1) * height / (neuronCount + 1);
+                    
+                    // Create neuron
+                    const neuron = document.createElement('div');
+                    neuron.className = 'neuron';
+                    neuron.style.left = `${xPos}px`;
+                    neuron.style.top = `${yPos}px`;
+                    neuron.style.animationDelay = `${Math.random() * 2}s`;
+                    aiVisualization.appendChild(neuron);
+                    
+                    // Create connections to next layer if exists
+                    if (l < layers.length - 1) {
+                        const nextLayerCount = layers[l + 1];
+                        for (let nextN = 0; nextN < nextLayerCount; nextN++) {
+                            const nextXPos = (l + 2) * width / (layers.length + 1);
+                            const nextYPos = (nextN + 1) * height / (nextLayerCount + 1);
+                            
+                            const connection = document.createElement('div');
+                            connection.className = 'connection';
+                            
+                            const length = Math.sqrt(Math.pow(nextXPos - xPos, 2) + Math.pow(nextYPos - yPos, 2));
+                            const angle = Math.atan2(nextYPos - yPos, nextXPos - xPos) * 180 / Math.PI;
+                            
+                            connection.style.width = `${length}px`;
+                            connection.style.left = `${xPos}px`;
+                            connection.style.top = `${yPos}px`;
+                            connection.style.transform = `rotate(${angle}deg)`;
+                            connection.style.opacity = 0.2 + Math.random() * 0.3;
+                            
+                            aiVisualization.appendChild(connection);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Add event listener for Enter key
+        commandInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                executeCommand();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                navigateHistory(-1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                navigateHistory(1);
+            }
+        });
+        
+        function navigateHistory(direction) {
+            if (commandHistory.length === 0) return;
+            
+            historyIndex += direction;
+            
+            if (historyIndex < 0) historyIndex = 0;
+            if (historyIndex >= commandHistory.length) historyIndex = commandHistory.length - 1;
+            
+            commandInput.value = commandHistory[historyIndex];
+        }
+        
+        function executeCommand() {
+            const command = commandInput.value.trim();
+            if (!command) return;
+            
+            // Add to history
+            commandHistory.push(command);
+            historyIndex = commandHistory.length;
+            
+            // Display command
+            addTerminalLine(`<span class="prompt">analyst@malware-lab:~$</span> <span class="command">${command}</span>`);
+            
+            // Process command
+            processCommand(command);
+            
+            // Clear input
+            commandInput.value = '';
+            commandInput.focus();
+        }
+        
+        function processCommand(cmd) {
+            const command = cmd.toLowerCase();
+            
+            if (command === 'help') {
+                showHelp();
+            } else if (command === 'clear') {
+                clearTerminal();
+            } else if (command === 'exit') {
+                addTerminalLine('<span class="output">Ending analysis session...</span>');
+            } else if (command === 'ls' || command === 'dir') {
+                listFiles();
+            } else if (command === 'whoami') {
+                addTerminalLine('<span class="output">analyst</span>');
+            } else if (command === 'pwd') {
+                addTerminalLine('<span class="output">/home/analyst/malware-lab</span>');
+            } else if (command.startsWith('strings')) {
+                runStrings(command);
+            } else if (command.startsWith('hexdump')) {
+                runHexdump(command);
+            } else if (command.startsWith('strace')) {
+                runStrace(command);
+            } else if (command.startsWith('objdump')) {
+                runObjdump(command);
+            } else if (command.startsWith('python')) {
+                runPython(command);
+            } else if (command.startsWith('deobfuscate')) {
+                runDeobfuscate(command);
+            } else if (command.startsWith('systemctl')) {
+                runSystemctl(command);
+            } else if (command.startsWith('xor_decrypt')) {
+                runXorDecrypt(command);
+            } else if (command.startsWith('cat')) {
+                runCat(command);
+            } else if (command === 'show flags') {
+                showFlags();
+            } else if (command === 'show progress') {
+                showProgress();
+            } else {
+                addTerminalLine(`<span class="error">Command not recognized: ${cmd}. Type 'help' for available commands.</span>`);
+            }
+        }
+        
+        function runStrings(cmd) {
+            if (cmd === 'strings model.ai') {
+                addTerminalLine('<span class="output">Scanning model.ai for strings...</span>');
+                addTerminalLine('<span class="output">/lib64/ld-linux-x86-64.so.2</span>');
+                addTerminalLine('<span class="output">libc.so.6</span>');
+                addTerminalLine('<span class="output">printf</span>');
+                addTerminalLine('<span class="output">sprintf</span>');
+                addTerminalLine('<span class="output">malloc</span>');
+                addTerminalLine('<span class="output">PyTorch Model v1.4</span>');
+                addTerminalLine('<span class="output">CTF{static_strings_in_binary}</span>');
+                addTerminalLine('<span class="output">api.malicious-domain.ai</span>');
+                addTerminalLine('<span class="output">/etc/systemd/system/model.service</span>');
+                
+                if (!flagsFound.includes('CTF{static_strings_in_binary}')) {
+                    flagsFound.push('CTF{static_strings_in_binary}');
+                    addTerminalLine('<span class="flag">Flag #1: CTF{static_strings_in_binary}</span>');
+                    showNotification('Static Analysis Complete - Flag #1 Discovered');
+                    updateProgress(12.5);
+                }
+            } else {
+                addTerminalLine('<span class="error">Usage: strings [binary]</span>');
+            }
+        }
+        
+        function runHexdump(cmd) {
+            if (cmd === 'hexdump -c weights.bin') {
+                addTerminalLine('<span class="output">00000000  43 54 46 7b 68 65 78 64  75 6d 70 5f 77 65 69 67  |CTF{hexdump_weig|</span>');
+                addTerminalLine('<span class="output">00000010  68 74 5f 61 6e 61 6c 79  73 69 73 7d 00 00 00 00  |ht_analysis}....|</span>');
+                addTerminalLine('<span class="output">00000020  1a 4f 3d 22 a7 44 1b 5e  84 7c 9a 12 4b 77 e9 3f  |.O=".D.^.|..Kw.?|</span>');
+                
+                if (!flagsFound.includes('CTF{hexdump_weight_analysis}')) {
+                    flagsFound.push('CTF{hexdump_weight_analysis}');
+                    addTerminalLine('<span class="flag">Flag #2: CTF{hexdump_weight_analysis}</span>');
+                    showNotification('Hexdump Analysis - Flag #2 Discovered');
+                    updateProgress(12.5);
+                }
+            } else {
+                addTerminalLine('<span class="error">Usage: hexdump [options] [file]</span>');
+            }
+        }
+        
+        function runStrace(cmd) {
+            if (cmd === 'strace ./model.ai') {
+                addTerminalLine('<span class="output">execve("./model.ai", ["./model.ai"], 0x7ffc5e5f8d80 /* 54 vars */) = 0</span>');
+                addTerminalLine('<span class="output">brk(NULL) = 0x55a1b2e4e000</span>');
+                addTerminalLine('<span class="output">access("/etc/ld.so.nohwcap", F_OK) = -1 ENOENT (No such file or directory)</span>');
+                addTerminalLine('<span class="output">mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f2a3a6f0000</span>');
+                addTerminalLine('<span class="output">connect(3, {sa_family=AF_INET, sin_port=htons(443), sin_addr=inet_addr("192.168.12.34")}, 16) = 0</span>');
+                addTerminalLine('<span class="output">sendto(3, "CTF{strace_suspicious_calls}", 28, MSG_NOSIGNAL, NULL, 0) = 28</span>');
+                addTerminalLine('<span class="output">recvfrom(3, "ACK", 3, 0, NULL, NULL) = 3</span>');
+                
+                if (!flagsFound.includes('CTF{strace_suspicious_calls}')) {
+                    flagsFound.push('CTF{strace_suspicious_calls}');
+                    addTerminalLine('<span class="flag">Flag #3: CTF{strace_suspicious_calls}</span>');
+                    showNotification('Strace Analysis - Flag #3 Discovered');
+                    updateProgress(12.5);
+                }
+            } else {
+                addTerminalLine('<span class="error">Usage: strace [command]</span>');
+            }
+        }
+        
+        function runObjdump(cmd) {
+            if (cmd === 'objdump -d model.ai') {
+                addTerminalLine('<span class="output">Disassembly of section .text:</span>');
+                addTerminalLine('<span class="output">00000000000010a0 <_start>:</span>');
+                addTerminalLine('<span class="output">    10a0: 31 ed xor %ebp,%ebp</span>');
+                addTerminalLine('<span class="output">    10a2: 49 89 d1 mov %rdx,%r9</span>');
+                addTerminalLine('<span class="output">    10a5: 5e pop %rsi</span>');
+                addTerminalLine('<span class="output">    10a6: 48 89 e2 mov %rsp,%rdx</span>');
+                addTerminalLine('<span class="output">    10a9: 48 83 e4 f0 and $0xfffffffffffffff0,%rsp</span>');
+                addTerminalLine('<span class="output">Malware uses advanced obfuscation techniques</span>');
+            } else {
+                addTerminalLine('<span class="error">Usage: objdump [options] [binary]</span>');
+            }
+        }
+        
+        function runPython(cmd) {
+            if (cmd === 'python decompile.py') {
+                addTerminalLine('<span class="output">Running model decompilation...</span>');
+                addTerminalLine('<span class="output">Found PyTorch model structure with malicious payload</span>');
+                addTerminalLine('<span class="output">Analyzing neural network layers...</span>');
+                addTerminalLine('<span class="output">Layer 1: 0x4f1a3d22a7441b5e</span>');
+                addTerminalLine('<span class="output">Layer 2: 0x7c9a124b77e93f84</span>');
+                addTerminalLine('<span class="output">Layer 3: 0x2c5d8819f73a6b41</span>');
+                addTerminalLine('<span class="output">Use these hashes with XOR tool for final flag</span>');
+            } else {
+                addTerminalLine('<span class="error">Python script not found</span>');
+            }
+        }
+        
+        function runDeobfuscate(cmd) {
+            if (cmd === 'deobfuscate frontend.js') {
+                addTerminalLine('<span class="output">Deobfuscating JavaScript code...</span>');
+                addTerminalLine('<span class="output">Original: _0x3a5c=["\x43\x54\x46\x7b\x6a\x73\x5f\x64\x65\x6f\x62\x66\x75\x73\x63\x61\x74\x69\x6f\x6e\x5f\x73\x75\x63\x63\x65\x73\x73\x7d"]</span>');
+                addTerminalLine('<span class="output">Deobfuscated: CTF{js_deobfuscation_success}</span>');
+                
+                if (!flagsFound.includes('CTF{js_deobfuscation_success}')) {
+                    flagsFound.push('CTF{js_deobfuscation_success}');
+                    addTerminalLine('<span class="flag">Flag #4: CTF{js_deobfuscation_success}</span>');
+                    showNotification('JS Deobfuscation - Flag #4 Discovered');
+                    updateProgress(12.5);
+                }
+            } else {
+                addTerminalLine('<span class="error">Usage: deobfuscate [file]</span>');
+            }
+        }
+        
+        function runSystemctl(cmd) {
+            if (cmd === 'systemctl list-units') {
+                addTerminalLine('<span class="output">UNIT LOAD ACTIVE SUB DESCRIPTION</span>');
+                addTerminalLine('<span class="output">model.service loaded active running Malicious AI Model Service</span>');
+                addTerminalLine('<span class="output">Use "cat /etc/systemd/system/model.service" to examine</span>');
+            } else {
+                addTerminalLine('<span class="error">Usage: systemctl [command]</span>');
+            }
+        }
+        
+        function runXorDecrypt(cmd) {
+            if (cmd === 'xor_decrypt layers') {
+                if (flagsFound.length >= 6) {
+                    addTerminalLine('<span class="output">XORing neural network layer hashes...</span>');
+                    addTerminalLine('<span class="output">0x4f1a3d22a7441b5e XOR 0x7c9a124b77e93f84 = 0x33802f69d0ad24da</span>');
+                    addTerminalLine('<span class="output">0x33802f69d0ad24da XOR 0x2c5d8819f73a6b41 = 0x1fdda77027f74f9b</span>');
+                    addTerminalLine('<span class="output">Converting to ASCII: CTF{xor_hash_correlation}</span>');
+                    
+                    if (!flagsFound.includes('CTF{xor_hash_correlation}')) {
+                        flagsFound.push('CTF{xor_hash_correlation}');
+                        addTerminalLine('<span class="flag">Flag #8: CTF{xor_hash_correlation}</span>');
+                        showNotification('XOR Decryption - Flag #8 Discovered');
+                        updateProgress(12.5);
+                    }
+                } else {
+                    addTerminalLine('<span class="error">Need at least 6 flags to derive decryption key</span>');
+                }
+            } else {
+                addTerminalLine('<span class="error">Usage: xor_decrypt [target]</span>');
+            }
+        }
+        
+        function runCat(cmd) {
+            if (cmd === 'cat ~/.modelcache') {
+                addTerminalLine('<span class="output">CTF{model_cache_persistence}</span>');
+                
+                if (!flagsFound.includes('CTF{model_cache_persistence}')) {
+                    flagsFound.push('CTF{model_cache_persistence}');
+                    addTerminalLine('<span class="flag">Flag #5: CTF{model_cache_persistence}</span>');
+                    showNotification('Model Cache - Flag #5 Discovered');
+                    updateProgress(12.5);
+                }
+            } else if (cmd === 'cat /etc/systemd/system/model.service') {
+                addTerminalLine('<span class="output">[Unit]</span>');
+                addTerminalLine('<span class="output">Description=Malicious AI Model Service</span>');
+                addTerminalLine('<span class="output">After=network.target</span>');
+                addTerminalLine('<span class="output">[Service]</span>');
+                addTerminalLine('<span class="output">Type=simple</span>');
+                addTerminalLine('<span class="output">ExecStart=/usr/bin/model.ai</span>');
+                addTerminalLine('<span class="output">Environment=CTF{systemd_service_hidden}</span>');
+                addTerminalLine('<span class="output">Restart=always</span>');
+                addTerminalLine('<span class="output">[Install]</span>');
+                addTerminalLine('<span class="output">WantedBy=multi-user.target</span>');
+                
+                if (!flagsFound.includes('CTF{systemd_service_hidden}')) {
+                    flagsFound.push('CTF{systemd_service_hidden}');
+                    addTerminalLine('<span class="flag">Flag #7: CTF{systemd_service_hidden}</span>');
+                    showNotification('Systemd Service - Flag #7 Discovered');
+                    updateProgress(12.5);
+                }
+            } else if (cmd === 'cat key.txt') {
+                addTerminalLine('<span class="output">NeuralLayerKey: 0x8d3f7a2b</span>');
+                addTerminalLine('<span class="output">Use this key to decrypt layer 6 data</span>');
+                
+                if (!flagsFound.includes('CTF{neural_layer_decryption}')) {
+                    flagsFound.push('CTF{neural_layer_decryption}');
+                    addTerminalLine('<span class="flag">Flag #6: CTF{neural_layer_decryption}</span>');
+                    showNotification('Neural Layer Key - Flag #6 Discovered');
+                    updateProgress(12.5);
+                }
+            } else {
+                addTerminalLine('<span class="error">File not found or permission denied.</span>');
+            }
+        }
+        
+        function listFiles() {
+            addTerminalLine('<span class="output">total 356K</span>');
+            addTerminalLine('<span class="output">-rwxr-xr-x 1 analyst analyst 312K Jun 15 10:12 model.ai</span>');
+            addTerminalLine('<span class="output">-rw-r--r-- 1 analyst analyst  512 Jun 15 10:13 weights.bin</span>');
+            addTerminalLine('<span class="output">-rw-r--r-- 1 analyst analyst 2.4K Jun 15 10:14 frontend.js</span>');
+            addTerminalLine('<span class="output">-rw-r--r-- 1 analyst analyst  12K Jun 15 10:15 strace.log</span>');
+            addTerminalLine('<span class="output">-rw-r--r-- 1 analyst analyst  256 Jun 15 10:16 key.txt</span>');
+        }
+        
+        function showHelp() {
+            addTerminalLine('<span class="output">Available malware analysis commands:</span>');
+            addTerminalLine('<span class="output">- strings model.ai - Extract strings from binary</span>');
+            addTerminalLine('<span class="output">- hexdump -C weights.bin - Hex dump of model weights</span>');
+            addTerminalLine('<span class="output">- strace ./model.ai - Trace system calls</span>');
+            addTerminalLine('<span class="output">- objdump -D model.ai - Disassemble binary</span>');
+            addTerminalLine('<span class="output">- python decompile.py - Decompile model structure</span>');
+            addTerminalLine('<span class="output">- deobfuscate frontend.js - Deobfuscate JavaScript</span>');
+            addTerminalLine('<span class="output">- systemctl list-units - List system services</span>');
+            addTerminalLine('<span class="output">- xor_decrypt layers - XOR layer hashes</span>');
+            addTerminalLine('<span class="output">- cat [file] - Display file contents</span>');
+            addTerminalLine('<span class="output">- show flags - Display found flags</span>');
+            addTerminalLine('<span class="output">- show progress - Display analysis progress</span>');
+            addTerminalLine('<span class="output">- clear - Clear terminal</span>');
+        }
+        
+        function showFlags() {
+            if (flagsFound.length === 0) {
+                addTerminalLine('<span class="output">No flags collected yet</span>');
+            } else {
+                addTerminalLine('<span class="output">Flags collected:</span>');
+                flagsFound.forEach(flag => {
+                    addTerminalLine(`<span class="flag">- ${flag}</span>`);
+                });
+            }
+        }
+        
+        function showProgress() {
+            addTerminalLine(`<span class="output">Analysis progress: ${progress}%</span>`);
+            addTerminalLine(`<span class="output">Flags collected: ${flagsFound.length}/8</span>`);
+        }
+        
+        function clearTerminal() {
+            terminal.innerHTML = '';
+            addTerminalLine('<span class="prompt">analyst@malware-lab:~$</span> <span class="output">Terminal cleared</span>');
+        }
+        
+        function addTerminalLine(content) {
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.innerHTML = content;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        function updateProgress(value) {
+            progress += value;
+            if (progress > 100) progress = 100;
+            
+            progressBar.style.width = progress + '%';
+            progressText.textContent = `Analysis Progress: ${progress}%`;
+            
+            if (progress >= 80) {
+                progressBar.style.background = 'linear-gradient(to right, var(--accent), var(--success))';
+            }
+            
+            // Check if all flags are found
+            if (flagsFound.length >= 8 && progress < 100) {
+                progress = 100;
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Analysis Progress: 100%';
+                addTerminalLine('<span class="success">MALWARE ANALYSIS COMPLETE! All flags found and malware fully analyzed!</span>');
+                showNotification('Analysis Complete! All Flags Collected!', true);
+            }
+        }
+        
+        function showNotification(message, isImportant = false) {
+            notificationText.textContent = message;
+            if (isImportant) {
+                notification.style.borderColor = 'var(--accent)';
+                notification.style.boxShadow = '0 0 15px rgba(179, 0, 255, 0.7)';
+            } else {
+                notification.style.borderColor = 'var(--secondary)';
+                notification.style.boxShadow = '0 0 15px rgba(5, 217, 232, 0.4)';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function selectFile(file) {
+            addTerminalLine(`<span class="prompt">analyst@malware-lab:~$</span> <span class="command">select ${file}</span>`);
+            
+            switch(file) {
+                case 'model.ai':
+                    addTerminalLine('<span class="output">Malware binary disguised as AI model</span>');
+                    addTerminalLine('<span class="output">Use strings, objdump, or strace to analyze</span>');
+                    break;
+                    
+                case 'weights.bin':
+                    addTerminalLine('<span class="output">Encoded model weights containing hidden data</span>');
+                    addTerminalLine('<span class="output">Use hexdump to extract information</span>');
+                    break;
+                    
+                case 'frontend.js':
+                    addTerminalLine('<span class="output">Obfuscated JavaScript for model frontend</span>');
+                    addTerminalLine('<span class="output">Use deobfuscate tool to reveal contents</span>');
+                    break;
+            }
+        }
+        
+        function executeTool(tool) {
+            addTerminalLine(`<span class="prompt">analyst@malware-lab:~$</span> <span class="command">${tool}</span>`);
+            
+            switch(tool) {
+                case 'strings':
+                    runStrings('strings model.ai');
+                    break;
+                    
+                case 'hexdump':
+                    runHexdump('hexdump -c weights.bin');
+                    break;
+                    
+                case 'strace':
+                    runStrace('strace ./model.ai');
+                    break;
+                    
+                case 'objdump':
+                    runObjdump('objdump -d model.ai');
+                    break;
+                    
+                case 'decompile':
+                    runPython('python decompile.py');
+                    break;
+                    
+                case 'js_deobfuscate':
+                    runDeobfuscate('deobfuscate frontend.js');
+                    break;
+                    
+                case 'check_services':
+                    runSystemctl('systemctl list-units');
+                    break;
+                    
+                case 'xor_tool':
+                    runXorDecrypt('xor_decrypt layers');
+                    break;
+            }
+        }
+        
+        function submitCompletion() {
+            if (flagsFound.length >= 8) {
+                addTerminalLine('<span class="success">Malware analysis completed successfully!</span>');
+                addTerminalLine('<span class="flag">All flags found. Malware fully analyzed and neutralized!</span>');
+                completionMessage.innerHTML = '<span class="success">✓ Analysis complete! All 8 flags found!</span>';
+
+                const townUrl = window.location.origin + "/town.html";
+                // Redirect back to the town with completion parameter for Building 2
+                window.location.href = `${townUrl}?completed=10`;
+            } else {
+                addTerminalLine('<span class="error">You haven\'t collected all flags yet!</span>');
+                addTerminalLine(`<span class="output">Flags collected: ${flagsFound.length}/8 required</span>`);
+                completionMessage.innerHTML = `<span class="error">✗ Only ${flagsFound.length}/8 flags collected. Keep analyzing!</span>`;
+            }
+        }
+
+        function returnToTown() {
+            sessionStorage.setItem('returningFromChallenge', 'true');
+            const townUrl = window.location.origin + "/town.html";
+            window.location.href = townUrl;
+        }
+        
+        // Update countdown timer
+        function updateCountdown() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownElement.textContent = `TIME: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft > 0) {
+                timeLeft--;
+                setTimeout(updateCountdown, 1000);
+            } else {
+                addTerminalLine('<span class="error">TIME CRITICAL: Analysis failed! Time expired!</span>');
+                showNotification('Analysis Failed! Time expired!', true);
+            }
+        }
+        
+        // Initialize the interface
+        window.onload = function() {
+            commandInput.focus();
+            updateCountdown();
+            createNeuralNetwork();
+            
+            // Resize neural network on window resize
+            window.addEventListener('resize', createNeuralNetwork);
+        };
+    </script>
+</body>
+</html>
