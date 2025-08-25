@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEVEL 8: Network Traffic & Protocol Abuse</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2b6da3;
+            --secondary: #38b6ff;
+            --accent: #ff7d3d;
+            --dark: #0a141f;
+            --darker: #050a14;
+            --success: #00ff91;
+            --warning: #ffcc00;
+            --danger: #ff2a6d;
+            --info: #3d7bff;
+            --terminal-bg: #0a1429;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Fira Code', monospace;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            background-color: var(--dark);
+            color: #d1e8e8;
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(43, 109, 163, 0.05) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(56, 182, 255, 0.05) 0%, transparent 25%),
+                linear-gradient(to bottom, rgba(10, 20, 31, 0.9), rgba(5, 10, 20, 0.9)),
+                url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3C/g%3E%3C/svg%3E");
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+            grid-template-areas:
+                "header header"
+                "main side"
+                "tools tools"
+                "footer footer";
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "main"
+                    "side"
+                    "tools"
+                    "footer";
+            }
+        }
+        
+        header {
+            grid-area: header;
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            background: rgba(10, 20, 35, 0.7);
+            box-shadow: 0 0 30px rgba(43, 109, 163, 0.4);
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(125deg, rgba(43, 109, 163, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary);
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(56, 182, 255, 0.5);
+        }
+        
+        .card {
+            background: rgba(15, 20, 35, 0.8);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(43, 109, 163, 0.3);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(125deg, rgba(43, 109, 163, 0.05) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        .card h2 {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(56, 182, 255, 0.5);
+        }
+        
+        .card h2 i {
+            font-size: 1.8rem;
+        }
+        
+        .tools-panel {
+            grid-area: tools;
+        }
+        
+        .main-panel {
+            grid-area: main;
+        }
+        
+        .side-panel {
+            grid-area: side;
+        }
+        
+        .footer {
+            grid-area: footer;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            border-top: 1px solid var(--primary);
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .terminal {
+            background: var(--terminal-bg);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 20px;
+            height: 500px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .prompt {
+            color: var(--success);
+        }
+        
+        .command {
+            color: var(--secondary);
+        }
+        
+        .output {
+            color: #cccccc;
+        }
+        
+        .success {
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        .error {
+            color: var(--danger);
+        }
+        
+        .important {
+            color: var(--warning);
+            font-weight: bold;
+        }
+        
+        .flag {
+            color: var(--warning);
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+        }
+        
+        .input-area {
+            display: flex;
+            margin-top: 15px;
+        }
+        
+        #command-input {
+            flex-grow: 1;
+            background: rgba(10, 15, 30, 0.8);
+            border: 1px solid var(--primary);
+            color: var(--success);
+            padding: 12px 15px;
+            font-family: 'Fira Code', monospace;
+            font-size: 16px;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        #execute-btn {
+            background: linear-gradient(to bottom, var(--primary), #1e4d80);
+            color: white;
+            border: 1px solid var(--primary);
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        #execute-btn:hover {
+            background: linear-gradient(to bottom, #3a7cba, var(--primary));
+            box-shadow: 0 0 15px rgba(43, 109, 163, 0.7);
+        }
+        
+        .progress {
+            margin-top: 20px;
+            background: rgba(15, 20, 35, 0.8);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--primary);
+        }
+        
+        .progress-bar-container {
+            height: 30px;
+            background: rgba(10, 15, 25, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--secondary);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 15px;
+            width: 0%;
+            transition: width 1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-image: linear-gradient(
+                -45deg,
+                rgba(255, 255, 255, 0.2) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0.2) 75%,
+                transparent 75%,
+                transparent
+            );
+            z-index: 1;
+            background-size: 50px 50px;
+            animation: move 2s linear infinite;
+            overflow: hidden;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 15px;
+            color: var(--secondary);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .toolbox {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .tool {
+            background: rgba(20, 25, 45, 0.8);
+            border: 1px solid var(--secondary);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-align: center;
+        }
+        
+        .tool:hover {
+            background: rgba(30, 35, 60, 0.8);
+            box-shadow: 0 0 15px var(--secondary);
+            transform: translateY(-3px);
+        }
+        
+        .tool i {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+        
+        .packet-viewer {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            background: rgba(10, 15, 25, 0.8);
+            font-family: 'Fira Code', monospace;
+            white-space: pre;
+            margin-bottom: 20px;
+            font-size: 12px;
+            line-height: 1.2;
+        }
+        
+        .packet-time {
+            color: var(--accent);
+        }
+        
+        .packet-protocol {
+            color: var(--secondary);
+        }
+        
+        .packet-info {
+            color: var(--success);
+        }
+        
+        .protocol-analysis {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            background: rgba(10, 15, 25, 0.8);
+            font-family: 'Fira Code', monospace;
+            white-space: pre;
+            margin-bottom: 20px;
+            font-size: 12px;
+            line-height: 1.2;
+        }
+        
+        .protocol-field {
+            color: var(--accent);
+        }
+        
+        .protocol-value {
+            color: var(--secondary);
+        }
+        
+        .protocol-flag {
+            color: var(--success);
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            margin-right: 8px;
+            background: rgba(20, 25, 45, 0.5);
+            font-weight: 600;
+        }
+        
+        .tab.active {
+            background: rgba(30, 35, 60, 0.8);
+            border-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .file-system {
+            height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            background: rgba(10, 15, 25, 0.8);
+            margin-bottom: 20px;
+        }
+        
+        .file-item {
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(43, 109, 163, 0.3);
+        }
+        
+        .file-item:hover {
+            background: rgba(30, 35, 60, 0.5);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px 25px;
+            background: rgba(20, 25, 45, 0.95);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(43, 109, 163, 0.4);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .countdown {
+            font-size: 1.5rem;
+            color: var(--danger);
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(255, 42, 109, 0.7);
+        }
+        
+        .submit-section {
+            margin-top: 30px;
+            text-align: center;
+            padding: 30px;
+            background: rgba(20, 25, 45, 0.8);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            grid-column: 1 / -1;
+        }
+        
+        .submit-button {
+            background: linear-gradient(to bottom, var(--success), #00cc73);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 15px 10px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-button:hover {
+            box-shadow: 0 0 20px var(--success);
+            transform: translateY(-3px);
+        }
+        
+        .return-button {
+            background: linear-gradient(to bottom, var(--info), #0040cc);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 15px 10px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .return-button:hover {
+            box-shadow: 0 0 20px var(--info);
+            transform: translateY(-3px);
+        }
+        
+        .completion-message {
+            color: var(--success);
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .network-map {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .network-node {
+            background: rgba(25, 30, 50, 0.8);
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .network-node:hover {
+            background: rgba(35, 40, 70, 0.8);
+            box-shadow: 0 0 15px var(--secondary);
+            transform: translateY(-3px);
+        }
+        
+        .network-node.scanned {
+            border-color: var(--success);
+            background: rgba(20, 40, 25, 0.8);
+        }
+        
+        .network-node.locked {
+            border-color: var(--danger);
+            background: rgba(40, 20, 25, 0.8);
+            cursor: not-allowed;
+        }
+        
+        @keyframes move {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 50px 50px;
+            }
+        }
+        
+        .scan-line {
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: linear-gradient(to right, transparent, var(--secondary), transparent);
+            top: 0;
+            animation: scan 3s linear infinite;
+            z-index: 1;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        
+        .analysis-note {
+            color: var(--accent);
+            font-style: italic;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .packet-filter {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        #filter-input {
+            flex-grow: 1;
+            background: rgba(10, 15, 30, 0.8);
+            border: 1px solid var(--primary);
+            color: var(--success);
+            padding: 8px 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        #filter-btn {
+            background: linear-gradient(to bottom, var(--primary), #1e4d80);
+            color: white;
+            border: 1px solid var(--primary);
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LEVEL 8: NETWORK TRAFFIC & PROTOCOL ABUSE</h1>
+            <p class="subtitle">Analyze Network Traffic to Uncover Covert Channels and Hidden Flags</p>
+            <div class="scan-line"></div>
+            <div class="countdown" id="countdown">TIME: 89:59</div>
+        </header>
+        
+        <div class="card main-panel">
+            <h2><i class="fas fa-network-wired"></i> Network Analysis Terminal</h2>
+            <p>Analyze the network traffic capture to uncover hidden flags in covert channels.</p>
+            
+            <div class="terminal" id="terminal">
+                <div class="terminal-line">
+                    <span class="prompt">net@traffic-analysis:~$</span>
+                    <span class="output">Initializing Network Analysis Environment</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">net@traffic-analysis:~$</span>
+                    <span class="output">Loading tools: tcpdump, wireshark, curl, netcat, dig, base64</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">net@traffic-analysis:~$</span>
+                    <span class="output">Target: traffic.pcapng (2.4GB, 1.2M packets, multiple protocols)</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">net@traffic-analysis:~$</span>
+                    <span class="output">Type 'help' for available commands</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">net@traffic-analysis:~$</span>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="command-input" placeholder="Type command here..." autofocus>
+                <button id="execute-btn" onclick="executeCommand()">EXECUTE</button>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="progress-text" id="progress-text">Analysis Progress: 0%</div>
+            </div>
+        </div>
+        
+        <div class="card side-panel">
+            <h2><i class="fas fa-file-alt"></i> File System</h2>
+            
+            <div class="file-system">
+                <div class="file-item" onclick="selectFile('traffic.pcapng')">
+                    <i class="fas fa-file-code"></i>
+                    <span>traffic.pcapng (2.4GB) - Main capture file</span>
+                </div>
+                <div class="file-item" onclick="selectFile('dns_logs')">
+                    <i class="fas fa-folder"></i>
+                    <span>dns_logs/ - DNS query analysis</span>
+                </div>
+                <div class="file-item" onclick="selectFile('http_streams')">
+                    <i class="fas fa-folder"></i>
+                    <span>http_streams/ - Extracted HTTP objects</span>
+                </div>
+                <div class="file-item" onclick="selectFile('icmp_data.bin')">
+                    <i class="fas fa-file"></i>
+                    <span>icmp_data.bin - Reconstructed ICMP payload</span>
+                </div>
+                <div class="file-item" onclick="selectFile('audio_stream.wav')">
+                    <i class="fas fa-file-audio"></i>
+                    <span>audio_stream.wav - Extracted RTP audio</span>
+                </div>
+            </div>
+            
+            <h2><i class="fas fa-sitemap"></i> Network Map</h2>
+            <div class="network-map">
+                <div class="network-node" onclick="analyzeNode('dns_server')">
+                    <h3>DNS Server</h3>
+                    <p>10.0.0.5:53</p>
+                </div>
+                <div class="network-node" onclick="analyzeNode('web_server')">
+                    <h3>Web Server</h3>
+                    <p>192.168.10.20:80</p>
+                </div>
+                <div class="network-node locked" onclick="analyzeNode('mystery_host')">
+                    <h3>Mystery Host</h3>
+                    <p>172.16.8.77:31337</p>
+                </div>
+                <div class="network-node locked" onclick="analyzeNode('client')">
+                    <h3>Client</h3>
+                    <p>192.168.10.100</p>
+                </div>
+                <div class="network-node locked" onclick="analyzeNode('router')">
+                    <h3>Router</h3>
+                    <p>192.168.10.1</p>
+                </div>
+                <div class="network-node locked" onclick="analyzeNode('voip_server')">
+                    <h3>VoIP Server</h3>
+                    <p>10.5.5.10:5060</p>
+                </div>
+                <div class="network-node locked" onclick="analyzeNode('malicious')">
+                    <h3>Suspicious Host</h3>
+                    <p>203.0.113.42:6667</p>
+                </div>
+                <div class="network-node locked" onclick="analyzeNode('broadcast')">
+                    <h3>Broadcast</h3>
+                    <p>192.168.10.255</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card tools-panel">
+            <h2><i class="fas fa-tools"></i> Network Analysis Tools</h2>
+            
+            <div class="tab-container">
+                <div class="tab active" onclick="switchTab('packet-tab')">Packet Analysis</div>
+                <div class="tab" onclick="switchTab('protocol-tab')">Protocol Decoding</div>
+                <div class="tab" onclick="switchTab('reconstruction-tab')">Data Reconstruction</div>
+            </div>
+            
+            <div id="packet-tab" class="tab-content active">
+                <div class="packet-filter">
+                    <input type="text" id="filter-input" placeholder="tcpdump filter expression (e.g., icmp, dns, tcp.port==80)">
+                    <button id="filter-btn" onclick="applyFilter()">Apply Filter</button>
+                </div>
+                
+                <div class="packet-viewer" id="packet-output">
+                    // Packet output will appear here
+                    // Use tcpdump or apply filters to analyze traffic
+                </div>
+                
+                <div class="toolbox">
+                    <div class="tool" onclick="executeTool('tcpdump')">
+                        <i class="fas fa-stream"></i>
+                        <span>tcpdump</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('dns_analysis')">
+                        <i class="fas fa-server"></i>
+                        <span>DNS Analysis</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('http_analysis')">
+                        <i class="fas fa-globe"></i>
+                        <span>HTTP Analysis</span>
+                    </div>
+                    <div class="tool" onclick="executeTool('icmp_analysis')">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>ICMP Analysis</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="protocol-tab" class="tab-content">
+                <div class="protocol-analysis" id="protocol-output">
+                    // Protocol decoding will appear here
+                    // Analyze specific protocols for hidden data
+                </div>
+                
+                <div class="toolbox">
+                    <div class="tool" onclick="decodeProtocol('dns_txt')">
+                        <i class="fas fa-font"></i>
+                        <span>DNS TXT</span>
+                    </div>
+                    <div class="tool" onclick="decodeProtocol('tcp_options')">
+                        <i class="fas fa-cog"></i>
+                        <span>TCP Options</span>
+                    </div>
+                    <div class="tool" onclick="decodeProtocol('icmp_payload')">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>ICMP Payload</span>
+                    </div>
+                    <div class="tool" onclick="decodeProtocol('dns_null')">
+                        <i class="fas fa-question-circle"></i>
+                        <span>DNS NULL</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="reconstruction-tab" class="tab-content">
+                <div class="protocol-analysis" id="reconstruction-output">
+                    // Data reconstruction will appear here
+                    // Reconstruct hidden data from multiple packets
+                </div>
+                
+                <div class="toolbox">
+                    <div class="tool" onclick="reconstructData('dns_exfil')">
+                        <i class="fas fa-puzzle-piece"></i>
+                        <span>DNS Exfiltration</span>
+                    </div>
+                    <div class="tool" onclick="reconstructData('audio_stego')">
+                        <i class="fas fa-music"></i>
+                        <span>Audio Steganography</span>
+                    </div>
+                    <div class="tool" onclick="reconstructData('http_stream')">
+                        <i class="fas fa-film"></i>
+                        <span>HTTP Stream</span>
+                    </div>
+                    <div class="tool" onclick="reconstructData('xor_decoder')">
+                        <i class="fas fa-unlock"></i>
+                        <span>XOR Decoder</span>
+                    </div>
+                </div>
+                <div class="analysis-note">
+                    Note: Some covert channels require multiple steps to decode
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>NETWORK ANALYSIS CHALLENGE | LEVEL 8 CTF | PROTOCOL ABUSE ANALYSIS</p>
+            <p>This is a simulation for educational purposes only. All challenges are fictional.</p>
+        </div>
+        
+        <div class="submit-section">
+            <p>Found all 6 flags? Submit your success!</p>
+            <button class="submit-button" onclick="submitCompletion()">Mission Complete</button>
+            <button class="return-button" onclick="returnToTown()">Emergency Exit</button>
+            <div id="completion-message" class="completion-message"></div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <span id="notification-text"></span>
+    </div>
+
+    <script>
+        // Initialize variables
+        let progress = 0;
+        let flagsFound = [];
+        let nodesScanned = [];
+        let commandHistory = [];
+        let historyIndex = -1;
+        let currentTab = 'packet-tab';
+        let timeLeft = 89 * 60; // 89 minutes in seconds
+        let currentFilter = '';
+        
+        // Define all 6 CTF flags
+        const allFlags = [
+            'CTF{dns_txt_exfil_reconstructed}',
+            'CTF{icmp_covert_xor_payload}',
+            'CTF{http_noise_header_flag}',
+            'CTF{tcp_options_hidden_field}',
+            'CTF{dns_null_obscure_record}',
+            'CTF{rtp_audio_steganography}'
+        ];
+        
+        // Initialize terminal
+        const terminal = document.getElementById('terminal');
+        const commandInput = document.getElementById('command-input');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
+        const completionMessage = document.getElementById('completion-message');
+        const countdownElement = document.getElementById('countdown');
+        const packetOutput = document.getElementById('packet-output');
+        const protocolOutput = document.getElementById('protocol-output');
+        const reconstructionOutput = document.getElementById('reconstruction-output');
+        const filterInput = document.getElementById('filter-input');
+        
+        // Add event listener for Enter key
+        commandInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                executeCommand();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                navigateHistory(-1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                navigateHistory(1);
+            }
+        });
+        
+        function navigateHistory(direction) {
+            if (commandHistory.length === 0) return;
+            
+            historyIndex += direction;
+            
+            if (historyIndex < 0) historyIndex = 0;
+            if (historyIndex >= commandHistory.length) historyIndex = commandHistory.length - 1;
+            
+            commandInput.value = commandHistory[historyIndex];
+        }
+        
+        function executeCommand() {
+            const command = commandInput.value.trim();
+            if (!command) return;
+            
+            // Add to history
+            commandHistory.push(command);
+            historyIndex = commandHistory.length;
+            
+            // Display command
+            addTerminalLine(`<span class="prompt">net@traffic-analysis:~$</span> <span class="command">${command}</span>`);
+            
+            // Process command
+            processCommand(command);
+            
+            // Clear input
+            commandInput.value = '';
+            commandInput.focus();
+        }
+        
+        function processCommand(cmd) {
+            const command = cmd.toLowerCase();
+            
+            if (command === 'help') {
+                showHelp();
+            } else if (command === 'clear') {
+                clearTerminal();
+            } else if (command === 'exit') {
+                addTerminalLine('<span class="output">Exiting network analysis environment...</span>');
+            } else if (command === 'ls' || command === 'dir') {
+                listFiles();
+            } else if (command === 'whoami') {
+                addTerminalLine('<span class="output">network-forensic-analyst</span>');
+            } else if (command === 'pwd') {
+                addTerminalLine('<span class="output">/home/net/traffic-analysis</span>');
+            } else if (command.startsWith('tcpdump')) {
+                runTcpdump(command);
+            } else if (command.startsWith('strings')) {
+                runStrings(command);
+            } else if (command.startsWith('dig')) {
+                runDig(command);
+            } else if (command.startsWith('curl')) {
+                runCurl(command);
+            } else if (command.startsWith('nc ') || command.startsWith('netcat')) {
+                runNetcat(command);
+            } else if (command.startsWith('base64')) {
+                runBase64(command);
+            } else if (command === 'show flags') {
+                showFlags();
+            } else if (command === 'show progress') {
+                showProgress();
+            } else if (command === 'status') {
+                showStatus();
+            } else {
+                addTerminalLine(`<span class="error">Command not recognized: ${cmd}. Type 'help' for available commands.</span>`);
+            }
+        }
+        
+        function runTcpdump(cmd) {
+            addTerminalLine('<span class="output">Analyzing network traffic with tcpdump...</span>');
+            
+            setTimeout(() => {
+                if (cmd.includes("-A") && cmd.includes("icmp")) {
+                    packetOutput.innerHTML = `<span class="packet-time">10:23:45.123456</span> <span class="packet-protocol">IP</span> 192.168.10.100 > 203.0.113.42: <span class="packet-info">ICMP echo request, id 12345, seq 1, length 64</span>
+<span class="packet-time">10:23:45.123789</span> <span class="packet-protocol">IP</span> 203.0.113.42 > 192.168.10.100: <span class="packet-info">ICMP echo reply, id 12345, seq 1, length 64</span>
+<span class="packet-time">10:23:46.234567</span> <span class="packet-protocol">IP</span> 192.168.10.100 > 203.0.113.42: <span class="packet-info">ICMP echo request, id 12345, seq 2, length 64</span>
+<span class="packet-time">10:23:46.234890</span> <span class="packet-protocol">IP</span> 203.0.113.42 > 192.168.10.100: <span class="packet-info">ICMP echo reply, id 12345, seq 2, length 64</span>
+<span class="packet-time">10:23:47.345678</span> <span class="packet-protocol">IP</span> 192.168.10.100 > 203.0.113.42: <span class="packet-info">ICMP echo request, id 12345, seq 3, length 64</span>
+<span class="packet-time">10:23:47.346001</span> <span class="packet-protocol">IP</span> 203.0.113.42 > 192.168.10.100: <span class="packet-info">ICMP echo reply, id 12345, seq 3, length 64</span>`;
+
+                    addTerminalLine('<span class="output">ICMP traffic analysis complete. Notice the pattern in payload data.</span>');
+                } else if (cmd.includes("dns") && cmd.includes("port 53")) {
+                    packetOutput.innerHTML = `<span class="packet-time">10:24:12.456789</span> <span class="packet-protocol">IP</span> 192.168.10.100.54321 > 10.0.0.5.53: <span class="packet-info">47341+ TXT? ctf.example.com. (35)</span>
+<span class="packet-time">10:24:12.457123</span> <span class="packet-protocol">IP</span> 10.0.0.5.53 > 192.168.10.100.54321: <span class="packet-info">47341 TXT 1/0/0 "Q" (84)</span>
+<span class="packet-time">10:24:13.567890</span> <span class="packet-protocol">IP</span> 192.168.10.100.54322 > 10.0.0.5.53: <span class="packet-info">47342+ TXT? ctf.example.com. (35)</span>
+<span class="packet-time">10:24:13.568224</span> <span class="packet-protocol">IP</span> 10.0.0.5.53 > 192.168.10.100.54322: <span class="packet-info">47342 TXT 1/0/0 "l" (84)</span>
+<span class="packet-time">10:24:14.678901</span> <span class="packet-protocol">IP</span> 192.168.10.100.54323 > 10.0.0.5.53: <span class="packet-info">47343+ TXT? ctf.example.com. (35)</span>
+<span class="packet-time">10:24:14.679235</span> <span class="packet-protocol">IP</span> 10.0.0.5.53 > 192.168.10.100.54323: <span class="packet-info">47343 TXT 1/0/0 "w" (84)</span>`;
+
+                    addTerminalLine('<span class="output">DNS traffic analysis complete. Notice the single-character TXT responses.</span>');
+                } else if (cmd.includes("tcp") && cmd.includes("port 80")) {
+                    packetOutput.innerHTML = `<span class="packet-time">10:25:33.123456</span> <span class="packet-protocol">IP</span> 192.168.10.100.45678 > 192.168.10.20.80: <span class="packet-info">Flags [S], seq 123456789, win 64240, options [mss 1460,sackOK,TS val 1234567 ecr 0,nop,wscale 7], length 0</span>
+<span class="packet-time">10:25:33.123789</span> <span class="packet-protocol">IP</span> 192.168.10.20.80 > 192.168.10.100.45678: <span class="packet-info">Flags [S.], seq 987654321, ack 123456790, win 65160, options [mss 1460,sackOK,TS val 7654321 ecr 1234567,nop,wscale 7], length 0</span>
+<span class="packet-time">10:25:33.234567</span> <span class="packet-protocol">IP</span> 192.168.10.100.45678 > 192.168.10.20.80: <span class="packet-info">Flags [.], ack 1, win 502, options [nop,nop,TS val 1234668 ecr 7654321], length 0</span>
+<span class="packet-time">10:25:33.345678</span> <span class="packet-protocol">IP</span> 192.168.10.100.45678 > 192.168.10.20.80: <span class="packet-info">Flags [P.], seq 1:518, ack 1, win 502, options [nop,nop,TS val 1234779 ecr 7654321], length 517: HTTP: GET /noise.php HTTP/1.1</span>
+<span class="packet-time">10:25:33.456789</span> <span class="packet-protocol">IP</span> 192.168.10.20.80 > 192.168.10.100.45678: <span class="packet-info">Flags [.], ack 518, win 506, options [nop,nop,TS val 7655432 ecr 1234779], length 0</span>
+<span class="packet-time">10:25:33.567890</span> <span class="packet-protocol">IP</span> 192.168.10.20.80 > 192.168.10.100.45678: <span class="packet-info">Flags [P.], seq 1:730, ack 518, win 506, options [nop,nop,TS val 7656543 ecr 1234779], length 729: HTTP: HTTP/1.1 200 OK</span>`;
+
+                    addTerminalLine('<span class="output">HTTP traffic analysis complete. Look for unusual headers in the response.</span>');
+                } else {
+                    packetOutput.innerHTML = `<span class="output">Usage: tcpdump -r traffic.pcapng [options] [filter expression]</span>
+<span class="output">Common options: -n (no name resolution), -A (print ASCII), -X (print hex and ASCII)</span>
+<span class="output">Filter examples: icmp, dns, tcp port 80, host 10.0.0.5, net 192.168.10.0/24</span>`;
+                    addTerminalLine('<span class="output">tcpdump analysis started. Specify a filter to narrow down results.</span>');
+                }
+            }, 2000);
+        }
+        
+        function runStrings(cmd) {
+            addTerminalLine('<span class="output">Extracting printable strings from pcap file...</span>');
+            
+            setTimeout(() => {
+                packetOutput.innerHTML = `<span class="output">Scanning traffic.pcapng for ASCII strings...</span>
+<span class="output">Found 124,567 strings</span>
+<span class="output">Filtering interesting strings...</span>
+<span class="output">X-CTF-Flag: RlRGe2h0dHBfbm9pc2VfaGVhZGVyX2ZsYWd9</span>
+<span class="output">User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0</span>
+<span class="output">Authorization: Basic dGF3b25fbWFmaWE6c2VjcmV0cGFzc3dvcmQ=</span>
+<span class="output">##RTP_AUDIO_STREAM##</span>
+<span class="output">##ICMP_COVERT_CHANNEL##</span>
+<span class="output">##DNS_EXFILTRATION##</span>`;
+
+                addTerminalLine('<span class="output">Strings extraction complete. Found interesting headers and markers.</span>');
+                
+                // Check if they found the encoded flag
+                if (cmd.includes("X-CTF-Flag")) {
+                    if (!flagsFound.includes('CTF{http_noise_header_flag}')) {
+                        flagsFound.push('CTF{http_noise_header_flag}');
+                        addTerminalLine('<span class="important">Flag 3: CTF{http_noise_header_flag}</span>');
+                        showNotification('HTTP Header Flag Found - Flag 3 Discovered');
+                        updateProgress(16.7);
+                    }
+                }
+            }, 2000);
+        }
+        
+        function runDig(cmd) {
+            addTerminalLine('<span class="output">Querying DNS server for information...</span>');
+            
+            setTimeout(() => {
+                if (cmd.includes("TXT") && cmd.includes("ctf.example.com")) {
+                    protocolOutput.innerHTML = `<span class="protocol-field">; <<>> DiG 9.16.1-Ubuntu <<>> @10.0.0.5 ctf.example.com TXT</span>
+<span class="protocol-field">; (1 server found)</span>
+<span class="protocol-field">;; global options: +cmd</span>
+<span class="protocol-field">;; Got answer:</span>
+<span class="protocol-field">;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 47341</span>
+<span class="protocol-field">;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1</span>
+<span class="protocol-field">;; WARNING: recursion requested but not available</span>
+
+<span class="protocol-field">;; QUESTION SECTION:</span>
+<span class="protocol-field">;ctf.example.com.               IN      TXT</span>
+
+<span class="protocol-field">;; ANSWER SECTION:</span>
+<span class="protocol-field">ctf.example.com.        300     IN      TXT     "Q"</span>
+
+<span class="protocol-field">;; Query time: 23 msec</span>
+<span class="protocol-field">;; SERVER: 10.0.0.5#53(10.0.0.5)</span>
+<span class="protocol-field">;; WHEN: Wed Jun 15 10:24:12 EDT 2023</span>
+<span class="protocol-field">;; MSG SIZE  rcvd: 84</span>`;
+
+                    addTerminalLine('<span class="output">DNS TXT query completed. Notice the single character response.</span>');
+                    addTerminalLine('<span class="output">Try querying multiple times to reconstruct the full message.</span>');
+                } else if (cmd.includes("NULL") && cmd.includes("ctf.example.com")) {
+                    protocolOutput.innerHTML = `<span class="protocol-field">; <<>> DiG 9.16.1-Ubuntu <<>> @10.0.0.5 ctf.example.com NULL</span>
+<span class="protocol-field">; (1 server found)</span>
+<span class="protocol-field">;; global options: +cmd</span>
+<span class="protocol-field">;; Got answer:</span>
+<span class="protocol-field">;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 47399</span>
+<span class="protocol-field">;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1</span>
+<span class="protocol-field">;; WARNING: recursion requested but not available</span>
+
+<span class="protocol-field">;; QUESTION SECTION:</span>
+<span class="protocol-field">;ctf.example.com.               IN      NULL</span>
+
+<span class="protocol-field">;; ANSWER SECTION:</span>
+<span class="protocol-field">ctf.example.com.        300     IN      NULL    \\# 46 4354467b646e735f6e756c6c5f6f6273637572655f7265636f72647d</span>
+
+<span class="protocol-field">;; Query time: 27 msec</span>
+<span class="protocol-field">;; SERVER: 10.0.0.5#53(10.0.0.5)</span>
+<span class="protocol-field">;; WHEN: Wed Jun 15 10:35:42 EDT 2023</span>
+<span class="protocol-field">;; MSG SIZE  rcvd: 97</span>`;
+
+                    addTerminalLine('<span class="output">DNS NULL query completed. Found encoded data in response.</span>');
+                    
+                    if (!flagsFound.includes('CTF{dns_null_obscure_record}')) {
+                        flagsFound.push('CTF{dns_null_obscure_record}');
+                        addTerminalLine('<span class="important">Flag 5: CTF{dns_null_obscure_record}</span>');
+                        showNotification('DNS NULL Record Flag Found - Flag 5 Discovered');
+                        updateProgress(16.7);
+                    }
+                } else {
+                    addTerminalLine('<span class="error">Usage: dig @server domain querytype</span>');
+                    addTerminalLine('<span class="error">Try: dig @10.0.0.5 ctf.example.com TXT</span>');
+                }
+            }, 1500);
+        }
+        
+        function runCurl(cmd) {
+            addTerminalLine('<span class="output">Making HTTP request with curl...</span>');
+            
+            setTimeout(() => {
+                if (cmd.includes("192.168.10.20") || cmd.includes("-H") || cmd.includes("--header")) {
+                    protocolOutput.innerHTML = `<span class="protocol-field">> GET /noise.php HTTP/1.1</span>
+<span class="protocol-field">> Host: 192.168.10.20</span>
+<span class="protocol-field">> User-Agent: curl/7.68.0</span>
+<span class="protocol-field">> Accept: */*</span>
+<span class="protocol-field">> X-CTF-Flag: RlRGe2h0dHBfbm9pc2VfaGVhZGVyX2ZsYWd9</span>
+<span class="protocol-field">></span>
+<span class="protocol-field">< HTTP/1.1 200 OK</span>
+<span class="protocol-field">< Date: Wed, 15 Jun 2023 14:25:33 GMT</span>
+<span class="protocol-field">< Server: Apache/2.4.41 (Ubuntu)</span>
+<span class="protocol-field">< Content-Length: 647</span>
+<span class="protocol-field">< Content-Type: text/html; charset=UTF-8</span>
+<span class="protocol-field"><</span>
+<span class="protocol-field"><!DOCTYPE html></span>
+<span class="protocol-field"><html></span>
+<span class="protocol-field"><head></span>
+<span class="protocol-field"><title>Noise Generator</title></span>
+<span class="protocol-field"></head></span>
+<span class="protocol-field"><body></span>
+<span class="protocol-field"><h1>Welcome to the Noise Generator</h1></span>
+<span class="protocol-field"><p>This page generates random noise for testing purposes.</p></span>
+<span class="protocol-field"><!-- 1000+ lines of random content --></span>
+<span class="protocol-field"></body></span>
+<span class="protocol-field"></html></span>`;
+
+                    addTerminalLine('<span class="output">HTTP request completed. Check response headers for flags.</span>');
+                    
+                    if (!flagsFound.includes('CTF{http_noise_header_flag}')) {
+                        flagsFound.push('CTF{http_noise_header_flag}');
+                        addTerminalLine('<span class="important">Flag 3: CTF{http_noise_header_flag}</span>');
+                        showNotification('HTTP Header Flag Found - Flag 3 Discovered');
+                        updateProgress(16.7);
+                    }
+                } else {
+                    addTerminalLine('<span class="error">Usage: curl [options] [URL]</span>');
+                    addTerminalLine('<span class="error">Try: curl -H "X-CTF-Flag: dummy" http://192.168.10.20/noise.php</span>');
+                }
+            }, 1500);
+        }
+        
+        function runNetcat(cmd) {
+            addTerminalLine('<span class="output">Establishing network connection with netcat...</span>');
+            
+            setTimeout(() => {
+                if (cmd.includes("10.0.0.5") && cmd.includes("53")) {
+                    protocolOutput.innerHTML = `<span class="output">Connected to 10.0.0.5 port 53</span>
+<span class="output">Sending manual DNS query...</span>
+<span class="output">Received response: </span>
+<span class="protocol-field">;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 12345</span>
+<span class="protocol-field">;; flags: qr aa; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0</span>
+
+<span class="protocol-field">;; QUESTION SECTION:</span>
+<span class="protocol-field">;ctf.example.com.               IN      TXT</span>
+
+<span class="protocol-field">;; ANSWER SECTION:</span>
+<span class="protocol-field">ctf.example.com.        300     IN      TXT     "Q"</span>`;
+
+                    addTerminalLine('<span class="output">Netcat DNS query completed. Single character response received.</span>');
+                } else {
+                    addTerminalLine('<span class="error">Usage: nc [options] host port</span>');
+                    addTerminalLine('<span class="error">Try: nc 10.0.0.5 53</span>');
+                }
+            }, 1500);
+        }
+        
+        function runBase64(cmd) {
+            addTerminalLine('<span class="output">Running base64 encoding/decoding...</span>');
+            
+            setTimeout(() => {
+                if (cmd.includes("-d") && cmd.includes("RlRGe2h0dHBfbm9pc2VfaGVhZGVyX2ZsYWd9")) {
+                    protocolOutput.innerHTML = `<span class="output">$ echo "RlRGe2h0dHBfbm9pc2VfaGVhZGVyX2ZsYWd9" | base64 -d</span>
+<span class="output">CTF{http_noise_header_flag}</span>`;
+                    
+                    if (!flagsFound.includes('CTF{http_noise_header_flag}')) {
+                        flagsFound.push('CTF{http_noise_header_flag}');
+                        addTerminalLine('<span class="important">Flag 3: CTF{http_noise_header_flag}</span>');
+                        showNotification('Base64 Decoded Flag Found - Flag 3 Discovered');
+                        updateProgress(16.7);
+                    }
+                } else {
+                    protocolOutput.innerHTML = `<span class="output">Usage: base64 [option] [file]</span>
+<span class="output">Options: -d, --decode   decode data</span>
+<span class="output">         -i, --ignore-garbage   when decoding, ignore non-alphabet characters</span>
+<span class="output">Try: echo "RlRGe2h0dHBfbm9pc2VfaGVhZGVyX2ZsYWd9" | base64 -d</span>`;
+                }
+            }, 1000);
+        }
+        
+        function listFiles() {
+            addTerminalLine('<span class="output">total 2.4G</span>');
+            addTerminalLine('<span class="output">-rw-r--r-- 1 net net  2.4G Jun 15 10:12 traffic.pcapng</span>');
+            addTerminalLine('<span class="output">drwxr-xr-x 2 net net  4.0K Jun 15 10:13 dns_logs/</span>');
+            addTerminalLine('<span class="output">drwxr-xr-x 2 net net  4.0K Jun 15 10:14 http_streams/</span>');
+            addTerminalLine('<span class="output">-rw-r--r-- 1 net net  512K Jun 15 10:15 icmp_data.bin</span>');
+            addTerminalLine('<span class="output">-rw-r--r-- 1 net net  8.7M Jun 15 10:16 audio_stream.wav</span>');
+        }
+        
+        function showHelp() {
+            addTerminalLine('<span class="output">Available network analysis commands:</span>');
+            addTerminalLine('<span class="output">- tcpdump -r traffic.pcapng [filter] - Analyze network traffic</span>');
+            addTerminalLine('<span class="output">- strings traffic.pcapng - Extract printable strings</span>');
+            addTerminalLine('<span class="output">- dig @10.0.0.5 ctf.example.com TXT - Query DNS TXT records</span>');
+            addTerminalLine('<span class="output">- curl -H "Header: value" http://192.168.10.20 - Make HTTP requests</span>');
+            addTerminalLine('<span class="output">- nc 10.0.0.5 53 - Connect to network services</span>');
+            addTerminalLine('<span class="output">- base64 -d [string] - Decode base64 strings</span>');
+            addTerminalLine('<span class="output">- show flags - Display found flags</span>');
+            addTerminalLine('<span class="output">- show progress - Display analysis progress</span>');
+            addTerminalLine('<span class="output">- status - Show current analysis status</span>');
+            addTerminalLine('<span class="output">- clear - Clear terminal</span>');
+        }
+        
+        function showFlags() {
+            if (flagsFound.length === 0) {
+                addTerminalLine('<span class="output">No flags collected yet</span>');
+            } else {
+                addTerminalLine('<span class="output">Flags collected:</span>');
+                flagsFound.forEach(flag => {
+                    addTerminalLine(`<span class="important">- ${flag}</span>`);
+                });
+            }
+        }
+        
+        function showProgress() {
+            addTerminalLine(`<span class="output">Analysis progress: ${progress}%</span>`);
+            addTerminalLine(`<span class="output">Flags collected: ${flagsFound.length}/6</span>`);
+        }
+        
+        function showStatus() {
+            addTerminalLine('<span class="output">Current analysis status:</span>');
+            addTerminalLine('<span class="output">- DNS exfiltration: Partially analyzed</span>');
+            addTerminalLine('<span class="output">- ICMP covert channel: Detected</span>');
+            addTerminalLine('<span class="output">- HTTP hidden flag: Found</span>');
+            addTerminalLine('<span class="output">- TCP options: Not analyzed</span>');
+            addTerminalLine('<span class="output">- DNS NULL records: Not queried</span>');
+            addTerminalLine('<span class="output">- RTP audio steganography: Suspected</span>');
+        }
+        
+        function clearTerminal() {
+            terminal.innerHTML = '';
+            addTerminalLine('<span class="prompt">net@traffic-analysis:~$</span> <span class="output">Terminal cleared</span>');
+        }
+        
+        function addTerminalLine(content) {
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.innerHTML = content;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        function updateProgress(value) {
+            progress += value;
+            if (progress > 100) progress = 100;
+            
+            progressBar.style.width = progress + '%';
+            progressText.textContent = `Analysis Progress: ${progress}%`;
+            
+            if (progress >= 80) {
+                progressBar.style.background = 'linear-gradient(to right, var(--success), #00cc00)';
+            }
+            
+            // Check if all flags are found
+            if (flagsFound.length >= 6 && progress < 100) {
+                progress = 100;
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Analysis Progress: 100%';
+                addTerminalLine('<span class="important">MISSION ACCOMPLISHED! All flags found and network analysis complete!</span>');
+                showNotification('Mission Accomplished! All Flags Collected!', true);
+            }
+        }
+        
+        function showNotification(message, isImportant = false) {
+            notificationText.textContent = message;
+            if (isImportant) {
+                notification.style.borderColor = 'var(--warning)';
+                notification.style.boxShadow = '0 0 20px rgba(255, 204, 0, 0.7)';
+            } else {
+                notification.style.borderColor = 'var(--primary)';
+                notification.style.boxShadow = '0 0 20px rgba(43, 109, 163, 0.4)';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            
+            currentTab = tabId;
+        }
+        
+        function selectFile(file) {
+            addTerminalLine(`<span class="prompt">net@traffic-analysis:~$</span> <span class="command">select ${file}</span>`);
+            
+            switch(file) {
+                case 'traffic.pcapng':
+                    addTerminalLine('<span class="output">Selected traffic.pcapng as analysis target</span>');
+                    break;
+                    
+                case 'dns_logs':
+                    addTerminalLine('<span class="output">Opening dns_logs/ directory</span>');
+                    addTerminalLine('<span class="output">Contents: queries.log responses.log exfil_pattern.txt</span>');
+                    break;
+            }
+        }
+        
+        function analyzeNode(node) {
+            if (node === 'dns_server') {
+                addTerminalLine('<span class="prompt">net@traffic-analysis:~$</span> <span class="command">analyze dns_server</span>');
+                addTerminalLine('<span class="output">Analyzing DNS server 10.0.0.5:53...</span>');
+                
+                setTimeout(() => {
+                    addTerminalLine('<span class="output">Found unusual TXT record responses</span>');
+                    addTerminalLine('<span class="output">DNS NULL records available for ctf.example.com</span>');
+                    addTerminalLine('<span class="output">Try: dig @10.0.0.5 ctf.example.com NULL</span>');
+                    
+                    // Mark node as scanned
+                    document.querySelector('.network-node:nth-child(1)').classList.add('scanned');
+                }, 2000);
+            } else if (node === 'web_server') {
+                addTerminalLine('<span class="prompt">net@traffic-analysis:~$</span> <span class="command">analyze web_server</span>');
+                addTerminalLine('<span class="output">Analyzing web server 192.168.10.20:80...</span>');
+                
+                setTimeout(() => {
+                    addTerminalLine('<span class="output">Found /noise.php endpoint with unusual headers</span>');
+                    addTerminalLine('<span class="output">Try: curl -H "X-CTF-Flag: dummy" http://192.168.10.20/noise.php</span>');
+                    
+                    // Mark node as scanned
+                    document.querySelector('.network-node:nth-child(2)').classList.add('scanned');
+                }, 2000);
+            } else {
+                addTerminalLine('<span class="error">Node locked. Analyze DNS and web servers first.</span>');
+            }
+        }
+        
+        function executeTool(tool) {
+            addTerminalLine(`<span class="prompt">net@traffic-analysis:~$</span> <span class="command">${tool}</span>`);
+            
+            switch(tool) {
+                case 'tcpdump':
+                    runTcpdump('tcpdump -r traffic.pcapng');
+                    break;
+                    
+                case 'dns_analysis':
+                    runTcpdump('tcpdump -r traffic.pcapng -n port 53');
+                    break;
+                    
+                case 'http_analysis':
+                    runTcpdump('tcpdump -r traffic.pcapng -n port 80');
+                    break;
+                    
+                case 'icmp_analysis':
+                    runTcpdump('tcpdump -r traffic.pcapng -n icmp');
+                    break;
+            }
+        }
+        
+        function applyFilter() {
+            const filter = filterInput.value.trim();
+            if (!filter) return;
+            
+            currentFilter = filter;
+            addTerminalLine(`<span class="prompt">net@traffic-analysis:~$</span> <span class="command">tcpdump -r traffic.pcapng ${filter}</span>`);
+            
+            if (filter.includes("icmp")) {
+                runTcpdump('tcpdump -r traffic.pcapng -A icmp');
+            } else if (filter.includes("dns")) {
+                runTcpdump('tcpdump -r traffic.pcapng -n port 53');
+            } else if (filter.includes("port 80")) {
+                runTcpdump('tcpdump -r traffic.pcapng -n port 80');
+            } else {
+                packetOutput.innerHTML = `<span class="output">Applying filter: ${filter}</span>
+<span class="output">tcpdump: reading from file traffic.pcapng</span>
+<span class="output">Filter expression: ${filter}</span>
+<span class="output">1000+ packets captured</span>
+<span class="output">Use more specific filters to narrow down results</span>`;
+            }
+        }
+        
+        function decodeProtocol(protocol) {
+            addTerminalLine(`<span class="prompt">net@traffic-analysis:~$</span> <span class="command">decode ${protocol}</span>`);
+            
+            switch(protocol) {
+                case 'dns_txt':
+                    protocolOutput.innerHTML = `<span class="output">Decoding DNS TXT exfiltration...</span>
+<span class="output">Querying DNS server for all TXT records...</span>
+<span class="output">Reconstructed data: QlwvXyheKS4qJF4k</span>
+<span class="output">Base64 decoding: B\/_(^).*$^$</span>
+<span class="output">Not a flag. Try a different approach.</span>
+<span class="output">Hint: The flag is split across multiple single-character TXT responses</span>
+<span class="output">Reconstruct in order: Q + l + w + ...</span>`;
+                    break;
+                    
+                case 'tcp_options':
+                    protocolOutput.innerHTML = `<span class="output">Analyzing TCP options field...</span>
+<span class="output">Found unusual option values in SYN packets</span>
+<span class="output">Option 34: 0x4354467b</span>
+<span class="output">Option 78: 0x7463705f</span>
+<span class="output">Option 123: 0x6f707469</span>
+<span class="output">Option 201: 0x6f6e735f</span>
+<span class="output">Option 254: 0x68696464</span>
+<span class="output">Option 255: 0x656e5f66</span>
+<span class="output">Combining and converting from hex: CTF{tcp_options_hidden_field}</span>`;
+                    
+                    if (!flagsFound.includes('CTF{tcp_options_hidden_field}')) {
+                        flagsFound.push('CTF{tcp_options_hidden_field}');
+                        addTerminalLine('<span class="important">Flag 4: CTF{tcp_options_hidden_field}</span>');
+                        showNotification('TCP Options Flag Found - Flag 4 Discovered');
+                        updateProgress(16.7);
+                    }
+                    break;
+                    
+                case 'icmp_payload':
+                    protocolOutput.innerHTML = `<span class="output">Analyzing ICMP payload data...</span>
+<span class="output">Extracting payload from ICMP echo requests</span>
+<span class="output">Payload pattern: 0x12 0x45 0x78 0xAB 0xCD 0xEF ...</span>
+<span class="output">XORing with key 0xAA: 0xB8 0xEF 0xD2 0x01 0x67 0x45 ...</span>
+<span class="output">Converting to ASCII: CTF{icmp_covert_xor_payload}</span>`;
+                    
+                    if (!flagsFound.includes('CTF{icmp_covert_xor_payload}')) {
+                        flagsFound.push('CTF{icmp_covert_xor_payload}');
+                        addTerminalLine('<span class="important">Flag 2: CTF{icmp_covert_xor_payload}</span>');
+                        showNotification('ICMP XOR Flag Found - Flag 2 Discovered');
+                        updateProgress(16.7);
+                    }
+                    break;
+                    
+                case 'dns_null':
+                    runDig('dig @10.0.0.5 ctf.example.com NULL');
+                    break;
+            }
+        }
+        
+        function reconstructData(type) {
+            addTerminalLine(`<span class="prompt">net@traffic-analysis:~$</span> <span class="command">reconstruct ${type}</span>`);
+            
+            switch(type) {
+                case 'dns_exfil':
+                    reconstructionOutput.innerHTML = `<span class="output">Reconstructing DNS exfiltration data...</span>
+<span class="output">Querying DNS server multiple times for TXT records...</span>
+<span class="output">Received: Q, l, w, v, X, y, 9, j, c, G, 4, g, _, d, n, s, _, t, x, t, _, e, x, f, i, l, _, r, e, c, o, n, s, t, r, u, c, t, e, d, }</span>
+<span class="output">Combining: QlwvXyheKS4qJF4k</span>
+<span class="output">Base64 decoding: B\/_(^).*$^$</span>
+<span class="output">Not a valid flag. Try a different approach.</span>
+<span class="output">Hint: The flag is split across multiple single-character TXT responses</span>
+<span class="output">Reconstruct in order: Q + l + w + ... then base64 decode</span>
+<span class="output">Correct reconstruction: QlwvXyheKS4qJF4k → Base64 decode → CTF{dns_txt_exfil_reconstructed}</span>`;
+                    
+                    if (!flagsFound.includes('CTF{dns_txt_exfil_reconstructed}')) {
+                        flagsFound.push('CTF{dns_txt_exfil_reconstructed}');
+                        addTerminalLine('<span class="important">Flag 1: CTF{dns_txt_exfil_reconstructed}</span>');
+                        showNotification('DNS Exfiltration Flag Found - Flag 1 Discovered');
+                        updateProgress(16.7);
+                    }
+                    break;
+                    
+                case 'audio_stego':
+                    reconstructionOutput.innerHTML = `<span class="output">Reconstructing audio steganography from RTP stream...</span>
+<span class="output">Extracting RTP payload to audio_stream.wav</span>
+<span class="output">Analyzing audio with spectrogram tool...</span>
+<span class="output">Found unusual patterns in high frequency range</span>
+<span class="output">Applying LSB (Least Significant Bit) decoding...</span>
+<span class="output">Extracted message: CTF{rtp_audio_steganography}</span>`;
+                    
+                    if (!flagsFound.includes('CTF{rtp_audio_steganography}')) {
+                        flagsFound.push('CTF{rtp_audio_steganography}');
+                        addTerminalLine('<span class="important">Flag 6: CTF{rtp_audio_steganography}</span>');
+                        showNotification('Audio Steganography Flag Found - Flag 6 Discovered');
+                        updateProgress(16.7);
+                    }
+                    break;
+                    
+                case 'http_stream':
+                    reconstructionOutput.innerHTML = `<span class="output">Reconstructing HTTP stream...</span>
+<span class="output">Found 1000+ HTTP requests to /noise.php</span>
+<span class="output">One request contains unusual header: X-CTF-Flag: RlRGe2h0dHBfbm9pc2VfaGVhZGVyX2ZsYWd9</span>
+<span class="output">Base64 decoding: CTF{http_noise_header_flag}</span>`;
+                    
+                    if (!flagsFound.includes('CTF{http_noise_header_flag}')) {
+                        flagsFound.push('CTF{http_noise_header_flag}');
+                        addTerminalLine('<span class="important">Flag 3: CTF{http_noise_header_flag}</span>');
+                        showNotification('HTTP Header Flag Found - Flag 3 Discovered');
+                        updateProgress(16.7);
+                    }
+                    break;
+                    
+                case 'xor_decoder':
+                    reconstructionOutput.innerHTML = `<span class="output">Applying XOR decoder to ICMP payload...</span>
+<span class="output">Extracted ICMP payload: 0x12 0x45 0x78 0xAB 0xCD 0xEF ...</span>
+<span class="output">XOR key found: 0xAA</span>
+<span class="output">Decoded: 0xB8 0xEF 0xD2 0x01 0x67 0x45 ...</span>
+<span class="output">ASCII conversion: CTF{icmp_covert_xor_payload}</span>`;
+                    
+                    if (!flagsFound.includes('CTF{icmp_covert_xor_payload}')) {
+                        flagsFound.push('CTF{icmp_covert_xor_payload}');
+                        addTerminalLine('<span class="important">Flag 2: CTF{icmp_covert_xor_payload}</span>');
+                        showNotification('ICMP XOR Flag Found - Flag 2 Discovered');
+                        updateProgress(16.7);
+                    }
+                    break;
+            }
+        }
+        
+        function submitCompletion() {
+            if (flagsFound.length >= 6) {
+                addTerminalLine('<span class="success">Mission accomplished successfully!</span>');
+                addTerminalLine('<span class="important">All flags found. Network analysis complete!</span>');
+                completionMessage.innerHTML = '<span class="success">✓ Mission accomplished! All 6 flags found!</span>';
+                
+                const townUrl = window.location.origin + "/town.html";
+                // Redirect back to the town with completion parameter for Building 8
+                window.location.href = `${townUrl}?completed=8`;
+            } else {
+                addTerminalLine('<span class="error">You haven\'t collected all flags yet!</span>');
+                addTerminalLine(`<span class="output">Flags collected: ${flagsFound.length}/6 required</span>`);
+                completionMessage.innerHTML = `<span class="error">✗ Only ${flagsFound.length}/6 flags collected. Keep analyzing!</span>`;
+            }
+        }
+        
+        function returnToTown() {
+            sessionStorage.setItem('returningFromChallenge', 'true');
+            const townUrl = window.location.origin + "/town.html";
+            window.location.href = townUrl;
+        }
+        
+        // Update countdown timer
+        function updateCountdown() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownElement.textContent = `TIME: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft > 0) {
+                timeLeft--;
+                setTimeout(updateCountdown, 1000);
+            } else {
+                addTerminalLine('<span class="error">TIME CRITICAL: Mission failed! Network analysis timed out!</span>');
+                showNotification('Mission Failed! Time expired!', true);
+            }
+        }
+        
+        // Initialize the interface
+        window.onload = function() {
+            commandInput.focus();
+            updateCountdown();
+        };
+    </script>
+</body>
+</html>
