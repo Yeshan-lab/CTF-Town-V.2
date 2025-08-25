@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPERATION: QUANTUM DECRYPTION | Final Challenge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --cyber-black: #0a0a12;
+            --cyber-dark: #12122d;
+            --cyber-blue: #0066ff;
+            --cyber-purple: #8a2be2;
+            --cyber-pink: #ff00c8;
+            --cyber-green: #00ffcc;
+            --cyber-red: #ff3366;
+            --cyber-yellow: #ffcc00;
+            --text-glow: #e9e3db;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: var(--cyber-black);
+            color: var(--text-glow);
+            line-height: 1.6;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(18, 18, 45, 0.7) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(138, 43, 226, 0.3) 0%, transparent 40%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .cyber-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .cyber-card {
+            background: rgba(10, 10, 18, 0.9);
+            border: 1px solid var(--cyber-blue);
+            border-radius: 5px;
+            padding: 25px;
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cyber-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 102, 255, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--cyber-blue);
+            position: relative;
+        }
+        
+        .header::after {
+            content: "";
+            position: absolute;
+            bottom: -3px;
+            left: 25%;
+            width: 50%;
+            height: 3px;
+            background: var(--cyber-blue);
+        }
+        
+        h1 {
+            font-size: 3.2rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+            color: var(--cyber-green);
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
+            font-weight: 900;
+        }
+        
+        h2 {
+            color: var(--cyber-blue);
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--cyber-purple);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 1.8rem;
+        }
+        
+        h3 {
+            color: var(--cyber-pink);
+            margin: 20px 0 10px;
+            font-size: 1.4rem;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .subtitle {
+            font-size: 1.6rem;
+            color: var(--cyber-purple);
+            margin-bottom: 25px;
+            text-shadow: 0 0 5px rgba(138, 43, 226, 0.7);
+        }
+        
+        .badge {
+            display: inline-block;
+            background: var(--cyber-red);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 3px;
+            font-size: 0.9rem;
+            margin: 0 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .terminal {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--cyber-green);
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .prompt {
+            color: var(--cyber-green);
+        }
+        
+        .command {
+            color: var(--cyber-blue);
+        }
+        
+        .output {
+            color: var(--text-glow);
+        }
+        
+        .scan-line {
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: linear-gradient(to right, transparent, var(--cyber-green), transparent);
+            top: 0;
+            animation: scan 3s linear infinite;
+            z-index: 1;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        
+        .cyber-button {
+            background: linear-gradient(to bottom, var(--cyber-blue), var(--cyber-purple));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .cyber-button:hover {
+            background: linear-gradient(to bottom, var(--cyber-purple), var(--cyber-blue));
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.7);
+            transform: translateY(-2px);
+        }
+        
+        .challenge-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid var(--cyber-pink);
+            border-radius: 5px;
+            background: rgba(18, 18, 45, 0.5);
+        }
+        
+        .input-group {
+            display: flex;
+            margin: 15px 0;
+        }
+        
+        .input-group input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--cyber-blue);
+            color: var(--cyber-green);
+            padding: 10px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+        }
+        
+        .input-group button {
+            background: var(--cyber-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .hint {
+            background: rgba(255, 204, 0, 0.1);
+            border-left: 3px solid var(--cyber-yellow);
+            padding: 10px 15px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            color: var(--cyber-yellow);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            border-top: 1px solid var(--cyber-blue);
+            color: var(--cyber-purple);
+            font-size: 1rem;
+        }
+        
+        .glow {
+            text-shadow: 0 0 5px currentColor;
+        }
+        
+        .success {
+            color: var(--cyber-green);
+            font-weight: bold;
+        }
+        
+        .error {
+            color: var(--cyber-red);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-container">
+        <header class="header">
+            <h1>OPERATION: QUANTUM DECRYPTION</h1>
+            <p class="subtitle">Final Challenge - Cryptographic Breakthrough</p>
+            <div class="scan-line"></div>
+        </header>
+        
+        <div class="cyber-card">
+            <h2><i class="fas fa-lock"></i> FINAL BRIEFING</h2>
+            <p>You've successfully infiltrated the Tawon Mafia network, but their most valuable asset - the <span class="glow" style="color: var(--cyber-red);">Quantum Encryption Key Vault</span> - remains protected by multiple layers of security.</p>
+            <p>Our intelligence indicates the vault uses a <span class="glow" style="color: var(--cyber-pink);">modified RSA algorithm</span> with a backdoor only accessible through a specific cryptographic attack.</p>
+            <p>You must perform a <span class="glow" style="color: var(--cyber-yellow);">Chosen Ciphertext Attack</span> to recover the final flag and complete your mission.</p>
+            
+            <div class="terminal" id="main-terminal">
+                <div class="terminal-line">
+                    <span class="prompt">vault://access$></span>
+                    <span class="output">Initializing Quantum Decryption Sequence</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">vault://access$></span>
+                    <span class="output">RSA Public Key Retrieved:</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">n = 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">e = 65537</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">vault://access$></span>
+                    <span class="output">Encrypted Flag: </span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output" id="encrypted-flag">U2FsdGVkX1+9u0aVH3g5G6LJ7Xy1/2kKt1pPqN7m4rM=</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">vault://access$></span>
+                    <span class="output">Oracle API: /api/decrypt?ciphertext=</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cyber-card">
+            <h2><i class="fas fa-project-diagram"></i> THE ATTACK VECTOR</h2>
+            <p>The vault's API allows you to decrypt any ciphertext except the encrypted flag itself. You must use this to your advantage.</p>
+            
+            <div class="challenge-section">
+                <h3>STAGE 1: Understand the Vulnerability</h3>
+                <p>The RSA cryptosystem here is vulnerable to a Chosen Ciphertext Attack. The mathematical principle is:</p>
+                <p>Given ciphertext c = m<sup>e</sup> mod n, we can compute c' = c * r<sup>e</sup> mod n for a random r.</p>
+                <p>When decrypted: m' = (c')<sup>d</sup> mod n = (c * r<sup>e</sup>)<sup>d</sup> mod n = m * r mod n</p>
+                <p>Then we can recover m = m' * r<sup>-1</sup> mod n</p>
+                
+                <div class="input-group">
+                    <input type="text" id="stage1-answer" placeholder="What is the value of r^{-1} mod n called?">
+                    <button onclick="checkStage1()">VERIFY</button>
+                </div>
+                <div id="stage1-result"></div>
+            </div>
+            
+            <div class="challenge-section">
+                <h3>STAGE 2: Implement the Attack</h3>
+                <p>Using the provided public key, you need to:</p>
+                <ol>
+                    <li>Choose a random number r (relatively prime to n)</li>
+                    <li>Compute c' = c * r<sup>e</sup> mod n</li>
+                    <li>Submit c' to the decryption oracle</li>
+                    <li>Get back m' = m * r mod n</li>
+                    <li>Compute m = m' * r<sup>-1</sup> mod n</li>
+                </ol>
+                
+                <div class="input-group">
+                    <input type="text" id="stage2-answer" placeholder="Paste your computed plaintext here">
+                    <button onclick="checkStage2()">DECRYPT</button>
+                </div>
+                <div id="stage2-result"></div>
+            </div>
+            
+            <div class="challenge-section">
+                <h3>STAGE 3: Recover the Final Flag</h3>
+                <p>The decrypted message contains the final flag, but it's encoded. Apply the appropriate decoding method.</p>
+                
+                <div class="input-group">
+                    <input type="text" id="stage3-answer" placeholder="Enter the final flag in CTF{} format">
+                    <button onclick="checkStage3()">SUBMIT FLAG</button>
+                </div>
+                <div id="stage3-result"></div>
+            </div>
+            
+            <div class="hint">
+                <h4><i class="fas fa-lightbulb"></i> HINT</h4>
+                <p>You'll need to write a script to perform the calculations. Use Python with the pow() function for modular exponentiation.</p>
+                <p>The encrypted flag is actually Base64-encoded ciphertext that needs to be decoded before performing the attack.</p>
+            </div>
+        </div>
+        
+        <div class="cyber-card">
+            <h2><i class="fas fa-terminal"></i> ORACLE SIMULATION</h2>
+            <p>This simulator allows you to test ciphertext decryption (except for the actual flag ciphertext):</p>
+            
+            <div class="input-group">
+                <input type="text" id="oracle-input" placeholder="Enter ciphertext (hexadecimal)">
+                <button onclick="queryOracle()">DECRYPT</button>
+            </div>
+            
+            <div class="terminal" id="oracle-terminal">
+                <div class="terminal-line">
+                    <span class="prompt">oracle$></span>
+                    <span class="output">Quantum Decryption Oracle ready.</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">oracle$></span>
+                    <span class="output">Note: The flag ciphertext is blocked by security protocols.</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>QUANTUM CRYPTOGRAPHY DIVISION | TOP SECRET // NOFORN</p>
+            <p>This is a simulation for educational purposes only. All scenarios are fictional.</p>
+        </div>
+    </div>
+
+    <script>
+        // RSA parameters (using smaller numbers for demonstration)
+        const p = 10007n;
+        const q = 10009n;
+        const n = p * q;
+        const e = 65537n;
+        const phi = (p - 1n) * (q - 1n);
+        const d = modInverse(e, phi);
+        
+        // The encrypted flag (for demonstration purposes)
+        const flag = "CTF{Qu4ntum_3ncrypt10n_Br0k3n}";
+        const flagEncoded = btoa(flag);
+        let flagCiphertext = encrypt(flag);
+        
+        // DOM elements
+        const encryptedFlagElement = document.getElementById('encrypted-flag');
+        encryptedFlagElement.textContent = flagCiphertext;
+        
+        // Oracle terminal
+        const oracleTerminal = document.getElementById('oracle-terminal');
+        
+        // Modular exponentiation
+        function modExp(base, exponent, modulus) {
+            if (modulus === 1n) return 0n;
+            let result = 1n;
+            base = base % modulus;
+            while (exponent > 0n) {
+                if (exponent % 2n === 1n) {
+                    result = (result * base) % modulus;
+                }
+                exponent = exponent >> 1n;
+                base = (base * base) % modulus;
+            }
+            return result;
+        }
+        
+        // Modular inverse
+        function modInverse(a, m) {
+            let [old_r, r] = [a, m];
+            let [old_s, s] = [1n, 0n];
+            let [old_t, t] = [0n, 1n];
+            
+            while (r !== 0n) {
+                const quotient = old_r / r;
+                [old_r, r] = [r, old_r - quotient * r];
+                [old_s, s] = [s, old_s - quotient * s];
+                [old_t, t] = [t, old_t - quotient * t];
+            }
+            
+            return old_s < 0n ? old_s + m : old_s;
+        }
+        
+        // Encrypt function
+        function encrypt(message) {
+            // For demonstration, we'll use a simple encoding
+            const encoded = Array.from(message).map(c => BigInt(c.charCodeAt(0))).reduce((acc, val) => acc * 256n + val, 0n);
+            return modExp(encoded, e, n).toString(16);
+        }
+        
+        // Decrypt function
+        function decrypt(ciphertext) {
+            try {
+                const cipherBigInt = BigInt('0x' + ciphertext);
+                const decrypted = modExp(cipherBigInt, d, n);
+                
+                // Convert back to string
+                let message = '';
+                let temp = decrypted;
+                while (temp > 0n) {
+                    message = String.fromCharCode(Number(temp % 256n)) + message;
+                    temp = temp / 256n;
+                }
+                
+                return message;
+            } catch (e) {
+                return "Decryption error: Invalid ciphertext";
+            }
+        }
+        
+        // Oracle query function
+        function queryOracle() {
+            const input = document.getElementById('oracle-input').value;
+            if (!input) return;
+            
+            // Add to terminal
+            const newLine = document.createElement('div');
+            newLine.className = 'terminal-line';
+            newLine.innerHTML = `<span class="prompt">oracle$></span> <span class="command">decrypt ${input}</span>`;
+            oracleTerminal.appendChild(newLine);
+            
+            // Check if it's the flag ciphertext
+            if (input === flagCiphertext) {
+                const resultLine = document.createElement('div');
+                resultLine.className = 'terminal-line';
+                resultLine.innerHTML = `<span class="output error">SECURITY PROTOCOL VIOLATION: Flag ciphertext rejected</span>`;
+                oracleTerminal.appendChild(resultLine);
+            } else {
+                const decrypted = decrypt(input);
+                const resultLine = document.createElement('div');
+                resultLine.className = 'terminal-line';
+                resultLine.innerHTML = `<span class="output">${decrypted}</span>`;
+                oracleTerminal.appendChild(resultLine);
+            }
+            
+            // Scroll to bottom
+            oracleTerminal.scrollTop = oracleTerminal.scrollHeight;
+            document.getElementById('oracle-input').value = '';
+        }
+        
+        // Stage checking functions
+        function checkStage1() {
+            const answer = document.getElementById('stage1-answer').value.toLowerCase();
+            const resultElement = document.getElementById('stage1-result');
+            
+            if (answer.includes('modular inverse') || answer.includes('inverse')) {
+                resultElement.innerHTML = `<span class="success">Correct! The modular inverse is key to this attack.</span>`;
+            } else {
+                resultElement.innerHTML = `<span class="error">Incorrect. Research "modular inverse" in RSA.</span>`;
+            }
+        }
+        
+        function checkStage2() {
+            const answer = document.getElementById('stage2-answer').value;
+            const resultElement = document.getElementById('stage2-result');
+            
+            if (answer.includes(flag)) {
+                resultElement.innerHTML = `<span class="success">Success! You've decrypted the message: ${flag}</span>`;
+            } else {
+                resultElement.innerHTML = `<span class="error">That doesn't appear to be the correct plaintext. Review your calculations.</span>`;
+            }
+        }
+        
+        function checkStage3() {
+            const answer = document.getElementById('stage3-answer').value;
+            const resultElement = document.getElementById('stage3-result');
+            
+            if (answer === flag) {
+                resultElement.innerHTML = `<span class="success">MISSION ACCOMPLISHED! You've broken the quantum encryption and recovered the flag: ${flag}</span>`;
+                
+                // Add to main terminal
+                const mainTerminal = document.getElementById('main-terminal');
+                const newLine = document.createElement('div');
+                newLine.className = 'terminal-line';
+                newLine.innerHTML = `<span class="prompt">vault://access$></span> <span class="output success">QUANTUM ENCRYPTION BREACHED. FLAG RECOVERED: ${flag}</span>`;
+                mainTerminal.appendChild(newLine);
+                mainTerminal.scrollTop = mainTerminal.scrollHeight;
+            } else {
+                resultElement.innerHTML = `<span class="error">Incorrect flag format. Remember to use CTF{} format.</span>`;
+            }
+        }
+        
+        // Allow Enter key in input fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        if (input.id === 'stage1-answer') checkStage1();
+                        if (input.id === 'stage2-answer') checkStage2();
+                        if (input.id === 'stage3-answer') checkStage3();
+                        if (input.id === 'oracle-input') queryOracle();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
