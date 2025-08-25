@@ -1,10 +1,32 @@
+# Cyber Forest CTF Chapter 03: The Encrypted Vault
+
+I'll create a new CTF challenge that builds upon the previous one with more advanced cryptography concepts and a deeper file system exploration.
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D CTF Town Explorer</title>
+    <title>🌲 Cyber Forest CTF Chapter 03: The Encrypted Vault</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Source+Code+Pro:wght@300;400;600&display=swap');
+        
+        :root {
+            --main-bg: #0a0a12;
+            --terminal-bg: #0a0a18;
+            --terminal-border: #ff2a7f;
+            --terminal-glow: rgba(255, 42, 127, 0.5);
+            --text-primary: #00ffcc;
+            --text-secondary: #ff2a7f;
+            --text-command: #66ff00;
+            --text-error: #ff2a7f;
+            --text-success: #00ff95;
+            --text-warning: #ffcc00;
+            --accent-1: #ff2a7f;
+            --accent-2: #7f2aff;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -12,754 +34,1379 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            background: linear-gradient(to bottom, #1a2a6c, #b21f1f, #fdbb2d);
-            color: white;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+            background-color: var(--main-bg);
+            color: var(--text-primary);
+            font-family: 'Source Code Pro', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 42, 127, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 85% 30%, rgba(127, 42, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 50% 80%, rgba(42, 255, 127, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+            padding: 20px;
         }
         
-        #canvas-container {
-            width: 100%;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
-        
-        #town-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        
-        .progress-container {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            max-width: 600px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            z-index: 100;
-            backdrop-filter: blur(5px);
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: #333;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 10px;
+        #app {
+            max-width: 1000px;
+            margin: 0 auto;
             position: relative;
+            z-index: 10;
         }
         
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(to right, #1a2a6c, #b21f1f, #fdbb2d);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-        
-        .progress-text {
+        #header {
             text-align: center;
-            font-size: 14px;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            position: relative;
+            border-bottom: 1px solid var(--terminal-border);
+            text-shadow: 0 0 10px var(--terminal-glow);
+        }
+        
+        #header h1 {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+        
+        #header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+        
+        #terminal-container {
+            position: relative;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 25px var(--terminal-glow);
+        }
+        
+        #terminal-header {
+            background: linear-gradient(90deg, #151530, #0f0f25);
+            padding: 10px 15px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--terminal-border);
+            font-size: 0.9rem;
         }
         
-        .building-info {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            z-index: 100;
-            max-width: 300px;
-            backdrop-filter: blur(5px);
+        #terminal-controls {
+            display: flex;
+            gap: 8px;
         }
         
-        .instructions {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            z-index: 100;
-            max-width: 300px;
-            backdrop-filter: blur(5px);
+        .control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
         }
         
-        .highlight {
-            color: #fdbb2d;
-            font-weight: bold;
-        }
+        .control.close { background-color: #ff5f57; }
+        .control.minimize { background-color: #ffbd2e; }
+        .control.maximize { background-color: #28c940; }
         
-        .close-btn {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            cursor: pointer;
-            font-size: 18px;
-        }
-        
-        .completion-dialog {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
+        #terminal {
+            background-color: var(--terminal-bg);
+            height: 500px;
             padding: 20px;
-            border-radius: 10px;
-            z-index: 1000;
-            text-align: center;
-            display: none;
-            backdrop-filter: blur(5px);
-            min-width: 300px;
+            overflow-y: auto;
+            background-image: 
+                linear-gradient(rgba(10, 10, 24, 0.9), rgba(10, 10, 24, 0.9)),
+                url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ff2a7f' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+            border: 1px solid var(--terminal-border);
         }
         
-        .reset-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
+        #input-container {
+            display: flex;
+            align-items: center;
+            background-color: rgba(10, 10, 24, 0.7);
+            padding: 10px 15px;
+            border: 1px solid var(--terminal-border);
+            border-radius: 8px;
+            box-shadow: 0 0 15px var(--terminal-glow);
         }
         
-        #reset-progress {
-            padding: 8px 15px;
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        #prompt {
+            color: var(--text-command);
+            margin-right: 10px;
             font-weight: bold;
+            text-shadow: 0 0 5px var(--text-command);
         }
         
-        .completed-building {
-            outline: 3px solid #00ff00 !important;
-            outline-offset: 2px;
+        #command-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Source Code Pro', monospace;
+            font-size: 1rem;
+            outline: none;
+            caret-color: var(--text-primary);
+            text-shadow: 0 0 5px var(--text-primary);
         }
         
-        .pulse {
-            animation: pulse 2s infinite;
+        #scoreboard {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(10, 10, 24, 0.7);
+            border: 1px solid var(--terminal-border);
+            border-radius: 8px;
+            box-shadow: 0 0 15px var(--terminal-glow);
         }
         
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
+        #scoreboard h3 {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
         }
         
-        .notification {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 100;
-            display: none;
+        #flags-found {
+            color: var(--text-success);
+            margin-left: 10px;
+            font-size: 1.5rem;
+            text-shadow: 0 0 8px var(--text-success);
         }
         
-        .welcome-modal {
+        #scoreboard p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            
+        }
+        
+        .command {
+            color: var(--text-command);
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px var(--text-command);
+        }
+        
+        .output {
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            text-shadow: 0 0 3px var(--text-primary);
+        }
+        
+        .error {
+            color: var(--text-error);
+            text-shadow: 0 0 5px var(--text-error);
+        }
+        
+        .success {
+            color: var(--text-success);
+            font-weight: bold;
+            text-shadow: 0 0 8px var(--text-success);
+        }
+        
+        .warning {
+            color: var(--text-warning);
+            text-shadow: 0 0 5px var(--text-warning);
+        }
+        
+        .directory {
+            color: var(--text-secondary);
+            text-shadow: 0 0 5px var(--text-secondary);
+        }
+        
+        .file {
+            color: var(--text-primary);
+        }
+        
+        .executable {
+            color: var(--text-command);
+            text-shadow: 0 0 5px var(--text-command);
+        }
+        
+        .encrypted {
+            color: var(--accent-2);
+            text-shadow: 0 0 5px var(--accent-2);
+        }
+        
+        .virus-effect {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: linear-gradient(45deg, #ff2a7f, #7f2aff);
+            z-index: 1000;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
-        }
-        
-        .modal-content {
-            background: linear-gradient(to bottom, #1a2a6c, #b21f1f);
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 500px;
+            flex-direction: column;
+            font-size: 2.5rem;
+            color: white;
             text-align: center;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .competition-id {
-            margin: 20px 0;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 5px;
-            font-family: monospace;
+            animation: virusPulse 0.3s infinite;
+            font-family: 'Share Tech Mono', monospace;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
         }
         
+        @keyframes virusPulse {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+        
+        .scan-line {
+            position: fixed;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to bottom, 
+                rgba(255, 42, 127, 0.3), 
+                rgba(255, 42, 127, 0.1), 
+                rgba(255, 42, 127, 0.3));
+            z-index: 5;
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+        
+        .hacking-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 42, 127, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 42, 127, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .glowing-particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-40px) translateX(0); }
+            75% { transform: translateY(-20px) translateX(-10px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+        
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .hud-item {
+            background: rgba(10, 10, 24, 0.7);
+            padding: 10px 15px;
+            border: 1px solid var(--terminal-border);
+            border-radius: 6px;
+            box-shadow: 0 0 10px var(--terminal-glow);
+            font-size: 0.9rem;
+        }
+        
+        .hud-value {
+            color: var(--text-success);
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--text-success);
+        }
+        
+        #matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        #submit-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        #submit-button {
+            background-color: var(--text-success);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        
+        #return-button {
+            margin-left: 10px;
+            padding: 10px 20px;
+            background: var(--text-secondary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Source Code Pro', monospace;
+        }
+        
+        @media (max-width: 768px) {
+            #header h1 {
+                font-size: 2rem;
+            }
+            
+            #terminal {
+                height: 400px;
+                padding: 15px;
+            }
+            
+            #hud {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="canvas-container">
-        <canvas id="town-canvas"></canvas>
-    </div>
+    <div class="scan-line"></div>
+    <div class="hacking-grid"></div>
+    <div class="glowing-particles" id="particles"></div>
+    <canvas id="matrix-rain"></canvas>
     
-    <div class="progress-container">
-        <div class="progress-bar">
-            <div class="progress-fill" id="progress-fill"></div>
+    <div id="app">
+        <div id="header">
+            <h1>CYBER FOREST CTF CHAPTER 03: THE ENCRYPTED VAULT</h1>
+            <p>Decrypt the secrets. Break the codes. Access the vault.</p>
         </div>
-        <div class="progress-text">Completed: <span id="progress-text">0</span>/<span id="total-challenges">0</span> challenges</div>
-    </div>
-    
-    <div class="building-info" id="building-info" style="display: none;">
-        <span class="close-btn" onclick="document.getElementById('building-info').style.display = 'none'">×</span>
-        <h3>Building <span id="building-number">0</span></h3>
-        <p id="building-description">Description</p>
-        <button id="building-link" style="margin-top: 10px; padding: 8px 15px; background: #fdbb2d; border: none; border-radius: 5px; cursor: pointer;">Go to Challenge</button>
-    </div>
-    
-    <div class="instructions">
-        <h3>CTF Town Instructions</h3>
-        <p>Explore the town and click on buildings to access CTF challenges.</p>
-        <p><span class="highlight">Controls:</span> Mouse to look around, Scroll to zoom, Click to select buildings</p>
-        <p><span class="highlight">Tip:</span> Complete challenges to fill the progress bar</p>
-    </div>
-    
-    <div class="completion-dialog" id="completion-dialog">
-        <h3>Challenge Completed!</h3>
-        <p>You've successfully completed this challenge.</p>
-        <button id="return-to-town" style="margin-top: 15px; padding: 8px 15px; background: #fdbb2d; border: none; border-radius: 5px; cursor: pointer;">Return to Town</button>
-    </div>
-
-    <div class="reset-container">
-        <button id="reset-progress">Reset Progress</button>
-    </div>
-
-    <div class="notification" id="notification">
-        Progress has been reset
-    </div>
-
-    <div class="welcome-modal" id="welcome-modal">
-        <div class="modal-content">
-            <h2>Welcome to CTF Town!</h2>
-            <p>This is a Capture The Flag competition environment. Explore the town, complete challenges and track your progress.</p>
-            <p>Your progress is stored locally in your browser and will not affect other participants.</p>
-            <div class="competition-id">
-                Competition ID: <span id="competition-id">CTF-2023-001</span>
+        
+        <div id="hud">
+            <div class="hud-item">System: <span class="hud-value">ENCRYPTED</span></div>
+            <div class="hud-item">Security: <span class="hud-value">LEVEL 3</span></div>
+            <div class="hud-item">Time: <span class="hud-value" id="timer">00:00:00</span></div>
+        </div>
+        
+        <div id="terminal-container">
+            <div id="terminal-header">
+                <div>user@cybervault:~</div>
+                <div id="terminal-controls">
+                    <div class="control close"></div>
+                    <div class="control minimize"></div>
+                    <div class="control maximize"></div>
+                </div>
             </div>
-            <button id="start-exploring" style="margin-top: 15px; padding: 10px 20px; background: #fdbb2d; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Start Exploring</button>
+            <div id="terminal"></div>
+        </div>
+        
+        <div id="input-container">
+            <span id="prompt">user@cybervault:$</span>
+            <input type="text" id="command-input" autofocus>
+        </div>
+        
+        <div id="scoreboard">
+            <h3>Flags Captured: <span id="flags-found">0</span>/5</h3>
+            <p>Available commands: ls, cd, cat, file, help, clear, decode, base64, xor, cipher, find</p>
+        </div>
+        
+        <div id="submit-section">
+            <p>Found all flags? Submit your completion!</p>
+            <button id="submit-button" onclick="submitCompletion()">Submit Completion</button>
+            <button id="return-button" onclick="returnToTown()">Return to Town</button>
         </div>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
 
     <script>
-        // Generate a unique competition ID
-        // Generate or retrieve a unique competition ID
-        // Generate or retrieve a unique competition ID
-        let competitionId = localStorage.getItem('ctfCompetitionId');
-        if (!competitionId) {
-            competitionId = 'CTF-' + new Date().getTime();
-            localStorage.setItem('ctfCompetitionId', competitionId);
-        }
-        document.getElementById('competition-id').textContent = competitionId;
+        // Game state
+        const state = {
+            currentPath: "/",
+            flagsFound: 0,
+            infected: false,
+            startTime: new Date(),
+            endTime: null,
+            foundFlags: {
+                flag1: false,
+                flag2: false,
+                flag3: false,
+                flag4: false,
+                flag5: false
+            },
+            unlockedCrypto: false,
+            completed: false,
+            decodedMessages: 0
+        };
 
-        // Check if we're returning from a challenge
-        const returningFromChallenge = sessionStorage.getItem('returningFromChallenge');
-        if (returningFromChallenge) {
-            // Clear the flag
-            sessionStorage.removeItem('returningFromChallenge');
-            // Ensure welcome is hidden
-            document.getElementById('welcome-modal').style.display = 'none';
-        }
-
-        // Show welcome modal on first visit only (check both conditions)
-        const firstVisit = !localStorage.getItem('ctfFirstVisit') && !returningFromChallenge;
-        if (firstVisit) {
-            document.getElementById('welcome-modal').style.display = 'flex';
-            localStorage.setItem('ctfFirstVisit', 'true');
-        } else if (!returningFromChallenge) {
-            // Only hide if not returning from challenge (might be already hidden by the returning check above)
-            document.getElementById('welcome-modal').style.display = 'none';
-        }
-
-        document.getElementById('start-exploring').addEventListener('click', function() {
-            document.getElementById('welcome-modal').style.display = 'none';
-        });
-
-        // Initialize Three.js
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); // Sky blue
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ 
-            canvas: document.getElementById('town-canvas'), 
-            antialias: true 
-        });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-
-        // Add lighting
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
-        scene.add(ambientLight);
+        // Leaderboard data (stored in localStorage)
+        let leaderboard = JSON.parse(localStorage.getItem('cyberForestLeaderboard')) || [];
         
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(50, 50, 50);
-        directionalLight.castShadow = true;
-        directionalLight.shadow.mapSize.width = 1024;
-        directionalLight.shadow.mapSize.height = 1024;
-        scene.add(directionalLight);
+        // File system structure
+        const fileSystem = {
+            "/": ["bin/", "home/", "var/", "etc/", "usr/", "vault/", "readme.txt", ".system_log"],
+            "/bin/": ["ls", "cat", "file", "decode", "base64", "xor", "cipher", "find", "virus"],
+            "/home/": ["user/", "crypto/", "admin/", "backup/", "note.txt"],
+            "/home/user/": ["Documents/", "Downloads/", "Pictures/", "Music/", "Desktop/", ".hidden/", "message.enc"],
+            "/home/user/Documents/": ["Work/", "Personal/", "Projects/", "notes.txt", "secret.docx", "flag1.enc"],
+            "/home/user/Documents/Work/": ["Reports/", "Presentations/", "Q3_Summary.doc", "budget.xls"],
+            "/home/user/Documents/Work/Reports/": ["2023/", "2024/", "template.doc"],
+            "/home/user/Documents/Work/Reports/2024/": ["Q1_Report.pdf", "Q2_Report.pdf", "confidential.enc"],
+            "/home/user/Documents/Personal/": ["Taxes/", "Recipes/", "Diary/", "notes.txt"],
+            "/home/user/Documents/Personal/Taxes/": ["2023.pdf", "W2_forms.zip"],
+            "/home/user/Documents/Projects/": ["CTF/", "Website/", "App/", "ideas.txt"],
+            "/home/user/Documents/Projects/CTF/": ["challenge1.py", "challenge2.exe", "hint.txt", "encrypted_data.bin"],
+            "/home/user/Downloads/": ["malware.exe", "clean_file.zip", "suspicious.rar", "crypto_tool.exe"],
+            "/home/user/Pictures/": ["vacation.jpg", "forest.png", "screenshot.png", "memes/", "steganography/"],
+            "/home/user/Pictures/memes/": ["funny1.jpg", "funny2.png"],
+            "/home/user/Pictures/steganography/": ["image1.png", "image2.jpg", "hidden_message.txt"],
+            "/home/user/Music/": ["song1.mp3", "song2.wav", "lyrics.txt"],
+            "/home/user/Desktop/": ["shortcut.lnk", "temp_file", "notes.txt", "flag2.b64"],
+            "/home/user/.hidden/": [".config", ".keys", "secret.txt"],
+            "/home/crypto/": ["challenges/", "tools/", "readme.txt"],
+            "/home/crypto/challenges/": ["caesar/", "vigenere/", "rsa/", "xor/", "base64/"],
+            "/home/crypto/challenges/caesar/": ["ciphertext.txt", "hint.txt"],
+            "/home/crypto/challenges/vigenere/": ["ciphertext.txt", "key_hint.txt"],
+            "/home/crypto/challenges/rsa/": ["public.key", "message.rsa"],
+            "/home/crypto/challenges/xor/": ["ciphertext.txt", "key.txt"],
+            "/home/crypto/challenges/base64/": ["encoded.txt"],
+            "/home/crypto/tools/": ["decoder.py", "encoder.exe", "stegsolve.jar"],
+            "/home/admin/": ["logs/", "config/", "backups/", "admin_tools.exe"],
+            "/home/admin/logs/": ["system.log", "auth.log", "debug.log"],
+            "/home/admin/config/": ["server.cfg", "security.policy", "users.db"],
+            "/home/admin/backups/": ["backup2024.zip", "system_backup.tar"],
+            "/var/": ["log/", "lib/", "tmp/", "cache/"],
+            "/var/log/": ["apache/", "system/", "install.log"],
+            "/var/log/apache/": ["access.log", "error.log"],
+            "/etc/": ["passwd", "shadow", "hosts", "config/"],
+            "/etc/config/": ["network.cfg", "security.cfg", "crypto.cfg"],
+            "/usr/": ["bin/", "lib/", "share/", "local/"],
+            "/usr/share/": ["doc/", "man/", "misc/", "flags/"],
+            "/usr/share/flags/": ["flag3.txt", "hint.txt"],
+            "/vault/": ["level1/", "level2/", "level3/", "README"],
+            "/vault/level1/": ["password.txt", "hint.txt"],
+            "/vault/level2/": ["key.bin", "challenge.enc"],
+            "/vault/level3/": ["final_flag.enc", "key_hint.txt"]
+        };
 
-        // Create ground with better visibility
-        const groundGeometry = new THREE.PlaneGeometry(100, 100);
-        const groundMaterial = new THREE.MeshLambertMaterial({ 
-            color: 0x4CAF50,
-            transparent: true,
-            opacity: 0.9
-        });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        scene.add(ground);
+        // File contents
+        const fileContents = {
+            "/readme.txt": "Welcome to the Encrypted Vault!\nThis system contains multiple layers of encryption.\nFind and decode all 5 flags to complete the challenge.",
+            "/.system_log": "System booted successfully.\nEncryption protocols enabled.\nWarning: Multiple cryptographic challenges detected.",
+            "/home/note.txt": "Important: The crypto tools in /home/crypto/ might be useful for decoding messages.",
+            "/home/user/message.enc": "U2FsdGVkX1/5K3N5dXBlcm1hbiBpcyB0aGUga2V5IQ==\nHint: This is Base64 encoded. The password is 'superman'.",
+            "/home/user/Documents/notes.txt": "Work Notes:\n- Finish quarterly report\n- Encrypt sensitive files\n- Change password every 90 days",
+            "/home/user/Documents/secret.docx": "This document appears to be corrupted or encrypted.",
+            "/home/user/Documents/flag1.enc": "U2FsdGVkX18R7xUZ6J6nD7Qy2w5Z6P4zX6Q5R5K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y1Z2\nHint: This is encrypted with OpenSSL. Password: 'cyberforest'",
+            "/home/user/Documents/Work/Q3_Summary.doc": "Q3 Performance Summary:\n- Revenue: $1.5M\n- Expenses: $900K\n- Profit: $600K",
+            "/home/user/Documents/Work/budget.xls": "Budget allocation for next year:\n- R&D: $250K\n- Marketing: $180K\n- Security: $120K",
+            "/home/user/Documents/Work/Reports/template.doc": "Report Template\nUse this for all quarterly reports",
+            "/home/user/Documents/Work/Reports/2024/Q1_Report.pdf": "Q1 2024 Financial Report\nAll targets met successfully",
+            "/home/user/Documents/Work/Reports/2024/Q2_Report.pdf": "Q2 2024 Financial Report\nMarket conditions challenging\nProjections adjusted downward",
+            "/home/user/Documents/Work/Reports/2024/confidential.enc": "This file is encrypted with AES-256. The key is hidden somewhere in the system.",
+            "/home/user/Documents/Personal/notes.txt": "Personal reminder:\n- Buy groceries\n- Call dentist\n- Pay electricity bill",
+            "/home/user/Documents/Personal/Taxes/2023.pdf": "2023 Tax Return\nFiled electronically April 15, 2024",
+            "/home/user/Documents/Personal/Taxes/W2_forms.zip": "W2 Forms Archive\nContains tax documents for 2023",
+            "/home/user/Documents/Projects/ideas.txt": "Project Ideas:\n- Smart home system\n- Mobile game app\n- AI assistant",
+            "/home/user/Documents/Projects/CTF/challenge1.py": "print('Hello CTF player!')\n# This is a decoy file",
+            "/home/user/Documents/Projects/CTF/challenge2.exe": "This executable file is corrupted",
+            "/home/user/Documents/Projects/CTF/hint.txt": "The real flags are often hidden in plain sight",
+            "/home/user/Documents/Projects/CTF/encrypted_data.bin": "U2FsdGVkX1+2w2Z6P4zX6Q5R5K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y1Z2\nThis data is encrypted with AES-256",
+            "/home/user/Downloads/malware.exe": "VIRUS ACTIVATED! Your system is now compromised!",
+            "/home/user/Downloads/clean_file.zip": "This archive contains nothing interesting.",
+            "/home/user/Downloads/suspicious.rar": "This archive is password protected.",
+            "/home/user/Downloads/crypto_tool.exe": "Crypto Tool v2.1\nUsage: crypto_tool [encode/decode] [file]",
+            "/home/user/Pictures/vacation.jpg": "A nice picture of the beach. Nothing hidden here.",
+            "/home/user/Pictures/forest.png": "A dense digital forest. Look closer...",
+            "/home/user/Pictures/screenshot.png": "Screenshot of error message\nError code: 0x80070005",
+            "/home/user/Pictures/memes/funny1.jpg": "Internet meme: 'One does not simply...'",
+            "/home/user/Pictures/memes/funny2.png": "Meme: 'I have no idea what I'm doing'",
+            "/home/user/Pictures/steganography/image1.png": "This image contains a hidden message. Use steganography tools to extract it.",
+            "/home/user/Pictures/steganography/image2.jpg": "Another image with hidden data. Look for LSB encoding.",
+            "/home/user/Pictures/steganography/hidden_message.txt": "The password for the vault level1 is: 'crypto123'",
+            "/home/user/Music/song1.mp3": "Audio file metadata:\nArtist: Unknown\nTitle: Unknown\nDuration: 3:45",
+            "/home/user/Music/song2.wav": "Raw audio data, no metadata",
+            "/home/user/Music/lyrics.txt": "Song lyrics:\nNever gonna give you up\nNever gonna let you down",
+            "/home/user/Desktop/shortcut.lnk": "Shortcut to important document\nTarget: /home/user/Documents/Work/Q3_Summary.doc",
+            "/home/user/Desktop/temp_file": "Temporary file contents\nWill be deleted on reboot",
+            "/home/user/Desktop/notes.txt": "Desktop notes:\n- Finish report\n- Email client\n- Buy coffee",
+            "/home/user/Desktop/flag2.b64": "Q1RGe2Jhc2U2NF9lbmNvZGluZ19pc19lYXN5fQ==",
+            "/home/user/.hidden/.config": "User configuration file\nContains personal settings",
+            "/home/user/.hidden/.keys": "AES-256 key: cyberforest2024ctf\nUse this for confidential.enc",
+            "/home/user/.hidden/secret.txt": "The vigenere cipher key is 'hiddenkey'",
+            "/home/crypto/readme.txt": "Cryptography Challenge Hub\nHere you'll find various crypto challenges.\nComplete them to improve your skills.",
+            "/home/crypto/challenges/caesar/ciphertext.txt": "Dwwdfn wr wkh F|Ehu Iruhvw FWI!",
+            "/home/crypto/challenges/caesar/hint.txt": "Shift of 3",
+            "/home/crypto/challenges/vigenere/ciphertext.txt": "Xmcwawa kmvq Qvmtckib Ctf!",
+            "/home/crypto/challenges/vigenere/key_hint.txt": "The key is 8 letters long",
+            "/home/crypto/challenges/rsa/public.key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwV7+2R0oOA2kX3zN4m7G\nk4K5X5L6M7N8O9P0Q1R2S3T4U5V6W7X8Y9Z0A1B2C3D4E5F6G7H8I9J0K1L2M3N4\nO5P6Q7R8S9T0U1V2W3X4Y5Z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0O1P2Q3R4S5T6\nU7V8W9X0Y1Z2A3B4C5D6E7F8G9H0I1J2K3L4M5N6O7P8Q9R0S1T2U3V4W5X6Y7Z8\nA9B0C1D2E3F4G5H6I7J8K9L0M1N2O3P4Q5R6S7T8U9V0W1X2Y3Z4A5B6C7D8E9F0\nG1H2I3J4K5L6M7N8O9P0Q1R2S3T4U5V6W7X8Y9Z0A1B2C3D4E5F6G7H8I9J0K1L2\nMwIDAQAB\n-----END PUBLIC KEY-----",
+            "/home/crypto/challenges/rsa/message.rsa": "This message is encrypted with RSA. You'll need the private key to decrypt it.",
+            "/home/crypto/challenges/xor/ciphertext.txt": "5d41402abc4b2a76b9719d911017c592",
+            "/home/crypto/challenges/xor/key.txt": "key",
+            "/home/crypto/challenges/base64/encoded.txt": "VGhlIGZsYWcgaXM6IENURntiYXNpY182NF9kZWNvZGV9",
+            "/home/crypto/tools/decoder.py": "#!/usr/bin/python3\n# Simple decoder tool\nimport base64\nprint('Base64 decoder ready')",
+            "/home/crypto/tools/encoder.exe": "Encoder tool v1.0\nConverts text to various encodings",
+            "/home/crypto/tools/stegsolve.jar": "Steganography tool for extracting hidden data from images",
+            "/home/admin/logs/system.log": "System log:\nServices started successfully\nNo errors detected",
+            "/home/admin/logs/auth.log": "Authentication log:\nUser admin logged in\nFailed login attempt: user123",
+            "/home/admin/logs/debug.log": "Debug messages:\nMemory allocation: 2GB\nCPU usage: 15%",
+            "/home/admin/config/server.cfg": "Server configuration:\nPort: 8080\nTimeout: 30s\nSSL: enabled",
+            "/home/admin/config/security.policy": "Security policy:\nPassword length: 12 chars\nLockout after 5 attempts",
+            "/home/admin/config/users.db": "User database encrypted",
+            "/home/admin/backups/backup2024.zip": "System backup from January 2024",
+            "/home/admin/backups/system_backup.tar": "Full system backup\nSize: 15GB",
+            "/home/admin/admin_tools.exe": "Administrative tools suite\nRequires elevation",
+            "/var/log/install.log": "Software installation log:\nPackage: text-editor\nStatus: success",
+            "/var/log/apache/access.log": "Web server access log:\n127.0.0.1 - GET /index.html\n192.168.1.5 - POST /login",
+            "/var/log/apache/error.log": "Web server errors:\n500 Internal Server Error\n404 File Not Found",
+            "/etc/passwd": "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin",
+            "/etc/shadow": "root:$6$rounds=656000$W2aH6lGjM3eKp.9Q$W8lLkZ7X2jH5fD3gS6hF7dK9J2lL3mN5bV8cX1zM4pQ7wR6tY9vB0n:19285:0:99999:7::\ndaemon:*:19284:0:99999:7::\nbin:*:19284:0:99999:7::\nsys:*:19284:0:99999:7::",
+            "/etc/hosts": "127.0.0.1 localhost\n127.0.1.1 cybervault\n\n# The following lines are desirable for IPv6 capable hosts\n::1 localhost ip6-localhost ip6-loopback\nff02::1 ip6-allnodes\nff02::2 ip6-allrouters",
+            "/etc/config/network.cfg": "Network configuration:\nIP: 192.168.1.100\nNetmask: 255.255.255.0\nGateway: 192.168.1.1",
+            "/etc/config/security.cfg": "Security settings:\nFirewall: enabled\nIDS: enabled\nEncryption: AES-256",
+            "/etc/config/crypto.cfg": "Cryptographic settings:\nDefault algorithm: AES-256\nKey length: 256 bits\nHash: SHA-256",
+            "/usr/share/flags/flag3.txt": "CTF{file_system_exploration}",
+            "/usr/share/flags/hint.txt": "The next flag is in the vault. Start with level1.",
+            "/vault/README": "VAULT ACCESS SYSTEM\nThis vault contains 3 security levels.\nEach level requires solving a cryptographic challenge.\nFind the keys and passwords throughout the system.",
+            "/vault/level1/password.txt": "The password for level2 is: 'xor_is_fun'",
+            "/vault/level1/hint.txt": "Use the password from the steganography image",
+            "/vault/level2/key.bin": "01111010 01100101 01110010 01101111 01100011 01101111 01101110 01110100 01110010 01101111 01101100", // zerocontrol in binary
+            "/vault/level2/challenge.enc": "This file is encrypted with XOR. The key is in key.bin.",
+            "/vault/level3/final_flag.enc": "U2FsdGVkX1/5K3N5dXBlcm1hbiBpcyB0aGUga2V5IQ==", // Base64 encoded "Superman is the key!" but actually "CTF{master_of_encryption}"
+            "/vault/level3/key_hint.txt": "The key is the answer to the life, the universe, and everything" // 42
+        };
 
-        // Add grid for better orientation
-        const gridHelper = new THREE.GridHelper(100, 20, 0x444444, 0x444444);
-        gridHelper.position.y = 0.1;
-        scene.add(gridHelper);
+        // File types (for 'file' command)
+        const fileTypes = {
+            "/readme.txt": "ASCII text",
+            "/.system_log": "ASCII text",
+            "/home/note.txt": "ASCII text",
+            "/home/user/message.enc": "Base64 encoded text",
+            "/home/user/Documents/notes.txt": "ASCII text",
+            "/home/user/Documents/secret.docx": "Microsoft Word 2007+",
+            "/home/user/Documents/flag1.enc": "OpenSSL encrypted data",
+            "/home/user/Documents/Work/Q3_Summary.doc": "Microsoft Word 97-2003",
+            "/home/user/Documents/Work/budget.xls": "Microsoft Excel 97-2003",
+            "/home/user/Documents/Work/Reports/template.doc": "Microsoft Word 2007+",
+            "/home/user/Documents/Work/Reports/2024/Q1_Report.pdf": "PDF document",
+            "/home/user/Documents/Work/Reports/2024/Q2_Report.pdf": "PDF document",
+            "/home/user/Documents/Work/Reports/
+            "/home/user/Documents/Work/Reports/2024/confidential.enc": "AES-256 encrypted data",
+            "/home/user/Documents/Personal/notes.txt": "ASCII text",
+            "/home/user/Documents/Personal/Taxes/2023.pdf": "PDF document",
+            "/home/user/Documents/Personal/Taxes/W2_forms.zip": "Zip archive data",
+            "/home/user/Documents/Projects/ideas.txt": "ASCII text",
+            "/home/user/Documents/Projects/CTF/challenge1.py": "Python script",
+            "/home/user/Documents/Projects/CTF/challenge2.exe": "PE32 executable",
+            "/home/user/Documents/Projects/CTF/hint.txt": "ASCII text",
+            "/home/user/Documents/Projects/CTF/encrypted_data.bin": "AES-256 encrypted data",
+            "/home/user/Downloads/malware.exe": "PE32 executable (GUI) Intel 80386",
+            "/home/user/Downloads/clean_file.zip": "Zip archive data",
+            "/home/user/Downloads/suspicious.rar": "RAR archive data",
+            "/home/user/Downloads/crypto_tool.exe": "PE32 executable",
+            "/home/user/Pictures/vacation.jpg": "JPEG image data",
+            "/home/user/Pictures/forest.png": "PNG image data",
+            "/home/user/Pictures/screenshot.png": "PNG image data",
+            "/home/user/Pictures/memes/funny1.jpg": "JPEG image data",
+            "/home/user/Pictures/memes/funny2.png": "PNG image data",
+            "/home/user/Pictures/steganography/image1.png": "PNG image data",
+            "/home/user/Pictures/steganography/image2.jpg": "JPEG image data",
+            "/home/user/Pictures/steganography/hidden_message.txt": "ASCII text",
+            "/home/user/Music/song1.mp3": "MP3 audio",
+            "/home/user/Music/song2.wav": "RIFF (little-endian) data, WAVE audio",
+            "/home/user/Music/lyrics.txt": "ASCII text",
+            "/home/user/Desktop/shortcut.lnk": "MS Windows shortcut",
+            "/home/user/Desktop/temp_file": "ASCII text",
+            "/home/user/Desktop/notes.txt": "ASCII text",
+            "/home/user/Desktop/flag2.b64": "Base64 encoded text",
+            "/home/user/.hidden/.config": "ASCII text",
+            "/home/user/.hidden/.keys": "ASCII text",
+            "/home/user/.hidden/secret.txt": "ASCII text",
+            "/home/crypto/readme.txt": "ASCII text",
+            "/home/crypto/challenges/caesar/ciphertext.txt": "ASCII text",
+            "/home/crypto/challenges/caesar/hint.txt": "ASCII text",
+            "/home/crypto/challenges/vigenere/ciphertext.txt": "ASCII text",
+            "/home/crypto/challenges/vigenere/key_hint.txt": "ASCII text",
+            "/home/crypto/challenges/rsa/public.key": "OpenSSL public key",
+            "/home/crypto/challenges/rsa/message.rsa": "RSA encrypted data",
+            "/home/crypto/challenges/xor/ciphertext.txt": "ASCII text",
+            "/home/crypto/challenges/xor/key.txt": "ASCII text",
+            "/home/crypto/challenges/base64/encoded.txt": "Base64 encoded text",
+            "/home/crypto/tools/decoder.py": "Python script",
+            "/home/crypto/tools/encoder.exe": "PE32 executable",
+            "/home/crypto/tools/stegsolve.jar": "Java archive data",
+            "/home/admin/logs/system.log": "ASCII text",
+            "/home/admin/logs/auth.log": "ASCII text",
+            "/home/admin/logs/debug.log": "ASCII text",
+            "/home/admin/config/server.cfg": "ASCII text",
+            "/home/admin/config/security.policy": "ASCII text",
+            "/home/admin/config/users.db": "data",
+            "/home/admin/backups/backup2024.zip": "Zip archive data",
+            "/home/admin/backups/system_backup.tar": "POSIX tar archive",
+            "/home/admin/admin_tools.exe": "PE32 executable",
+            "/var/log/install.log": "ASCII text",
+            "/var/log/apache/access.log": "ASCII text",
+            "/var/log/apache/error.log": "ASCII text",
+            "/etc/passwd": "ASCII text",
+            "/etc/shadow": "ASCII text",
+            "/etc/hosts": "ASCII text",
+            "/etc/config/network.cfg": "ASCII text",
+            "/etc/config/security.cfg": "ASCII text",
+            "/etc/config/crypto.cfg": "ASCII text",
+            "/usr/share/flags/flag3.txt": "ASCII text",
+            "/usr/share/flags/hint.txt": "ASCII text",
+            "/vault/README": "ASCII text",
+            "/vault/level1/password.txt": "ASCII text",
+            "/vault/level1/hint.txt": "ASCII text",
+            "/vault/level2/key.bin": "ASCII text",
+            "/vault/level2/challenge.enc": "data",
+            "/vault/level3/final_flag.enc": "Base64 encoded text",
+            "/vault/level3/key_hint.txt": "ASCII text"
+        };
 
-        // Store building information
-        const buildingData = [];
-        let buildingCounter = 1;
-        const completedChallenges = new Set();
+        // DOM elements
+        const terminal = document.getElementById('terminal');
+        const commandInput = document.getElementById('command-input');
+        const flagsFoundElement = document.getElementById('flags-found');
+        const timerElement = document.getElementById('timer');
 
-        // Function to create buildings with better visibility
-        function createBuilding(x, z, width, depth, height, color, challengeUrl, description) {
-            const geometry = new THREE.BoxGeometry(width, height, depth);
-            const material = new THREE.MeshLambertMaterial({ color: color });
-            const building = new THREE.Mesh(geometry, material);
-            building.position.set(x, height/2, z);
-            building.castShadow = true;
-            building.receiveShadow = true;
+        // Initialize the terminal
+        function initTerminal() {
+            addOutput("Cyber Forest CTF - The Encrypted Vault");
+            addOutput("Type 'help' for available commands.");
+            addOutput("----------------------------------------");
+            updatePrompt();
             
-            // Store building data
-            const buildingId = buildingCounter++;
-            building.userData = {
-                id: buildingId,
-                challengeUrl: challengeUrl,
-                description: description
-            };
+            // Start the timer
+            setInterval(updateTimer, 1000);
             
-            buildingData.push(building);
-            scene.add(building);
+            // Create particles
+            createParticles();
             
-            // Add building number label - improved visibility
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = 128;
-            canvas.height = 128; // Increased size for better visibility
-            context.fillStyle = 'rgba(255, 255, 255, 0.95)';
-            context.beginPath();
-            context.arc(canvas.width/2, canvas.height/2, canvas.width/2 - 10, 0, Math.PI * 2);
-            context.fill();
-            
-            context.font = 'bold 60px Arial';
-            context.fillStyle = '#1a2a6c';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillText(buildingId.toString(), canvas.width / 2, canvas.height / 2);
-            
-            const texture = new THREE.CanvasTexture(canvas);
-            const labelMaterial = new THREE.SpriteMaterial({ 
-                map: texture,
-                transparent: true
-            });
-            const label = new THREE.Sprite(labelMaterial);
-            label.position.set(x, height + 5, z); // Positioned higher for better visibility
-            label.scale.set(8, 8, 1); // Larger label
-            scene.add(label);
-            
-            // Add windows with better visibility
-            const windowMaterial = new THREE.MeshLambertMaterial({ 
-                color: 0xADD8E6,
-                emissive: 0x222222
-            });
-            
-            for (let i = 0; i < Math.floor(height/5); i++) {
-                for (let j = 0; j < 2; j++) {
-                    const window = new THREE.Mesh(
-                        new THREE.PlaneGeometry(1, 1.5),
-                        windowMaterial
-                    );
-                    window.position.set(
-                        x + (j === 0 ? -width/2.5 : width/2.5),
-                        5 + i * 5,
-                        z + (depth/2 + 0.01)
-                    );
-                    window.rotation.y = Math.PI;
-                    scene.add(window);
-                    
-                    const window2 = window.clone();
-                    window2.position.set(
-                        x + (j === 0 ? -width/2.5 : width/2.5),
-                        5 + i * 5,
-                        z - (depth/2 + 0.01)
-                    );
-                    window2.rotation.y = 0;
-                    scene.add(window2);
-                }
+            // Start matrix rain animation
+            initMatrixRain();
+        }
+
+        // Update the command prompt
+        function updatePrompt() {
+            const promptElement = document.getElementById('prompt');
+            promptElement.textContent = `user@cybervault:${state.currentPath}$`;
+        }
+
+        // Add output to the terminal
+        function addOutput(text, className = '') {
+            const outputElement = document.createElement('div');
+            if (className) {
+                outputElement.className = className;
             }
-            
-            // Add roof for better visibility
-            const roofGeometry = new THREE.ConeGeometry(width/1.5, height/4, 4);
-            const roofMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
-            const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-            roof.position.set(x, height + height/8, z);
-            roof.rotation.y = Math.PI/4;
-            roof.castShadow = true;
-            scene.add(roof);
-            
-            return building;
+            outputElement.textContent = text;
+            terminal.appendChild(outputElement);
+            terminal.scrollTop = terminal.scrollHeight;
         }
 
-        // Create multiple buildings with challenge links
-        const buildingColors = [0x8B4513, 0xA52A2A, 0xD2691E, 0xCD853F, 0xA0522D, 0x708090, 0x2F4F4F];
-        
-        // Create a grid of buildings with challenge URLs
-        // 10 challenges as requested
-        // IMPORTANT: Replace these with your actual challenge URLs when hosting
-        const challengeUrls = [
-            "challenge1.html",
-            "challenge2.html", // Replace with your actual challenge URL
-            "challenge3.html",
-            "challenge4.html",
-            "challenge5.html",
-            "https://example.com/challenge6",
-            "https://example.com/challenge7",
-            "https://example.com/challenge8",
-            "https://example.com/challenge9",
-            "https://example.com/challenge10"
-        ];
-        
-        const descriptions = [
-            "Forensics Challenge: Find the Hidden 3 Flags",
-            "Cyber Forest CTF: Find 4 Hidden Flags",
-            "Cryptography Challenge: Decode the secret message",
-            "Forensics Challenge: Analyze the image to find the flag",
-            "Steganography Challenge: There's more than meets the eye",
-            "Reverse Engineering Challenge: Crack the code",
-            "Network Analysis Challenge: Inspect the packets",
-            "OSINT Challenge: Find information about the target",
-            "Programming Challenge: Write a script to solve the problem",
-            "Binary Exploitation Challenge: Find the vulnerability"
-        ];
-        
-        let urlIndex = 0;
-        for (let i = -4; i <= 4; i += 2) {
-            for (let j = -4; j <= 4; j += 2) {
-                if (urlIndex < challengeUrls.length) {
-                    const width = 6 + Math.random() * 4;
-                    const depth = 6 + Math.random() * 4;
-                    const height = 10 + Math.random() * 15;
-                    const color = buildingColors[Math.floor(Math.random() * buildingColors.length)];
-                    
-                    createBuilding(
-                        i * 10, 
-                        j * 10, 
-                        width, 
-                        depth, 
-                        height, 
-                        color,
-                        challengeUrls[urlIndex],
-                        descriptions[urlIndex]
-                    );
-                    
-                    urlIndex++;
-                }
-            }
-        }
-        
-        // Update total challenges count
-        document.getElementById('total-challenges').textContent = urlIndex;
-
-        // Add roads with better visibility
-        function createRoad() {
-            const roadMaterial = new THREE.MeshLambertMaterial({ color: 0x333333 });
+        // Process commands
+        function processCommand(command) {
+            if (!command) return;
             
-            // Main roads
-            for (let i = -5; i <= 5; i++) {
-                const road1 = new THREE.Mesh(
-                    new THREE.BoxGeometry(100, 0.2, 5),
-                    roadMaterial
-                );
-                road1.position.set(0, 0.1, i * 10);
-                road1.receiveShadow = true;
-                scene.add(road1);
-                
-                const road2 = new THREE.Mesh(
-                    new THREE.BoxGeometry(5, 0.2, 100),
-                    roadMaterial
-                );
-                road2.position.set(i * 10, 0.1, 0);
-                road2.receiveShadow = true;
-                scene.add(road2);
-            }
+            // Add command to terminal
+            addOutput(`user@cybervault:${state.currentPath}$ ${command}`, 'command');
             
-            // Add road markings with better visibility
-            const markingMaterial = new THREE.MeshLambertMaterial({ color: 0xFFFF00 });
-            for (let i = -50; i <= 50; i += 5) {
-                for (let j = -5; j <= 5; j++) {
-                    if (j !== 0) {
-                        const marking1 = new THREE.Mesh(
-                            new THREE.BoxGeometry(0.5, 0.21, 1.5),
-                            markingMaterial
-                        );
-                        marking1.position.set(i, 0.11, j * 10);
-                        scene.add(marking1);
-                        
-                        const marking2 = new THREE.Mesh(
-                            new THREE.BoxGeometry(1.5, 0.21, 0.5),
-                            markingMaterial
-                        );
-                        marking2.position.set(j * 10, 0.11, i);
-                        scene.add(marking2);
-                    }
-                }
-            }
-        }
-        createRoad();
-
-        // Add trees with better visibility
-        function createTree(x, z) {
-            const group = new THREE.Group();
+            const args = command.split(' ');
+            const cmd = args[0].toLowerCase();
             
-            // Trunk
-            const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.7, 5, 8);
-            const trunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
-            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-            trunk.position.y = 2.5;
-            trunk.castShadow = true;
-            trunk.receiveShadow = true;
-            group.add(trunk);
-            
-            // Foliage (multiple spheres for better visibility)
-            const foliageMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
-            
-            for (let i = 0; i < 3; i++) {
-                const size = 3 - i * 0.7;
-                const foliage = new THREE.Mesh(
-                    new THREE.SphereGeometry(size, 8, 8),
-                    foliageMaterial
-                );
-                foliage.position.y = 6 + i * 2.5;
-                foliage.castShadow = true;
-                group.add(foliage);
-            }
-            
-            group.position.set(x, 0, z);
-            scene.add(group);
-            
-            return group;
-        }
-        
-        // Add trees randomly where there are no buildings
-        for (let i = -45; i <= 45; i += 5) {
-            for (let j = -45; j <= 45; j += 5) {
-                if (Math.abs(i) > 5 || Math.abs(j) > 5) {
-                    if (Math.random() > 0.7) {
-                        createTree(i, j);
-                    }
-                }
-            }
-        }
-
-        // Add a central fountain for better orientation
-        function createFountain() {
-            const group = new THREE.Group();
-            
-            // Base
-            const baseGeometry = new THREE.CylinderGeometry(5, 6, 1, 32);
-            const baseMaterial = new THREE.MeshLambertMaterial({ color: 0x888888 });
-            const base = new THREE.Mesh(baseGeometry, baseMaterial);
-            base.position.y = 0.5;
-            base.receiveShadow = true;
-            group.add(base);
-            
-            // Middle
-            const middleGeometry = new THREE.CylinderGeometry(3, 5, 2, 32);
-            const middle = new THREE.Mesh(middleGeometry, baseMaterial);
-            middle.position.y = 2;
-            group.add(middle);
-            
-            // Top
-            const topGeometry = new THREE.CylinderGeometry(2, 3, 1, 32);
-            const top = new THREE.Mesh(topGeometry, baseMaterial);
-            top.position.y = 3.5;
-            group.add(top);
-            
-            // Water
-            const waterGeometry = new THREE.CylinderGeometry(2, 2, 0.2, 32);
-            const waterMaterial = new THREE.MeshLambertMaterial({ 
-                color: 0x0077be,
-                transparent: true,
-                opacity: 0.7
-            });
-            const water = new THREE.Mesh(waterGeometry, waterMaterial);
-            water.position.y = 3.6;
-            group.add(water);
-            
-            group.position.set(0, 0, 0);
-            scene.add(group);
-            
-            return group;
-        }
-        
-        createFountain();
-
-        // Set up camera controls
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.screenSpacePanning = false;
-        controls.minDistance = 5;
-        controls.maxDistance = 100;
-        controls.maxPolarAngle = Math.PI / 2;
-
-        // Set initial camera position for better visibility
-        camera.position.set(0, 30, 40);
-        controls.update();
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // Raycaster for detecting building clicks
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        
-        function onMouseClick(event) {
-            // Calculate mouse position in normalized device coordinates
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-            
-            // Update the picking ray with the camera and mouse position
-            raycaster.setFromCamera(mouse, camera);
-            
-            // Calculate objects intersecting the picking ray
-            const intersects = raycaster.intersectObjects(buildingData);
-            
-            if (intersects.length > 0) {
-                const building = intersects[0].object;
-                const buildingInfo = building.userData;
-                
-                // Show building info
-                document.getElementById('building-number').textContent = buildingInfo.id;
-                document.getElementById('building-description').textContent = buildingInfo.description;
-                
-                const linkButton = document.getElementById('building-link');
-                linkButton.onclick = function() {
-                    // Open challenge in new tab
-                    window.open(buildingInfo.challengeUrl, '_blank');
-                };
-                
-                document.getElementById('building-info').style.display = 'block';
+            switch(cmd) {
+                case 'help':
+                    showHelp();
+                    break;
+                case 'ls':
+                    listDirectory(args[1]);
+                    break;
+                case 'cd':
+                    changeDirectory(args[1]);
+                    break;
+                case 'cat':
+                    showFileContents(args[1]);
+                    break;
+                case 'file':
+                    showFileType(args[1]);
+                    break;
+                case 'clear':
+                    clearTerminal();
+                    break;
+                case 'decode':
+                    decodeContent(args[1], args[2]);
+                    break;
+                case 'base64':
+                    base64Operation(args[1], args[2]);
+                    break;
+                case 'xor':
+                    xorOperation(args[1], args[2], args[3]);
+                    break;
+                case 'cipher':
+                    cipherOperation(args[1], args[2], args[3]);
+                    break;
+                case 'find':
+                    findFile(args[1]);
+                    break;
+                default:
+                    addOutput(`Command not found: ${cmd}`, 'error');
             }
         }
-        
-        window.addEventListener('click', onMouseClick, false);
-        
-        // Function to update progress
-        function updateProgress() {
-            const progress = (completedChallenges.size / buildingData.length) * 100;
-            document.getElementById('progress-fill').style.width = progress + '%';
-            document.getElementById('progress-text').textContent = completedChallenges.size;
+
+        // Show help information
+        function showHelp() {
+            addOutput("Available commands:");
+            addOutput("  ls [dir]        - List directory contents");
+            addOutput("  cd [dir]        - Change directory");
+            addOutput("  cat [file]      - Display file contents");
+            addOutput("  file [file]     - Determine file type");
+            addOutput("  clear           - Clear the terminal");
+            addOutput("  decode [method] [file] - Decode file contents");
+            addOutput("  base64 [decode/encode] [text/file] - Base64 operations");
+            addOutput("  xor [key] [file] - XOR decryption");
+            addOutput("  cipher [type] [key] [file] - Cipher decryption (caesar, vigenere)");
+            addOutput("  find [pattern]  - Find files matching pattern");
+            addOutput("  help            - Show this help message");
+        }
+
+        // List directory contents
+        function listDirectory(path = '') {
+            let targetPath = state.currentPath;
             
-            // Update building visuals for completed challenges
-            buildingData.forEach(building => {
-                if (completedChallenges.has(building.userData.id)) {
-                    building.material.emissive = new THREE.Color(0x00ff00);
-                    building.material.emissiveIntensity = 0.2;
+            if (path) {
+                if (path.startsWith('/')) {
+                    targetPath = path;
                 } else {
-                    building.material.emissive = new THREE.Color(0x000000);
-                    building.material.emissiveIntensity = 0;
+                    targetPath = state.currentPath + (state.currentPath.endsWith('/') ? '' : '/') + path;
                 }
+                
+                // Handle parent directory
+                if (path === '..') {
+                    const parts = state.currentPath.split('/').filter(part => part);
+                    parts.pop();
+                    targetPath = '/' + parts.join('/');
+                    if (targetPath === '') targetPath = '/';
+                }
+            }
+            
+            // Normalize path
+            if (!targetPath.endsWith('/')) {
+                targetPath += '/';
+            }
+            
+            if (fileSystem[targetPath]) {
+                const contents = fileSystem[targetPath];
+                let output = '';
+                
+                contents.forEach(item => {
+                    if (item.endsWith('/')) {
+                        output += `<span class="directory">${item}</span> `;
+                    } else if (item.endsWith('.enc') || item.endsWith('.b64') || item.endsWith('.bin') || 
+                              item.endsWith('.rsa') || item.endsWith('.key')) {
+                        output += `<span class="encrypted">${item}</span> `;
+                    } else if (item.endsWith('.exe') || item.endsWith('.jar') || item.endsWith('.py')) {
+                        output += `<span class="executable">${item}</span> `;
+                    } else {
+                        output += `<span class="file">${item}</span> `;
+                    }
+                });
+                
+                addOutput(output);
+            } else {
+                addOutput(`ls: cannot access '${path}': No such file or directory`, 'error');
+            }
+        }
+
+        // Change directory
+        function changeDirectory(path) {
+            if (!path) {
+                state.currentPath = '/';
+                updatePrompt();
+                return;
+            }
+            
+            let targetPath = state.currentPath;
+            
+            if (path.startsWith('/')) {
+                targetPath = path;
+            } else {
+                if (state.currentPath.endsWith('/')) {
+                    targetPath = state.currentPath + path;
+                } else {
+                    targetPath = state.currentPath + '/' + path;
+                }
+            }
+            
+            // Handle parent directory
+            if (path === '..') {
+                const parts = state.currentPath.split('/').filter(part => part);
+                parts.pop();
+                targetPath = '/' + parts.join('/');
+                if (targetPath === '') targetPath = '/';
+            }
+            
+            // Ensure path ends with slash for directory lookup
+            if (!targetPath.endsWith('/')) {
+                targetPath += '/';
+            }
+            
+            if (fileSystem[targetPath]) {
+                state.currentPath = targetPath;
+                updatePrompt();
+            } else {
+                addOutput(`cd: no such directory: ${path}`, 'error');
+            }
+        }
+
+        // Show file contents
+        function showFileContents(filename) {
+            if (!filename) {
+                addOutput('cat: missing file operand', 'error');
+                return;
+            }
+            
+            let filePath;
+            
+            if (filename.startsWith('/')) {
+                filePath = filename;
+            } else {
+                filePath = state.currentPath + (state.currentPath.endsWith('/') ? '' : '/') + filename;
+            }
+            
+            if (fileContents[filePath]) {
+                // Check for special files that trigger events
+                if (filePath === '/home/user/Downloads/malware.exe') {
+                    activateVirus();
+                }
+                
+                // Check for flags
+                if (filePath === '/usr/share/flags/flag3.txt' && !state.foundFlags.flag3) {
+                    state.foundFlags.flag3 = true;
+                    state.flagsFound++;
+                    flagsFoundElement.textContent = state.flagsFound;
+                    addOutput('Flag captured!', 'success');
+                }
+                
+                if (filePath === '/home/user/Desktop/flag2.b64' && !state.foundFlags.flag2) {
+                    state.foundFlags.flag2 = true;
+                    state.flagsFound++;
+                    flagsFoundElement.textContent = state.flagsFound;
+                    addOutput('Flag captured!', 'success');
+                }
+                
+                addOutput(fileContents[filePath]);
+            } else {
+                addOutput(`cat: ${filename}: No such file or directory`, 'error');
+            }
+        }
+
+        // Show file type
+        function showFileType(filename) {
+            if (!filename) {
+                addOutput('file: missing file operand', 'error');
+                return;
+            }
+            
+            let filePath;
+            
+            if (filename.startsWith('/')) {
+                filePath = filename;
+            } else {
+                filePath = state.currentPath + (state.currentPath.endsWith('/') ? '' : '/') + filename;
+            }
+            
+            if (fileTypes[filePath]) {
+                addOutput(`${filename}: ${fileTypes[filePath]}`);
+            } else {
+                addOutput(`file: ${filename}: No such file or directory`, 'error');
+            }
+        }
+
+        // Clear terminal
+        function clearTerminal() {
+            terminal.innerHTML = '';
+        }
+
+        // Decode content
+        function decodeContent(method, filename) {
+            if (!method || !filename) {
+                addOutput('decode: missing operand(s)', 'error');
+                addOutput('Usage: decode [method] [file]', 'error');
+                addOutput('Methods: base64, xor, caesar, vigenere', 'error');
+                return;
+            }
+            
+            let filePath;
+            
+            if (filename.startsWith('/')) {
+                filePath = filename;
+            } else {
+                filePath = state.currentPath + (state.currentPath.endsWith('/') ? '' : '/') + filename;
+            }
+            
+            if (!fileContents[filePath]) {
+                addOutput(`decode: ${filename}: No such file or directory`, 'error');
+                return;
+            }
+            
+            const content = fileContents[filePath];
+            let decoded = '';
+            
+            switch(method.toLowerCase()) {
+                case 'base64':
+                    try {
+                        decoded = atob(content.trim());
+                        addOutput(`Base64 decoded: ${decoded}`);
+                        state.decodedMessages++;
+                    } catch (e) {
+                        addOutput('Error: Invalid Base64 string', 'error');
+                    }
+                    break;
+                    
+                case 'xor':
+                    addOutput('XOR decoding requires a key. Use: xor [key] [file]', 'warning');
+                    break;
+                    
+                case 'caesar':
+                    // Simple Caesar cipher decoder (shift of 3)
+                    decoded = caesarDecode(content, 3);
+                    addOutput(`Caesar decoded: ${decoded}`);
+                    state.decodedMessages++;
+                    break;
+                    
+                case 'vigenere':
+                    addOutput('Vigenère decoding requires a key. Use: cipher vigenere [key] [file]', 'warning');
+                    break;
+                    
+                default:
+                    addOutput(`decode: unknown method: ${method}`, 'error');
+            }
+            
+            // Check if this decoding reveals a flag
+            if (filePath === '/home/crypto/challenges/caesar/ciphertext.txt' && decoded.includes('CTF{')) {
+                if (!state.foundFlags.flag4) {
+                    state.foundFlags.flag4 = true;
+                    state.flagsFound++;
+                    flagsFoundElement.textContent = state.flagsFound;
+                    addOutput('Flag captured!', 'success');
+                }
+            }
+        }
+
+        // Base64 operations
+        function base64Operation(operation, input) {
+            if (!operation || !input) {
+                addOutput('base64: missing operand(s)', 'error');
+                addOutput('Usage: base64 [decode/encode] [text/file]', 'error');
+                return;
+            }
+            
+            let content = input;
+            
+            // Check if input is a file path
+            if (input.startsWith('/') || input.includes('/')) {
+                let filePath;
+                
+                if (input.startsWith('/')) {
+                    filePath = input;
+                } else {
+                    filePath = state.currentPath + (state.currentPath.endsWith('/') ? '' : '/') + input;
+                }
+                
+                if (fileContents[filePath]) {
+                    content = fileContents[filePath];
+                }
+            }
+            
+            switch(operation.toLowerCase()) {
+                case 'decode':
+                    try {
+                        const decoded = atob(content.trim());
+                        addOutput(`Base64 decoded: ${decoded}`);
+                        state.decodedMessages++;
+                        
+                        // Check if this is a flag
+                        if (decoded.includes('CTF{')) {
+                            if (input === 'flag2.b64' && !state.foundFlags.flag2) {
+                                state.foundFlags.flag2 = true;
+                                state.flagsFound++;
+                                flagsFoundElement.textContent = state.flagsFound;
+                                addOutput('Flag captured!', 'success');
+                            }
+                        }
+                    } catch (e) {
+                        addOutput('Error: Invalid Base64 string', 'error');
+                    }
+                    break;
+                    
+                case 'encode':
+                    const encoded = btoa(content);
+                    addOutput(`Base64 encoded: ${encoded}`);
+                    break;
+                    
+                default:
+                    addOutput(`base64: unknown operation: ${operation}`, 'error');
+            }
+        }
+
+        // XOR operation
+        function xorOperation(key, filename) {
+            if (!key || !filename) {
+                addOutput('xor: missing operand(s)', 'error');
+                addOutput('Usage: xor [key] [file]', 'error');
+                return;
+            }
+            
+            let filePath;
+            
+            if (filename.startsWith('/')) {
+                filePath = filename;
+            } else {
+                filePath = state.currentPath + (state.currentPath.endsWith('/') ? '' : '/') + filename;
+            }
+            
+            if (!fileContents[filePath]) {
+                addOutput(`xor: ${filename}: No such file or directory`, 'error');
+                return;
+            }
+            
+            const content = fileContents[filePath];
+            let result = '';
+            
+            // Simple XOR implementation
+            for (let i = 0; i < content.length; i++) {
+                const charCode = content.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+                result += String.fromCharCode(charCode);
+            }
+            
+            addOutput(`XOR decrypted: ${result}`);
+            state.decodedMessages++;
+            
+            // Check if this is a flag
+            if (result.includes('CTF{')) {
+                if (filePath === '/vault/level2/challenge.enc' && !state.foundFlags.flag5) {
+                    state.foundFlags.flag5 = true;
+                    state.flagsFound++;
+                    flagsFoundElement.textContent = state.flagsFound;
+                    addOutput('Flag captured!', 'success');
+                }
+            }
+        }
+
+        // Cipher operations
+        function cipherOperation(type, key, filename) {
+            if (!type || !key || !filename) {
+                addOutput('cipher: missing operand(s)', 'error');
+                addOutput('Usage: cipher [type] [key] [file]', 'error');
+                addOutput('Types: caesar, vigenere', 'error');
+                return;
+            }
+            
+            let filePath;
+            
+            if (filename.startsWith('/')) {
+                filePath = filename;
+            } else {
+                filePath = state.currentPath + (state.currentPath.endsWith('/') ? '' : '/') + filename;
+            }
+            
+            if (!fileContents[filePath]) {
+                addOutput(`cipher: ${filename}: No such file or directory`, 'error');
+                return;
+            }
+            
+            const content = fileContents[filePath];
+            let result = '';
+            
+            switch(type.toLowerCase()) {
+                case 'caesar':
+                    const shift = parseInt(key);
+                    if (isNaN(shift)) {
+                        addOutput('cipher: caesar key must be a number', 'error');
+                        return;
+                    }
+                    result = caesarDecode(content, shift);
+                    break;
+                    
+                case 'vigenere':
+                    result = vigenereDecode(content, key);
+                    break;
+                    
+                default:
+                    addOutput(`cipher: unknown type: ${type}`, 'error');
+                    return;
+            }
+            
+            addOutput(`${type} decrypted: ${result}`);
+            state.decodedMessages++;
+            
+            // Check if this is a flag
+            if (result.includes('CTF{')) {
+                if (filePath === '/home/crypto/challenges/vigenere/ciphertext.txt' && !state.foundFlags.flag4) {
+                    state.foundFlags.flag4 = true;
+                    state.flagsFound++;
+                    flagsFoundElement.textContent = state.flagsFound;
+                    addOutput('Flag captured!', 'success');
+                }
+            }
+        }
+
+        // Find file
+        function findFile(pattern) {
+            if (!pattern) {
+                addOutput('find: missing pattern', 'error');
+                return;
+            }
+            
+            addOutput(`Searching for files matching: ${pattern}`);
+            
+            const results = [];
+            const searchRegex = new RegExp(pattern.replace('*', '.*'));
+            
+            for (const path in fileSystem) {
+                const files = fileSystem[path];
+                
+                for (const file of files) {
+                    if (searchRegex.test(file)) {
+                        results.push(path + file);
+                    }
+                }
+            }
+            
+            if (results.length > 0) {
+                results.forEach(result => {
+                    addOutput(result);
+                });
+            } else {
+                addOutput('No files found', 'warning');
+            }
+        }
+
+        // Caesar cipher decoder
+        function caesarDecode(text, shift) {
+            let result = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                
+                if (char.match(/[a-z]/i)) {
+                    const code = text.charCodeAt(i);
+                    
+                    // Uppercase letters
+                    if (code >= 65 && code <= 90) {
+                        char = String.fromCharCode(((code - 65 - shift + 26) % 26) + 65);
+                    }
+                    // Lowercase letters
+                    else if (code >= 97 && code <= 122) {
+                        char = String.fromCharCode(((code - 97 - shift + 26) % 26) + 97);
+                    }
+                }
+                
+                result += char;
+            }
+            
+            return result;
+        }
+
+        // Vigenère cipher decoder
+        function vigenereDecode(text, key) {
+            let result = '';
+            key = key.toUpperCase();
+            
+            for (let i = 0, j = 0; i < text.length; i++) {
+                let char = text[i];
+                
+                if (char.match(/[a-z]/i)) {
+                    const code = text.charCodeAt(i);
+                    
+                    // Uppercase letters
+                    if (code >= 65 && code <= 90) {
+                        char = String.fromCharCode(((code - 65 - (key.charCodeAt(j % key.length) - 65) + 26) % 26) + 65);
+                        j++;
+                    }
+                    // Lowercase letters
+                    else if (code >= 97 && code <= 122) {
+                        char = String.fromCharCode(((code - 97 - (key.charCodeAt(j % key.length) - 65) + 26) % 26) + 97);
+                        j++;
+                    }
+                }
+                
+                result += char;
+            }
+            
+            return result;
+        }
+
+        // Activate virus effect
+        function activateVirus() {
+            if (state.infected) return;
+            
+            state.infected = true;
+            const virusEffect = document.createElement('div');
+            virusEffect.className = 'virus-effect';
+            virusEffect.innerHTML = '<div>VIRUS DETECTED!</div><div>SYSTEM COMPROMISED</div>';
+            document.body.appendChild(virusEffect);
+            
+            setTimeout(() => {
+                document.body.removeChild(virusEffect);
+                addOutput('Warning: Malware executed! System may be unstable.', 'error');
+            }, 3000);
+        }
+
+        // Update timer
+        function updateTimer() {
+            const now = new Date();
+            const elapsed = new Date(now - state.startTime);
+            
+            const hours = elapsed.getUTCHours().toString().padStart(2, '0');
+            const minutes = elapsed.getUTCMinutes().toString().padStart(2, '0');
+            const seconds = elapsed.getUTCSeconds().toString().padStart(2, '0');
+            
+            timerElement.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Create particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const colors = ['#ff2a7f', '#7f2aff', '#2aff7f', '#2a7fff'];
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random properties
+                const size = Math.random() * 10 + 5;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.background = color;
+                particle.style.boxShadow = `0 0 ${size * 2}px ${size}px ${color}`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize matrix rain animation
+        function initMatrixRain() {
+            const canvas = document.getElementById('matrix-rain');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            
+            const drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = 1;
+            }
+            
+            function draw() {
+                ctx.fillStyle = 'rgba(10, 10, 24, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#00ffcc';
+                ctx.font = `${fontSize}px monospace`;
+                
+                for (let i = 0; i < drops.length; i++) {
+                    const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    
+                    drops[i]++;
+                }
+            }
+            
+            setInterval(draw, 33);
+            
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
             });
         }
-        
-        // Load progress from localStorage
-        function loadProgress() {
-            const savedProgress = localStorage.getItem('ctfProgress');
-            if (savedProgress) {
-                const progressData = JSON.parse(savedProgress);
-                progressData.forEach(id => completedChallenges.add(id));
-                updateProgress();
-            }
-        }
-        
-        // Save progress to localStorage
-        function saveProgress() {
-            const progressArray = Array.from(completedChallenges);
-            localStorage.setItem('ctfProgress', JSON.stringify(progressArray));
-        }
-        
-        // Reset progress
-        document.getElementById('reset-progress').addEventListener('click', function() {
-            completedChallenges.clear();
-            updateProgress();
-            saveProgress();
-            
-            // Show notification
-            const notification = document.getElementById('notification');
-            notification.textContent = 'Progress has been reset';
-            notification.style.display = 'block';
-            
-            setTimeout(function() {
-                notification.style.display = 'none';
-            }, 3000);
-        });
-        
-        // Check URL parameters for completed challenges
-        function checkUrlParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const completedId = urlParams.get('completed');
-            
-            if (completedId) {
-                // Remove the parameter from URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-                
-                // Show completion dialog
-                document.getElementById('completion-dialog').style.display = 'block';
-                
-                // Mark challenge as completed
-                if (!completedChallenges.has(parseInt(completedId))) {
-                    completedChallenges.add(parseInt(completedId));
-                    updateProgress();
-                    saveProgress();
-                }
-            }
-        }
-        
-        // Return to town button handler
-        document.getElementById('return-to-town').addEventListener('click', function() {
-            document.getElementById('completion-dialog').style.display = 'none';
-        });
-        
-        // Load progress on startup and check URL parameters
-        loadProgress();
-        checkUrlParams();
 
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
+        // Submit completion
+        function submitCompletion() {
+            if (state.flagsFound === 5) {
+                state.endTime = new Date();
+                const timeTaken = new Date(state.endTime - state.startTime);
+                
+                const hours = timeTaken.getUTCHours().toString().padStart(2, '0');
+                const minutes = timeTaken.getUTCMinutes().toString().padStart(2, '0');
+                const seconds = timeTaken.getUTCSeconds().toString().padStart(2, '0');
+                
+                const completionTime = `${hours}:${minutes}:${seconds}`;
+                
+                // Add to leaderboard
+                leaderboard.push({
+                    name: 'Player',
+                    time: completionTime,
+                    date: new Date().toLocaleDateString()
+                });
+                
+                // Sort by time
+                leaderboard.sort((a, b) => {
+                    const aTime = a.time.split(':').reduce((acc, time) => (60 * acc) + +time, 0);
+                    const bTime = b.time.split(':').reduce((acc, time) => (60 * acc) + +time, 0);
+                    return aTime - bTime;
+                });
+                
+                // Keep top 10
+                leaderboard = leaderboard.slice(0, 10);
+                
+                // Save to localStorage
+                localStorage.setItem('cyberForestLeaderboard', JSON.stringify(leaderboard));
+                
+                addOutput('Challenge completed! Your time has been recorded.', 'success');
+                state.completed = true;
+            } else {
+                addOutput(`You have found ${state.flagsFound} out of 5 flags. Keep searching!`, 'warning');
+            }
         }
-        
-        animate();
+
+        // Return to town
+        function returnToTown() {
+            addOutput('Returning to Cyber Forest Town...', 'success');
+            // In a real implementation, this would redirect to the main town page
+        }
+
+        // Event listeners
+        commandInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const command = commandInput.value.trim();
+                commandInput.value = '';
+                processCommand(command);
+            }
+        });
+
+        // Initialize the terminal when the page loads
+        window.onload = initTerminal;
     </script>
 </body>
 </html>
