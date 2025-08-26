@@ -284,6 +284,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
+            display: none; /* Initially hidden */
         }
         
         .hud-item {
@@ -315,7 +316,7 @@
         #submit-section {
             margin-top: 20px;
             text-align: center;
-            display: none;
+            display: none; /* Initially hidden */
         }
         
         #submit-button, #return-button {
@@ -445,6 +446,7 @@
         const flagsFoundDisplay = document.getElementById('flags-found');
         const timerDisplay = document.getElementById('timer');
         const submitSection = document.getElementById('submit-section');
+        const hud = document.getElementById('hud');
 
         // Initialize terminal
         printToTerminal('OSINT + Programming CTF Terminal - Type "help" for available commands\n\n', 'info');
@@ -456,6 +458,9 @@
                 printToTerminal('You are investigating a target known as "MysteryPerson"', 'success');
                 printToTerminal('Find all 5 flags using OSINT techniques and code analysis.\n', 'success');
                 printToTerminal('Start by examining the case files in your Documents folder.', 'info');
+                
+                // Show HUD after initialization
+                hud.style.display = 'flex';
             }, 800);
         }, 800);
 
