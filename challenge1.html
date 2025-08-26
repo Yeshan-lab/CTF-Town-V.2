@@ -3,96 +3,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌲 Cyber Forest CTF Challenge</title>
+    <title>🕸️ Web + Binary Exploitation CTF</title>
     <style>
-        body {
-            background-color: #0a0a0a;
-            color: #0f0;
-            font-family: 'Courier New', monospace;
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Source+Code+Pro:wght@300;400;600&display=swap');
+        
+        :root {
+            --main-bg: #0a0a12;
+            --terminal-bg: #0a0a18;
+            --terminal-border: #2a7fff;
+            --terminal-glow: rgba(42, 127, 255, 0.5);
+            --text-primary: #00ffcc;
+            --text-secondary: #2a7fff;
+            --text-command: #66ff00;
+            --text-error: #ff2a7f;
+            --text-success: #00ff95;
+            --text-warning: #ffcc00;
+            --accent-1: #7f2aff;
+            --accent-2: #ff2a7f;
+        }
+        
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--main-bg);
+            color: var(--text-primary);
+            font-family: 'Source Code Pro', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(42, 127, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 85% 30%, rgba(255, 42, 127, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 50% 80%, rgba(42, 255, 127, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
             padding: 20px;
-            line-height: 1.5;
         }
+        
         #app {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
+            position: relative;
+            z-index: 10;
         }
+        
         #header {
-            border-bottom: 1px solid #0f0;
-            padding-bottom: 10px;
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            position: relative;
+            border-bottom: 1px solid var(--terminal-border);
+            text-shadow: 0 0 10px var(--terminal-glow);
+        }
+        
+        #header h1 {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+        
+        #header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+        
+        #terminal-container {
+            position: relative;
             margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 25px var(--terminal-glow);
         }
-        #terminal {
-            background-color: #111;
-            border: 1px solid #0f0;
-            border-radius: 5px;
-            padding: 15px;
-            height: 500px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-        }
-        #input-line {
+        
+        #terminal-header {
+            background: linear-gradient(90deg, #151530, #0f0f25);
+            padding: 10px 15px;
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--terminal-border);
+            font-size: 0.9rem;
         }
+        
+        #terminal-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .control.close { background-color: #ff5f57; }
+        .control.minimize { background-color: #ffbd2e; }
+        .control.maximize { background-color: #28c940; }
+        
+        #terminal {
+            background-color: var(--terminal-bg);
+            height: 500px;
+            padding: 20px;
+            overflow-y: auto;
+            background-image: 
+                linear-gradient(rgba(10, 10, 24, 0.9), rgba(10, 10, 24, 0.9)),
+                url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%232a7fff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+            border: 1px solid var(--terminal-border);
+        }
+        
+        #input-container {
+            display: flex;
+            align-items: center;
+            background-color: rgba(10, 10, 24, 0.7);
+            padding: 10px 15px;
+            border: 1px solid var(--terminal-border);
+            border-radius: 8px;
+            box-shadow: 0 0 15px var(--terminal-glow);
+        }
+        
         #prompt {
+            color: var(--text-command);
             margin-right: 10px;
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--text-command);
         }
+        
         #command-input {
             flex-grow: 1;
-            background-color: #111;
-            border: 1px solid #0f0;
-            color: #0f0;
-            font-family: 'Courier New', monospace;
-            padding: 5px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Source Code Pro', monospace;
+            font-size: 1rem;
+            outline: none;
+            caret-color: var(--text-primary);
+            text-shadow: 0 0 5px var(--text-primary);
         }
+        
+        #scoreboard {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(10, 10, 24, 0.7);
+            border: 1px solid var(--terminal-border);
+            border-radius: 8px;
+            box-shadow: 0 0 15px var(--terminal-glow);
+        }
+        
+        #scoreboard h3 {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        #flags-found {
+            color: var(--text-success);
+            margin-left: 10px;
+            font-size: 1.5rem;
+            text-shadow: 0 0 8px var(--text-success);
+        }
+        
+        #scoreboard p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
         .command {
-            color: #0af;
-            margin-bottom: 5px;
+            color: var(--text-command);
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px var(--text-command);
         }
+        
         .output {
             margin-bottom: 15px;
             white-space: pre-wrap;
+            text-shadow: 0 0 3px var(--text-primary);
         }
+        
         .error {
-            color: #f00;
+            color: var(--text-error);
+            text-shadow: 0 0 5px var(--text-error);
         }
+        
         .success {
-            color: #0f0;
+            color: var(--text-success);
             font-weight: bold;
+            text-shadow: 0 0 8px var(--text-success);
         }
+        
         .warning {
-            color: #ff0;
+            color: var(--text-warning);
+            text-shadow: 0 0 5px var(--text-warning);
         }
-        .virus-effect {
+        
+        .directory {
+            color: var(--text-secondary);
+            text-shadow: 0 0 5px var(--text-secondary);
+        }
+        
+        .file {
+            color: var(--text-primary);
+        }
+        
+        .executable {
+            color: var(--text-command);
+            text-shadow: 0 0 5px var(--text-command);
+        }
+        
+        .scan-line {
+            position: fixed;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to bottom, 
+                rgba(0, 255, 204, 0.3), 
+                rgba(0, 255, 204, 0.1), 
+                rgba(0, 255, 204, 0.3));
+            z-index: 5;
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+        
+        .hacking-grid {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #f00;
-            z-index: 1000;
+            background-image: 
+                linear-gradient(rgba(42, 127, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(42, 127, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .glowing-particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-40px) translateX(0); }
+            75% { transform: translateY(-20px) translateX(-10px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+        
+        #hud {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2em;
-            color: #000;
-            animation: virusPulse 0.5s infinite;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
-        @keyframes virusPulse {
-            0% { background-color: #f00; }
-            50% { background-color: #ff0; }
-            100% { background-color: #f00; }
+        
+        .hud-item {
+            background: rgba(10, 10, 24, 0.7);
+            padding: 10px 15px;
+            border: 1px solid var(--terminal-border);
+            border-radius: 6px;
+            box-shadow: 0 0 10px var(--terminal-glow);
+            font-size: 0.9rem;
         }
-        #scoreboard {
-            margin-top: 20px;
-            border-top: 1px solid #0f0;
-            padding-top: 10px;
+        
+        .hud-value {
+            color: var(--text-success);
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--text-success);
         }
+        
+        #matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
         #submit-section {
             margin-top: 20px;
             text-align: center;
         }
-        #submit-button {
+        
+        #submit-button, #return-button {
             background-color: #0f0;
             color: #000;
             border: none;
@@ -102,36 +321,68 @@
             cursor: pointer;
             margin-top: 10px;
         }
+        
         #return-button {
-            background-color: #0af;
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
+            background-color: #2a7fff;
+            color: white;
             margin-left: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            #header h1 {
+                font-size: 2rem;
+            }
+            
+            #terminal {
+                height: 400px;
+                padding: 15px;
+            }
+            
+            #hud {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="scan-line"></div>
+    <div class="hacking-grid"></div>
+    <div class="glowing-particles" id="particles"></div>
+    <canvas id="matrix-rain"></canvas>
+    
     <div id="app">
         <div id="header">
-            <h1>🌲 CYBER FOREST CTF CHALLENGE 🌲</h1>
-            <p>Navigate the dangerous cyber forest to find the hidden flags. Beware of traps!</p>
+            <h1>🕸️ WEB + BINARY EXPLOITATION CTF</h1>
+            <p>Exploit web vulnerabilities and binary flaws to capture all flags</p>
         </div>
         
-        <div id="terminal"></div>
+        <div id="hud">
+            <div class="hud-item">Target: <span class="hud-value">127.0.0.1:8080</span></div>
+            <div class="hud-item">Status: <span class="hud-value">VULNERABLE</span></div>
+            <div class="hud-item">Time: <span class="hud-value" id="timer">00:00:00</span></div>
+        </div>
         
-        <div id="input-line">
-            <span id="prompt">user@cyberforest:$</span>
+        <div id="terminal-container">
+            <div id="terminal-header">
+                <div>hacker@exploit-box:~</div>
+                <div id="terminal-controls">
+                    <div class="control close"></div>
+                    <div class="control minimize"></div>
+                    <div class="control maximize"></div>
+                </div>
+            </div>
+            <div id="terminal"></div>
+        </div>
+        
+        <div id="input-container">
+            <span id="prompt">hacker@exploit-box:$</span>
             <input type="text" id="command-input" autofocus>
         </div>
         
         <div id="scoreboard">
-            <h3>Flags Found: <span id="flags-found">0</span>/3</h3>
-            <p>Available commands: ls, cd, cat, file, help, clear</p>
+            <h3>Flags Captured: <span id="flags-found">0</span>/4</h3>
+            <p>Available commands: curl, chmod, ./vuln, help, clear, python3</p>
         </div>
         
         <div id="submit-section">
@@ -144,75 +395,42 @@
     <script>
         // Game state
         const state = {
-            currentPath: "/",
             flagsFound: 0,
-            infected: false,
             startTime: new Date(),
             foundFlags: {
                 flag1: false,
                 flag2: false,
-                flag3: false
-            }
-        };
-
-        // File system structure
-        const fileSystem = {
-            "/": ["bin/", "home/", "tmp/", "readme.txt"],
-            "/bin/": ["ls", "cat", "virus", "safe_program"],
-            "/home/": ["user/", "guest/", "flag.txt"],
-            "/home/user/": ["Documents/", "Downloads/", "Pictures/", ".hidden_file"],
-            "/home/user/Documents/": ["note.txt", "flag2.txt", "secret.docx"],
-            "/home/user/Downloads/": ["malware.exe", "clean_file.zip", "suspicious.rar"],
-            "/home/user/Pictures/": ["vacation.jpg", "forest.png", "flag3.png"],
-            "/home/guest/": ["welcome.txt"],
-            "/tmp/": ["temp1", "temp2", "trash/"]
-        };
-
-        // File contents
-        const fileContents = {
-            "/readme.txt": "Welcome to the Cyber Forest!\nBe careful what files you open...",
-            "/home/flag.txt": "CTF{not_the_real_flag}",
-            "/home/user/Documents/note.txt": "Remember:\n- Don't open suspicious files\n- Check file types before opening\n- The real flags are well hidden",
-            "/home/user/Documents/flag2.txt": "CTF{you_found_the_second_flag}",
-            "/home/user/Documents/secret.docx": "This appears to be a Word document, but it's actually empty.",
-            "/home/user/Downloads/malware.exe": "VIRUS ACTIVATED! Your system is now compromised!",
-            "/home/user/Downloads/clean_file.zip": "This archive contains nothing interesting.",
-            "/home/user/Downloads/suspicious.rar": "This archive is password protected.",
-            "/home/user/Pictures/vacation.jpg": "A nice picture of the beach. Nothing hidden here.",
-            "/home/user/Pictures/forest.png": "A dense digital forest. Look closer...",
-            "/home/user/Pictures/flag3.png": "The flag is hidden in this image's metadata: CTF{metadata_master}",
-            "/home/guest/welcome.txt": "Guest account - no privileges here.",
-            "/home/user/.hidden_file": "CTF{hidden_in_plain_sight}",
-            "/bin/virus": "INFECTION! You shouldn't have run this!",
-            "/bin/safe_program": "This program does nothing dangerous."
-        };
-
-        // File types (for 'file' command)
-        const fileTypes = {
-            "/readme.txt": "ASCII text",
-            "/home/flag.txt": "ASCII text",
-            "/home/user/Documents/note.txt": "ASCII text",
-            "/home/user/Documents/flag2.txt": "ASCII text",
-            "/home/user/Documents/secret.docx": "Microsoft Word 2007+",
-            "/home/user/Downloads/malware.exe": "PE32 executable (GUI) Intel 80386",
-            "/home/user/Downloads/clean_file.zip": "Zip archive data",
-            "/home/user/Downloads/suspicious.rar": "RAR archive data",
-            "/home/user/Pictures/vacation.jpg": "JPEG image data",
-            "/home/user/Pictures/forest.png": "PNG image data",
-            "/home/user/Pictures/flag3.png": "PNG image data",
-            "/home/guest/welcome.txt": "ASCII text",
-            "/home/user/.hidden_file": "ASCII text",
-            "/bin/virus": "ELF 64-bit LSB executable",
-            "/bin/safe_program": "ELF 64-bit LSB executable"
+                flag3: false,
+                flag4: false
+            },
+            downloadedBinary: false,
+            completed: false
         };
 
         // DOM elements
         const terminal = document.getElementById('terminal');
         const commandInput = document.getElementById('command-input');
         const flagsFoundDisplay = document.getElementById('flags-found');
+        const timerDisplay = document.getElementById('timer');
+        const submitSection = document.getElementById('submit-section');
 
         // Initialize terminal
-        printToTerminal('Type "help" for available commands\n\n');
+        printToTerminal('Web + Binary Exploitation CTF Terminal - Type "help" for available commands\n\n');
+        printToTerminal('Initializing exploit environment...', 'warning');
+        setTimeout(() => {
+            printToTerminal('Target service detected at http://127.0.0.1:8080', 'warning');
+            setTimeout(() => {
+                printToTerminal('Vulnerability scan complete...\n', 'warning');
+                printToTerminal('A vulnerable web service is running at 127.0.0.1:8080', 'success');
+                printToTerminal('Find and exploit vulnerabilities to capture all 4 flags.\n', 'success');
+            }, 800);
+        }, 800);
+
+        // Create glowing particles
+        createParticles();
+
+        // Start timer
+        const timerInterval = setInterval(updateTimer, 1000);
 
         // Command processing
         commandInput.addEventListener('keydown', function(e) {
@@ -221,34 +439,29 @@
                 commandInput.value = '';
                 
                 if (command) {
-                    printToTerminal(`user@cyberforest:${state.currentPath}$ ${command}`, 'command');
+                    printToTerminal(`hacker@exploit-box:$ ${command}`, 'command');
                     processCommand(command);
                 }
             }
         });
 
         function processCommand(command) {
-            if (state.infected) {
-                printToTerminal('System locked due to infection! Please wait...', 'error');
-                return;
-            }
-
             const parts = command.split(' ');
             const cmd = parts[0];
             const args = parts.slice(1);
 
             switch (cmd) {
-                case 'ls':
-                    executeLs(args);
+                case 'curl':
+                    executeCurl(args);
                     break;
-                case 'cd':
-                    executeCd(args);
+                case 'chmod':
+                    executeChmod(args);
                     break;
-                case 'cat':
-                    executeCat(args);
+                case './vuln':
+                    executeVuln(args);
                     break;
-                case 'file':
-                    executeFile(args);
+                case 'python3':
+                    executePython3(args);
                     break;
                 case 'help':
                     executeHelp();
@@ -261,183 +474,296 @@
             }
         }
 
-        function executeLs(args) {
-            const path = args[0] ? resolvePath(args[0]) : state.currentPath;
-            
-            if (!fileSystem[path]) {
-                printToTerminal(`ls: cannot access '${args[0] || path}': No such file or directory`, 'error');
+        function executeCurl(args) {
+            if (args.length === 0) {
+                printToTerminal('curl: try \'curl --help\' or \'curl --manual\' for more information', 'error');
                 return;
             }
+
+            const url = args[0];
             
-            printToTerminal(fileSystem[path].join(' '));
+            // Simulate web server responses
+            if (url === 'http://127.0.0.1:8080') {
+                printToTerminal('<!DOCTYPE html>');
+                printToTerminal('<html>');
+                printToTerminal('<head><title>Login Portal</title></head>');
+                printToTerminal('<body>');
+                printToTerminal('<h1>Secure Login Portal</h1>');
+                printToTerminal('<form action="/login" method="POST">');
+                printToTerminal('Username: <input type="text" name="user"><br>');
+                printToTerminal('Password: <input type="password" name="pass"><br>');
+                printToTerminal('<input type="submit" value="Login">');
+                printToTerminal('</form>');
+                printToTerminal('</body>');
+                printToTerminal('</html>');
+            } 
+            else if (url.includes('/downloads/../../../../etc/passwd')) {
+                printToTerminal('root:x:0:0:root:/root:/bin/bash');
+                printToTerminal('daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin');
+                printToTerminal('bin:x:2:2:bin:/bin:/usr/sbin/nologin');
+                printToTerminal('sys:x:3:3:sys:/dev:/usr/sbin/nologin');
+                printToTerminal('# admin:x:0:0:root:/root:/bin/bash  # FLAG{web_dirtrav_found}');
+                
+                // Check for flag
+                checkForFlags('FLAG{web_dirtrav_found}', 1);
+            }
+            else if (url.includes('/internal-api?url=http://127.0.0.1:9000/admin')) {
+                printToTerminal('{"status": "success", "data": "Admin endpoint accessed"}');
+            }
+            else if (url.includes('/internal-api?url=http://127.0.0.1:9000/flag')) {
+                printToTerminal('{"flag": "FLAG{ssrf_is_fun}"}');
+                
+                // Check for flag
+                checkForFlags('FLAG{ssrf_is_fun}', 2);
+            }
+            else if (url.includes('/binaries/vuln')) {
+                printToTerminal('Downloading vulnerable binary...');
+                printToTerminal('100% [================================>] 15.2K  --.-KB/s    in 0.1s');
+                printToTerminal('Binary saved as "vuln"');
+                state.downloadedBinary = true;
+            }
+            else {
+                printToTerminal('curl: (7) Failed to connect to 127.0.0.1 port 8080: Connection refused', 'error');
+            }
         }
 
-        function executeCd(args) {
-            if (!args[0]) {
-                state.currentPath = "/";
+        function executeChmod(args) {
+            if (args.length !== 1 || args[0] !== '+x') {
+                printToTerminal('Usage: chmod +x FILE', 'error');
                 return;
             }
-
-            let targetPath = resolvePath(args[0]);
             
-            // Special case for parent directory
-            if (args[0] === '..') {
-                if (state.currentPath === '/') {
-                    printToTerminal('Already at root directory', 'warning');
-                    return;
+            if (!state.downloadedBinary) {
+                printToTerminal('chmod: cannot access \'vuln\': No such file or directory', 'error');
+                return;
+            }
+            
+            printToTerminal('Made binary executable');
+        }
+
+        function executeVuln(args) {
+            if (!state.downloadedBinary) {
+                printToTerminal('bash: ./vuln: No such file or directory', 'error');
+                return;
+            }
+            
+            // Check if we're providing input via args
+            if (args.length > 0 && args[0] === '<<<') {
+                // Simulate input for ROP chain
+                printToTerminal('Enter number: ');
+                printToTerminal('Welcome, user!');
+                printToTerminal('You gained shell access!');
+                printToTerminal('FLAG{fake_rop_shell_win}');
+                
+                // Check for flag
+                checkForFlags('FLAG{fake_rop_shell_win}', 4);
+                return;
+            }
+            
+            // Simulate the vulnerable binary
+            printToTerminal('Enter number: ');
+            
+            // Add a small delay to simulate program execution
+            setTimeout(() => {
+                // Check if we have input waiting (simulated)
+                const lastCommand = commandInput.value;
+                
+                // Logic bug - if input is a large number
+                if (lastCommand && !isNaN(lastCommand) && parseInt(lastCommand) > 1000000) {
+                    printToTerminal('Welcome, admin!');
+                    printToTerminal('FLAG{overflowed_auth}');
+                    
+                    // Check for flag
+                    checkForFlags('FLAG{overflowed_auth}', 3);
+                } else {
+                    printToTerminal('Welcome, user!');
+                    printToTerminal('Access level: USER');
                 }
-                
-                const parts = state.currentPath.split('/').filter(p => p);
-                parts.pop();
-                state.currentPath = parts.length ? '/' + parts.join('/') + '/' : '/';
-                return;
-            }
-            
-            // Check if directory exists
-            if (!fileSystem[targetPath] && !fileSystem[targetPath + '/']) {
-                printToTerminal(`cd: no such file or directory: ${args[0]}`, 'error');
-                return;
-            }
-            
-            // Add trailing slash if needed
-            if (!targetPath.endsWith('/')) {
-                targetPath += '/';
-            }
-            
-            state.currentPath = targetPath;
+            }, 500);
         }
 
-        function executeCat(args) {
-            if (!args[0]) {
-                printToTerminal('Usage: cat FILE', 'error');
+        function executePython3(args) {
+            if (args.length === 0 || args[0] !== '-c') {
+                printToTerminal('Python 3.10.12 (main, Jun 11 2023, 05:26:28)');
+                printToTerminal('[GCC 11.4.0] on linux');
+                printToTerminal('Type "help", "copyright", "credits" or "license" for more information.');
+                printToTerminal('>>>');
                 return;
             }
-
-            const filePath = resolvePath(args[0]);
             
-            if (filePath in fileContents) {
-                const content = fileContents[filePath];
-                printToTerminal(content);
+            // Check if it's the ROP chain command
+            if (args[1] && args[1].includes('print("A"*112 + "ROP")')) {
+                printToTerminal('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAROP');
                 
-                // Check for flags
-                checkForFlags(content);
-                
-                // Check for viruses
-                if (filePath === '/bin/virus' || filePath === '/home/user/Downloads/malware.exe') {
-                    triggerVirus();
-                }
+                // Now simulate running the binary with this input
+                setTimeout(() => {
+                    printToTerminal('\nRunning binary with crafted input...');
+                    executeVuln(['<<<']);
+                }, 500);
             } else {
-                printToTerminal(`cat: ${args[0]}: No such file or directory`, 'error');
-            }
-        }
-
-        function executeFile(args) {
-            if (!args[0]) {
-                printToTerminal('Usage: file FILE', 'error');
-                return;
-            }
-
-            const filePath = resolvePath(args[0]);
-            
-            if (filePath in fileTypes) {
-                printToTerminal(`${args[0]}: ${fileTypes[filePath]}`);
-            } else {
-                printToTerminal(`file: ${args[0]}: No such file or directory`, 'error');
+                printToTerminal('Python command executed');
             }
         }
 
         function executeHelp() {
             const helpText = `Available commands:
-ls [DIR]    - List directory contents
-cd [DIR]    - Change directory
-cat FILE    - Display file contents
-file FILE   - Determine file type
-help        - Display this help
-clear       - Clear the terminal
+curl URL      - Make HTTP requests to the target server
+chmod +x FILE - Make a file executable
+./vuln        - Run the vulnerable binary
+python3 -c CMD - Execute Python command
+help          - Display this help
+clear         - Clear the terminal
 
 Flags:
-There are 3 hidden flags in the system. Find them all!
+There are 4 flags to find by exploiting:
+1. Web Directory Traversal
+2. SSRF to internal service
+3. Binary logic bug
+4. ROP chain exploitation
 `;
             printToTerminal(helpText);
         }
 
-        function resolvePath(path) {
-            if (path.startsWith('/')) {
-                return path;
+        function checkForFlags(flag, flagNumber) {
+            if (!state.foundFlags[`flag${flagNumber}`]) {
+                state.foundFlags[`flag${flagNumber}`] = true;
+                state.flagsFound++;
+                flagsFoundDisplay.textContent = state.flagsFound;
+                printToTerminal(`\nFlag ${flagNumber} captured: ${flag}`, 'success');
+                
+                if (state.flagsFound === 4 && !state.completed) {
+                    state.completed = true;
+                    state.endTime = new Date();
+                    const timeTaken = Math.floor((state.endTime - state.startTime) / 1000);
+                    const minutes = Math.floor(timeTaken / 60);
+                    const seconds = timeTaken % 60;
+                    
+                    printToTerminal(`\n🎉 EXPLOITATION SUCCESSFUL! 🎉\nCaptured all 4 flags in ${minutes}m ${seconds}s!`, 'success');
+                    printToTerminal('You have proven yourself as a skilled penetration tester!', 'success');
+                    
+                    // Show submit section
+                    submitSection.style.display = 'block';
+                    terminal.scrollTop = terminal.scrollHeight;
+                }
+            }
+        }
+
+        function printToTerminal(text, className = '', isHTML = false) {
+            const div = document.createElement('div');
+            if (className) {
+                div.className = `output ${className}`;
+            } else {
+                div.className = 'output';
             }
             
-            return state.currentPath + path;
-        }
-
-        function checkForFlags(content) {
-            const flags = [
-                'CTF{hidden_in_plain_sight}',
-                'CTF{you_found_the_second_flag}',
-                'CTF{metadata_master}'
-            ];
+            if (isHTML) {
+                div.innerHTML = text;
+            } else {
+                div.textContent = text;
+            }
             
-            flags.forEach((flag, index) => {
-                if (content.includes(flag) && !state.foundFlags[`flag${index + 1}`]) {
-                    state.foundFlags[`flag${index + 1}`] = true;
-                    state.flagsFound++;
-                    flagsFoundDisplay.textContent = state.flagsFound;
-                    printToTerminal(`\nCongratulations! You found flag ${index + 1}: ${flag}`, 'success');
-                    
-                    if (state.flagsFound === 3) {
-                        const timeTaken = Math.floor((new Date() - state.startTime) / 1000);
-                        printToTerminal(`\n🎉 YOU WIN! 🎉\nFound all flags in ${timeTaken} seconds!`, 'success');
-                    }
-                }
-            });
-        }
-
-        function triggerVirus() {
-            state.infected = true;
-            
-            // Create virus effect
-            const virusDiv = document.createElement('div');
-            virusDiv.className = 'virus-effect';
-            virusDiv.textContent = '☠️ VIRUS DETECTED! SYSTEM COMPROMISED! ☠️';
-            document.body.appendChild(virusDiv);
-            
-            // Disable input
-            commandInput.disabled = true;
-            
-            // Remove virus after timeout
-            setTimeout(() => {
-                document.body.removeChild(virusDiv);
-                state.infected = false;
-                commandInput.disabled = false;
-                commandInput.focus();
-                printToTerminal('System restored. Be more careful next time!', 'warning');
-            }, 10000);
-        }
-
-        function printToTerminal(text, className = '') {
-            const div = document.createElement('div');
-            div.className = `output ${className}`;
-            div.textContent = text;
             terminal.appendChild(div);
             terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const colors = ['#2a7fff', '#00ffcc', '#7f2aff', '#ff2a7f'];
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random properties
+                const size = Math.random() * 10 + 5;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.background = color;
+                particle.style.boxShadow = `0 0 ${size*2}px ${size}px ${color}`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+                particle.style.animationDelay = `-${Math.random() * 20}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const elapsed = Math.floor((now - state.startTime) / 1000);
+            
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const seconds = elapsed % 60;
+            
+            timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Matrix rain effect
+        function setupMatrixRain() {
+            const canvas = document.getElementById('matrix-rain');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const characters = '01';
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            
+            const drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = 1;
+            }
+            
+            function draw() {
+                ctx.fillStyle = 'rgba(10, 10, 24, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#00ffcc';
+                ctx.font = `${fontSize}px monospace`;
+                
+                for (let i = 0; i < drops.length; i++) {
+                    const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    
+                    drops[i]++;
+                }
+            }
+            
+            setInterval(draw, 33);
         }
         
         // Submit completion function
         function submitCompletion() {
-            if (state.flagsFound === 3) {
-                // Redirect back to the town with completion parameter
-                window.location.href = "/?completed=1"; // Just "/" for home page
+            if (state.flagsFound === 4) {
+                // Get the town page URL from the current domain
+                const townUrl = window.location.origin + "/town.html";
+                // Redirect back to the town with completion parameter for Building 3
+                window.location.href = `${townUrl}?completed=1`;
             } else {
-                alert("You haven't found all flags yet! Keep searching.");
-    }
+                alert("You haven't found all flags yet! Keep exploiting.");
+            }
         }
-        
+
         // Return to town function
         function returnToTown() {
             // Set a flag indicating we're returning from a challenge
             sessionStorage.setItem('returningFromChallenge', 'true');
             const townUrl = window.location.origin + "/town.html";
-            window.location.href = townUrl; 
+            window.location.href = townUrl;
         }
+
+        // Initialize matrix rain
+        window.addEventListener('load', setupMatrixRain);
+        window.addEventListener('resize', setupMatrixRain);
     </script>
 </body>
 </html>
