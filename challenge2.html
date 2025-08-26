@@ -18,8 +18,6 @@
             --text-error: #ff2a7f;
             --text-success: #00ff95;
             --text-warning: #ffcc00;
-            --accent-1: #7f2aff;
-            --accent-2: #ff2a7f;
             --text-info: #2a7fff;
         }
         
@@ -467,6 +465,12 @@
         const submitButton = document.getElementById('submit-button');
         const submitMessage = document.getElementById('submit-message');
         const hud = document.getElementById('hud');
+        const promptElement = document.getElementById('prompt');
+
+        // Update prompt to show current path
+        function updatePrompt() {
+            promptElement.textContent = `investigator@osint-box:${state.currentPath}$`;
+        }
 
         // Initialize terminal
         printToTerminal('OSINT + Programming CTF Terminal - Type "help" for available commands\n\n', 'info');
@@ -481,6 +485,9 @@
                 
                 // Show HUD after initialization
                 hud.style.display = 'flex';
+                
+                // Update prompt
+                updatePrompt();
                 
                 // Update submit button state
                 updateSubmitButton();
@@ -574,6 +581,7 @@
         function executeCd(args) {
             if (!args[0]) {
                 state.currentPath = "/home/investigator";
+                updatePrompt();
                 return;
             }
 
@@ -589,6 +597,7 @@
                 const parts = state.currentPath.split('/').filter(p => p);
                 parts.pop();
                 state.currentPath = parts.length ? '/' + parts.join('/') : '/home/investigator';
+                updatePrompt();
                 return;
             }
             
@@ -604,6 +613,7 @@
             }
             
             state.currentPath = targetPath;
+            updatePrompt();
         }
 
         function executeCat(args) {
@@ -763,7 +773,7 @@
                 printToTerminal('# Generate a random number based on current time');
                 printToTerminal('def generate_random():');
                 printToTerminal('    seed = int(time.time())');
-                printToTerminal('    random.seed(seed);
+                printToTerminal('    random.seed(seed)');
                 printToTerminal('    return random.randint(0, 1000000)');
                 printToTerminal('');
                 printToTerminal('# Current value: 478231');
@@ -886,7 +896,19 @@ There are 5 flags to find using OSINT and programming skills:
                 return path;
             }
             
-            return state.currentPath + '/' + path;
+            // Handle relative paths
+            if (path === '..') {
+                const parts = state.currentPath.split('/').filter(p => p);
+                parts.pop();
+                return parts.length ? '/' + parts.join('/') : '/home/investigator';
+            }
+            
+            // Handle subdirectories
+            if (state.currentPath.endsWith('/')) {
+                return state.currentPath + path;
+            } else {
+                return state.currentPath + '/' + path;
+            }
         }
 
         function checkForFlags(flag, flagNumber) {
@@ -989,6 +1011,7 @@ There are 5 flags to find using OSINT and programming skills:
             const canvas = document.getElementById('matrix-rain');
             const ctx = canvas.getContext('2d');
             
+            // Set canvas size to match window
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             
@@ -996,12 +1019,14 @@ There are 5 flags to find using OSINT and programming skills:
             const fontSize = 14;
             const columns = canvas.width / fontSize;
             
+            // Create an array for drops - one per column
             const drops = [];
             for (let i = 0; i < columns; i++) {
-                drops[i] = 1;
+                drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
             }
             
             function draw() {
+                // Semi-transparent black to create trail effect
                 ctx.fillStyle = 'rgba(10, 10, 24, 0.05)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
@@ -1012,6 +1037,7 @@ There are 5 flags to find using OSINT and programming skills:
                     const text = characters.charAt(Math.floor(Math.random() * characters.length));
                     ctx.fillText(text, i * fontSize, drops[i] * fontSize);
                     
+                    // Reset drop to top of screen randomly or if it reaches bottom
                     if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
                         drops[i] = 0;
                     }
@@ -1020,6 +1046,7 @@ There are 5 flags to find using OSINT and programming skills:
                 }
             }
             
+            // Start the animation
             setInterval(draw, 33);
         }
         
@@ -1044,7 +1071,10 @@ There are 5 flags to find using OSINT and programming skills:
         }
 
         // Initialize matrix rain
-        window.addEventListener('load', setupMatrixRain);
+        window.addEventListener('load', function() {
+            setupMatrixRain();
+            updatePrompt();
+        });
         window.addEventListener('resize', setupMatrixRain);
     </script>
 </body>
